@@ -6,7 +6,7 @@ license="MIT"
 modId="flightring"
 version="${file.jarVersion}"
 displayName="简易飞行戒指 Simple Flight Ring"
-authors="flightring"
+authors="EasyRain"
 description='''简易飞行戒指 (Simple Flight Ring)
 
 A small mod that adds 6 tiers of flight rings: Wood, Stone, Iron, Gold, Diamond and Netherite.
@@ -28,27 +28,27 @@ Features:
 [[dependencies.flightring]]
 modId="neoforge"
 type="required"
-versionRange="[21.1.228,)"
+versionRange="[21.1.228,21.2)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.flightring]]
 modId="curios"
 type="optional"
-versionRange="[9.5.1,)"
+versionRange="[9.5.1,10)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.flightring]]
 modId="cloth_config"
 type="optional"
-versionRange="[15,)"
+versionRange="[15,16)"
 ordering="AFTER"
 side="CLIENT"
 
 [[dependencies.flightring]]
 modId="sophisticatedbackpacks"
 type="optional"
-versionRange="[3.20,)"
+versionRange="[3.20,4)"
 ordering="AFTER"
 side="BOTH"

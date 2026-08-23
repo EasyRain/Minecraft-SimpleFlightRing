@@ -6,27 +6,26 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleSmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
-import net.minecraft.world.item.crafting.TransmuteRecipe;
-import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
-import net.minecraft.world.item.crafting.display.SmithingRecipeDisplay;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
  * Smithing-table upgrade for the netherite ring: netherite upgrade smithing template
  * + diamond flight ring + netherite ingot. Enchantments, custom name and lore are
  * preserved (transmute behavior) and the ring starts at full durability.
+ * <p>
+ * This deliberately extends {@link SmithingTransformRecipe} instead of implementing
+ * {@code SmithingRecipe} directly: JEI's smithing recipe category resolves its display
+ * extension by matching the recipe's runtime class against registered extensions
+ * ({@code isAssignableFrom}), so subclasses of {@code SmithingTransformRecipe} are shown
+ * like any vanilla smithing transform recipe.
  */
-public class RingSmithingRecipe extends SimpleSmithingRecipe {
+public class RingSmithingRecipe extends SmithingTransformRecipe {
 
     public static final MapCodec<RingSmithingRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
@@ -52,8 +51,15 @@ public class RingSmithingRecipe extends SimpleSmithingRecipe {
             RingSmithingRecipe::new
     );
 
-    public static final RecipeSerializer<RingSmithingRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+    // The codec produces RingSmithingRecipe instances; the serializer is exposed as the
+    // parent type so getSerializer() can override SmithingTransformRecipe's signature.
+    @SuppressWarnings("unchecked")
+    public static final RecipeSerializer<SmithingTransformRecipe> SERIALIZER =
+            (RecipeSerializer<SmithingTransformRecipe>) (RecipeSerializer<?>) new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
+    // Shadow copies of the parent's package-private fields, kept so the codec above can
+    // (de)serialize this recipe without access transformers. They hold the same instances
+    // passed to the super constructor.
     private final Optional<Ingredient> template;
     private final Ingredient base;
     private final Optional<Ingredient> addition;
@@ -61,7 +67,7 @@ public class RingSmithingRecipe extends SimpleSmithingRecipe {
 
     public RingSmithingRecipe(Recipe.CommonInfo commonInfo, Optional<Ingredient> template, Ingredient base,
                               Optional<Ingredient> addition, ItemStackTemplate result) {
-        super(commonInfo);
+        super(commonInfo, template, base, addition, result);
         this.template = template;
         this.base = base;
         this.addition = addition;
@@ -70,47 +76,14 @@ public class RingSmithingRecipe extends SimpleSmithingRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input) {
-        ItemStack assembled = TransmuteRecipe.createWithOriginalComponents(this.result, input.base());
+        ItemStack assembled = super.assemble(input);
         // Upgraded rings start with full durability (enchantments/name/lore carried over above).
         assembled.setDamageValue(0);
         return assembled;
     }
 
     @Override
-    public Optional<Ingredient> templateIngredient() {
-        return this.template;
-    }
-
-    @Override
-    public Ingredient baseIngredient() {
-        return this.base;
-    }
-
-    @Override
-    public Optional<Ingredient> additionIngredient() {
-        return this.addition;
-    }
-
-    @Override
-    public RecipeSerializer<? extends SimpleSmithingRecipe> getSerializer() {
+    public RecipeSerializer<SmithingTransformRecipe> getSerializer() {
         return SERIALIZER;
-    }
-
-    @Override
-    protected PlacementInfo createPlacementInfo() {
-        return PlacementInfo.createFromOptionals(List.of(this.template, Optional.of(this.base), this.addition));
-    }
-
-    @Override
-    public List<RecipeDisplay> display() {
-        return List.of(
-                new SmithingRecipeDisplay(
-                        Ingredient.optionalIngredientToDisplay(this.template),
-                        this.base.display(),
-                        Ingredient.optionalIngredientToDisplay(this.addition),
-                        new SlotDisplay.ItemStackSlotDisplay(this.result),
-                        new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)
-                )
-        );
     }
 }

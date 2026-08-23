@@ -2,6 +2,7 @@ package com.flightring;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -15,7 +16,7 @@ public class ModRecipeSerializers {
             SERIALIZERS.register("ring_upgrade", () -> RingUpgradeRecipe.SERIALIZER);
 
     /** Smithing-table upgrade (diamond -> netherite), preserves enchantments/name/lore and resets durability. */
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingSmithingRecipe>> RING_SMITHING =
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SmithingTransformRecipe>> RING_SMITHING =
             SERIALIZERS.register("ring_smithing", () -> RingSmithingRecipe.SERIALIZER);
 
     private ModRecipeSerializers() {
