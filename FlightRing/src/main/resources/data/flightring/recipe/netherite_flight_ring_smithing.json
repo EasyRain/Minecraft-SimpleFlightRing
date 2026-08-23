@@ -1,0 +1,16 @@
+{
+  "type": "flightring:ring_smithing",
+  "template": {
+    "item": "minecraft:netherite_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "flightring:diamond_flight_ring"
+  },
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
+  "result": {
+    "id": "flightring:netherite_flight_ring",
+    "count": 1
+  }
+}

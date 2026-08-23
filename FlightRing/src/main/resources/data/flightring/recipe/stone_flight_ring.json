@@ -1,0 +1,21 @@
+{
+  "type": "flightring:ring_upgrade",
+  "category": "equipment",
+  "pattern": [
+    "SSS",
+    "SRS",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "R": {
+      "item": "flightring:wood_flight_ring"
+    }
+  },
+  "result": {
+    "id": "flightring:stone_flight_ring",
+    "count": 1
+  }
+}

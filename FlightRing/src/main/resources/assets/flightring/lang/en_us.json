@@ -1,0 +1,20 @@
+{
+  "itemGroup.flightring": "Simple Flight Ring",
+  "item.flightring.wood_flight_ring": "Wooden Flight Ring",
+  "item.flightring.stone_flight_ring": "Stone Flight Ring",
+  "item.flightring.iron_flight_ring": "Iron Flight Ring",
+  "item.flightring.gold_flight_ring": "Golden Flight Ring",
+  "item.flightring.diamond_flight_ring": "Diamond Flight Ring",
+  "item.flightring.netherite_flight_ring": "Netherite Flight Ring",
+  "tooltip.flightring.remaining_time": "Remaining flight time: %s min %s s",
+  "tooltip.flightring.hint": "Grants creative flight; consumes 1 durability per second of flight",
+  "tooltip.flightring.unbreaking_hint": "Each Unbreaking level extends each durability point by 1 second",
+  "curios.identifier.flight_ring": "Flight Ring",
+  "hud.flightring.flight_time": "Flight time: %s min %s s",
+  "cloth.flightring.title": "Simple Flight Ring Config",
+  "cloth.flightring.category.hud": "HUD Settings",
+  "cloth.flightring.show_timer": "Show flight time countdown",
+  "cloth.flightring.hide_in_chat": "Hide countdown while chat is open",
+  "cloth.flightring.hud_x": "Horizontal position (pixels from left edge)",
+  "cloth.flightring.hud_y": "Vertical position (pixels from bottom edge)"
+}

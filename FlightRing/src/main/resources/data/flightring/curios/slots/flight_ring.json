@@ -1,0 +1,9 @@
+{
+  "size": 1,
+  "order": 200,
+  "icon": "flightring:slot/flight_ring",
+  "validators": [
+    "curios:tag"
+  ],
+  "use_native_gui": true
+}

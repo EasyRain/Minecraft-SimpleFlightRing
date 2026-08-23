@@ -1,0 +1,54 @@
+modLoader="javafml"
+loaderVersion="[2,)"
+license="MIT"
+
+[[mods]]
+modId="flightring"
+version="${file.jarVersion}"
+displayName="简易飞行戒指 Simple Flight Ring"
+authors="flightring"
+description='''简易飞行戒指 (Simple Flight Ring)
+
+A small mod that adds 6 tiers of flight rings: Wood, Stone, Iron, Gold, Diamond and Netherite.
+
+Features:
+- Traditional creative flight while a ring with durability is equipped or carried in the inventory.
+- Durability is consumed only while flying: 1 point per second.
+- Each Unbreaking level extends one durability point by one extra second (Unbreaking III = 1 point per 4 seconds).
+- Nested crafting upgrades: 8 material + lower-tier ring in the center of a 3x3 grid (wood ring uses a feather).
+- Upgrades keep enchantments, custom names and lore; the input ring may have any remaining durability.
+- Netherite ring is crafted via smithing: Netherite Upgrade template + Diamond Flight Ring + Netherite Ingot.
+- Optional Curios API support: adds an extra "flight ring" slot; without Curios the rings simply work from the inventory.
+- HUD flight time countdown (left-bottom corner by default), toggle and position configurable in config/flightring-client.toml.
+- Optional Cloth Config API support: in-game configuration screen from the mod list.
+- Optional Sophisticated Backpacks support: rings stored inside sophisticated backpacks carried by the player also grant flight (nested backpacks included).
+
+飞行时间(分钟/耐久): 木5/300 · 石15/900 · 铁30/1800 · 金60/3600 · 钻石120/7200 · 下界合金240/14400，每飞行1秒消耗1耐久'''
+
+[[dependencies.flightring]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.228,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.flightring]]
+modId="curios"
+type="optional"
+versionRange="[9.5.1,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.flightring]]
+modId="cloth_config"
+type="optional"
+versionRange="[15,)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.flightring]]
+modId="sophisticatedbackpacks"
+type="optional"
+versionRange="[3.20,)"
+ordering="AFTER"
+side="BOTH"

@@ -1,0 +1,7 @@
+{
+  "type": "flightring:ring_upgrade",
+  "category": "equipment",
+  "pattern": ["GGG","GRG","GGG"],
+  "key": { "G": "minecraft:gold_ingot", "R": "flightring:iron_flight_ring" },
+  "result": { "id": "flightring:gold_flight_ring", "count": 1 }
+}

@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "flightring:item/stone_flight_ring"
+  }
+}

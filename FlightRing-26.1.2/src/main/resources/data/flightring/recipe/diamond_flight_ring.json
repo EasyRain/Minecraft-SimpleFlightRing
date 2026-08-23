@@ -1,0 +1,7 @@
+{
+  "type": "flightring:ring_upgrade",
+  "category": "equipment",
+  "pattern": ["DDD","DRD","DDD"],
+  "key": { "D": "minecraft:diamond", "R": "flightring:gold_flight_ring" },
+  "result": { "id": "flightring:diamond_flight_ring", "count": 1 }
+}

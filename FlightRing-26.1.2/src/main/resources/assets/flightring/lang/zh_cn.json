@@ -1,0 +1,20 @@
+{
+  "itemGroup.flightring": "简易飞行戒指",
+  "item.flightring.wood_flight_ring": "木飞行戒指",
+  "item.flightring.stone_flight_ring": "石飞行戒指",
+  "item.flightring.iron_flight_ring": "铁飞行戒指",
+  "item.flightring.gold_flight_ring": "金飞行戒指",
+  "item.flightring.diamond_flight_ring": "钻石飞行戒指",
+  "item.flightring.netherite_flight_ring": "下界合金飞行戒指",
+  "tooltip.flightring.remaining_time": "剩余飞行时间：%s 分 %s 秒",
+  "tooltip.flightring.hint": "赋予创造飞行能力；仅飞行时消耗耐久，每飞行1秒消耗1点",
+  "tooltip.flightring.unbreaking_hint": "耐久附魔每级可让每点耐久多飞行1秒",
+  "curios.identifier.flight_ring": "飞行戒指",
+  "hud.flightring.flight_time": "飞行时间：%s 分 %s 秒",
+  "cloth.flightring.title": "简易飞行戒指 配置",
+  "cloth.flightring.category.hud": "HUD 设置",
+  "cloth.flightring.show_timer": "显示飞行时间倒计时",
+  "cloth.flightring.hide_in_chat": "打开聊天框时隐藏倒计时",
+  "cloth.flightring.hud_x": "水平位置（距左边缘，像素）",
+  "cloth.flightring.hud_y": "垂直位置（距底部边缘，像素）"
+}

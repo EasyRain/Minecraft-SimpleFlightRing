@@ -1,0 +1,27 @@
+package com.flightring;
+
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+/**
+ * Network payload registration. Registered manually on the mod event bus by
+ * {@link FlightRingMod}.
+ */
+public final class ModPayloads {
+
+    private ModPayloads() {
+    }
+
+    public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(FlightRingMod.MODID).versioned("1");
+        registrar.playToClient(FlightTimePayload.TYPE, FlightTimePayload.STREAM_CODEC, ModPayloads::handleFlightTime);
+    }
+
+    private static void handleFlightTime(FlightTimePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ClientFlightTime.update(payload.totalSeconds());
+            FlightRingMod.LOGGER.debug("[FlightRing] received total flight time: {} s", payload.totalSeconds());
+        });
+    }
+}
