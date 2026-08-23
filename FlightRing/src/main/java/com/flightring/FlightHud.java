@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 
 /**
@@ -26,6 +27,9 @@ public class FlightHud {
 
     private static final ResourceLocation LAYER_ID =
             ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "flight_timer");
+
+    /** Show the hours unit once the remaining flight time reaches 1000 minutes (60 000 seconds). */
+    private static final int SHOW_HOURS_THRESHOLD = 60_000;
 
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(LAYER_ID, FlightHud::renderTimer);
@@ -57,9 +61,18 @@ public class FlightHud {
         if (totalRemainingSeconds <= 0) {
             return;
         }
-        int minutes = totalRemainingSeconds / 60;
-        int seconds = totalRemainingSeconds % 60;
-        Component text = Component.translatable("hud.flightring.flight_time", minutes, seconds);
+        Component text;
+        if (totalRemainingSeconds >= SHOW_HOURS_THRESHOLD) {
+            // Very long flight times (>= 1000 minutes): show hours too.
+            int hours = totalRemainingSeconds / 3600;
+            int minutes = (totalRemainingSeconds % 3600) / 60;
+            int seconds = totalRemainingSeconds % 60;
+            text = Component.translatable("hud.flightring.flight_time_long", hours, minutes, seconds);
+        } else {
+            int minutes = totalRemainingSeconds / 60;
+            int seconds = totalRemainingSeconds % 60;
+            text = Component.translatable("hud.flightring.flight_time", minutes, seconds);
+        }
 
         int x = FlightRingConfig.HUD_X.get();
         int y = minecraft.getWindow().getGuiScaledHeight() - FlightRingConfig.HUD_Y.get() - 9;
@@ -70,27 +83,32 @@ public class FlightHud {
      * Sums the remaining flight time (in seconds) of every usable ring the player
      * carries: Curios flight ring slot (if loaded), main inventory, offhand and
      * sophisticated backpacks (if loaded). A fully consumed ring contributes nothing.
+     * <p>
+     * Each ring contributes {@code remaining durability points * (1 + Unbreaking level)}
+     * seconds, i.e. the actual flight time taking the ring's enchantments into account.
      */
     private static int totalRemainingSeconds(Player player) {
         int total = 0;
         if (CuriosCompat.isLoaded()) {
-            total += remainingSeconds(CuriosCompat.findRingInSlot(player));
+            total += remainingSeconds(player, CuriosCompat.findRingInSlot(player));
         }
         for (ItemStack stack : player.getInventory().items) {
-            total += remainingSeconds(stack);
+            total += remainingSeconds(player, stack);
         }
-        total += remainingSeconds(player.getInventory().offhand.get(0));
+        total += remainingSeconds(player, player.getInventory().offhand.get(0));
         if (BackpackCompat.isLoaded()) {
             for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
-                total += remainingSeconds(ring.stack());
+                total += remainingSeconds(player, ring.stack());
             }
         }
         return total;
     }
 
-    private static int remainingSeconds(ItemStack stack) {
+    private static int remainingSeconds(Player player, ItemStack stack) {
         if (isUsableRing(stack)) {
-            return stack.getMaxDamage() - stack.getDamageValue();
+            int remainingPoints = stack.getMaxDamage() - stack.getDamageValue();
+            int unbreaking = stack.getEnchantmentLevel(player.registryAccess().holderOrThrow(Enchantments.UNBREAKING));
+            return remainingPoints * (1 + unbreaking);
         }
         return 0;
     }

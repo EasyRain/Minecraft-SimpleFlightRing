@@ -62,7 +62,27 @@ public class FlightHandler {
         state.ticksSinceSync++;
         if (state.ticksSinceSync >= 10) {
             state.ticksSinceSync = 0;
-            PacketDistributor.sendToPlayer(player, new FlightTimePayload(totalFlightSeconds(player)));
+            int theoretical = totalFlightSeconds(player);
+            boolean flying = player.getAbilities().flying;
+            // Keep the pushed value smooth (decreasing 1 second per second of actual
+            // flight) instead of jumping in durability-drain steps. Re-sync with the
+            // theoretical value when not flying or when the ring set/enchantments
+            // changed significantly (e.g. a ring was removed or upgraded mid-flight).
+            if (!flying || Math.abs(state.displaySeconds - theoretical) > 30) {
+                state.displaySeconds = theoretical;
+            }
+            if (flying) {
+                state.displayTickCounter += 10;
+                if (state.displayTickCounter >= 20) {
+                    state.displayTickCounter -= 20;
+                    if (state.displaySeconds > 0) {
+                        state.displaySeconds--;
+                    }
+                }
+            } else {
+                state.displayTickCounter = 0;
+            }
+            PacketDistributor.sendToPlayer(player, new FlightTimePayload(state.displaySeconds));
         }
 
         // Creative/spectator players already have vanilla flight; the ring is left untouched.
@@ -125,27 +145,32 @@ public class FlightHandler {
      * Server-authoritative total remaining flight time (seconds) across every usable
      * ring the player carries: Curios flight ring slot, inventory, offhand and
      * sophisticated backpacks. Pushed to the client for the HUD countdown.
+     * <p>
+     * Each ring contributes {@code remaining durability points * (1 + Unbreaking level)}
+     * seconds, i.e. the actual flight time taking the ring's enchantments into account.
      */
     private static int totalFlightSeconds(ServerPlayer player) {
         int total = 0;
         if (CuriosCompat.isLoaded()) {
-            total += usableSeconds(CuriosCompat.findRingInSlot(player));
+            total += usableSeconds(player, CuriosCompat.findRingInSlot(player));
         }
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-            total += usableSeconds(stack);
+            total += usableSeconds(player, stack);
         }
-        total += usableSeconds(player.getItemBySlot(EquipmentSlot.OFFHAND));
+        total += usableSeconds(player, player.getItemBySlot(EquipmentSlot.OFFHAND));
         if (BackpackCompat.isLoaded()) {
             for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
-                total += usableSeconds(ring.stack());
+                total += usableSeconds(player, ring.stack());
             }
         }
         return total;
     }
 
-    private static int usableSeconds(ItemStack stack) {
+    private static int usableSeconds(ServerPlayer player, ItemStack stack) {
         if (stack.getItem() instanceof FlightRingItem && stack.getDamageValue() < stack.getMaxDamage()) {
-            return stack.getMaxDamage() - stack.getDamageValue();
+            int remainingPoints = stack.getMaxDamage() - stack.getDamageValue();
+            // Unbreaking N makes each durability point last (N + 1) seconds.
+            return remainingPoints * (1 + unbreakingLevel(player, stack));
         }
         return 0;
     }
@@ -194,6 +219,10 @@ public class FlightHandler {
         int ticksFlying;
         int ticksSinceSync;
         boolean grantedByUs;
+        /** Smooth HUD value (seconds), decreasing 1 per second of actual flight. */
+        int displaySeconds;
+        /** Ticks accumulated for the smooth display decrement (every 20 ticks = 1 second). */
+        int displayTickCounter;
         BackpackCompat.BackpackRing activeBackpackRing;
     }
 }
