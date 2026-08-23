@@ -34,7 +34,6 @@ public class FlightRingItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
             tooltipComponents.add(Component.translatable("tooltip.flightring.remaining_infinite"));
-            tooltipComponents.add(Component.translatable("tooltip.flightring.infinite_hint"));
             return;
         }
         int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());

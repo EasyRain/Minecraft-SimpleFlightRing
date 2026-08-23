@@ -33,7 +33,6 @@ public class FlightRingItem extends Item {
                                 Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
             tooltipComponents.accept(Component.translatable("tooltip.flightring.remaining_infinite"));
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.infinite_hint"));
             return;
         }
         int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());

@@ -215,36 +215,52 @@ public class FlightHandler {
      * Finds the active ring: first the Curios flight ring slot (if Curios is loaded),
      * then the main inventory and offhand, then sophisticated backpacks carried by
      * the player (if Sophisticated Backpacks is loaded). A fully consumed ring does
-     * not count. When the ring comes from a backpack, its location is stored in
-     * {@code state.activeBackpackRing} so durability changes can be written back.
+     * not count. An indestructible ring is preferred over regular rings, so regular
+     * rings never lose durability while an infinite one is carried. When the ring
+     * comes from a backpack, its location is stored in {@code state.activeBackpackRing}
+     * so durability changes can be written back.
      */
     private static ItemStack findRing(ServerPlayer player, PlayerState state) {
+        ItemStack infinite = findRingMatching(player, state, true);
+        if (!infinite.isEmpty()) {
+            return infinite;
+        }
+        return findRingMatching(player, state, false);
+    }
+
+    private static ItemStack findRingMatching(ServerPlayer player, PlayerState state, boolean wantInfinite) {
         if (CuriosCompat.isLoaded()) {
             ItemStack stack = CuriosCompat.findRingInSlot(player);
-            if (isUsableRing(stack)) {
+            if (matchesFilter(stack, wantInfinite)) {
                 state.activeBackpackRing = null;
                 return stack;
             }
         }
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-            if (isUsableRing(stack)) {
+            if (matchesFilter(stack, wantInfinite)) {
                 state.activeBackpackRing = null;
                 return stack;
             }
         }
         ItemStack offhand = player.getItemBySlot(EquipmentSlot.OFFHAND);
-        if (isUsableRing(offhand)) {
+        if (matchesFilter(offhand, wantInfinite)) {
             state.activeBackpackRing = null;
             return offhand;
         }
         if (BackpackCompat.isLoaded()) {
-            state.activeBackpackRing = BackpackCompat.findFirstUsableRing(player).orElse(null);
-            if (state.activeBackpackRing != null) {
-                return state.activeBackpackRing.stack();
+            for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
+                if (matchesFilter(ring.stack(), wantInfinite)) {
+                    state.activeBackpackRing = ring;
+                    return ring.stack();
+                }
             }
         }
         state.activeBackpackRing = null;
         return ItemStack.EMPTY;
+    }
+
+    private static boolean matchesFilter(ItemStack stack, boolean wantInfinite) {
+        return isUsableRing(stack) && stack.has(ModDataComponents.INDESTRUCTIBLE.get()) == wantInfinite;
     }
 
     private static boolean isUsableRing(ItemStack stack) {

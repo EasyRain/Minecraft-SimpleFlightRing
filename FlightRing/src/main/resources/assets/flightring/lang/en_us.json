@@ -8,7 +8,6 @@
   "item.flightring.netherite_flight_ring": "Netherite Flight Ring",
   "item.flightring.indestructible_core": "Indestructible Core",
   "tooltip.flightring.remaining_infinite": "Remaining flight time: Infinite",
-  "tooltip.flightring.infinite_hint": "Never consumes durability - fly forever",
   "tooltip.flightring.remaining_time": "Remaining flight time: %s min %s s",
   "tooltip.flightring.remaining_time_long": "Remaining flight time: %s h %s min %s s",
   "tooltip.flightring.hint": "Grants creative flight; consumes 1 durability per second of flight",

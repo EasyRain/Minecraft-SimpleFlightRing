@@ -8,7 +8,6 @@
   "item.flightring.netherite_flight_ring": "下界合金飞行戒指",
   "item.flightring.indestructible_core": "不毁核心",
   "tooltip.flightring.remaining_infinite": "剩余飞行时间：无限",
-  "tooltip.flightring.infinite_hint": "永不消耗耐久，无限飞行",
   "tooltip.flightring.remaining_time": "剩余飞行时间：%s 分 %s 秒",
   "tooltip.flightring.remaining_time_long": "剩余飞行时间：%s 小时 %s 分 %s 秒",
   "tooltip.flightring.hint": "赋予创造飞行能力；仅飞行时消耗耐久，每飞行1秒消耗1点",
