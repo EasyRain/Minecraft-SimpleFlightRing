@@ -36,3 +36,7 @@ SlashBlade_Resharped-1.21.1/
 # ---- Crash reports / logs ----
 crash-reports/
 logs/
+
+# ---- Credentials (never commit token files) ----
+*.cred-tmp
+*.cred

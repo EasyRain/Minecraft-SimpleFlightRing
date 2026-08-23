@@ -1,0 +1,6 @@
+{
+  "type": "flightring:ring_repair",
+  "category": "equipment",
+  "material": "minecraft:netherite_ingot",
+  "result": { "id": "flightring:netherite_flight_ring", "count": 1 }
+}

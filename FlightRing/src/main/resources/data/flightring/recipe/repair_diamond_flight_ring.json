@@ -1,0 +1,11 @@
+{
+  "type": "flightring:ring_repair",
+  "category": "equipment",
+  "material": {
+    "item": "minecraft:diamond"
+  },
+  "result": {
+    "id": "flightring:diamond_flight_ring",
+    "count": 1
+  }
+}

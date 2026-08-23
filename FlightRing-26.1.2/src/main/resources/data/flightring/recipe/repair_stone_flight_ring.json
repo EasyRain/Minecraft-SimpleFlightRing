@@ -1,0 +1,6 @@
+{
+  "type": "flightring:ring_repair",
+  "category": "equipment",
+  "material": "#c:cobblestones",
+  "result": { "id": "flightring:stone_flight_ring", "count": 1 }
+}

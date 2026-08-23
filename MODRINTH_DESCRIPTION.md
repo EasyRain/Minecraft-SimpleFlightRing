@@ -19,6 +19,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
   - The input ring may have **any remaining durability** (even zero).
   - The upgraded ring starts at **full durability**.
 - ⚒️ **Netherite ring via smithing** — Netherite Upgrade Smithing Template + Diamond Flight Ring + Netherite Ingot in the smithing table.
+- 🔧 **Crafting-table repair** — combine a ring with its tier material (shapeless): each material restores 25% durability, a stacked input repairs several times in one craft, and a single Netherite Ingot fully repairs the Netherite ring. Enchantments, names and lore are preserved.
 - 🖥️ **HUD flight time countdown** — shows the remaining flight time in the bottom-left corner by default.
   - Multiple rings are **summed up** (Curios slot + inventory + offhand + backpacks).
   - Automatically hidden while the chat is open (configurable).
@@ -44,20 +45,39 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
 
 ### Wooden Flight Ring
 ```
-Oak Planks  Oak Planks  Oak Planks
-Oak Planks   Feather    Oak Planks
-Oak Planks  Oak Planks  Oak Planks
+Planks        Planks        Planks
+Planks         Feather      Planks
+Planks        Planks        Planks
 ```
+> Any planks work (`#minecraft:planks` tag) — all vanilla wood types and planks from other mods are accepted.
 
 ### Upgrades (Stone / Iron / Gold / Diamond)
 8 material items around the lower-tier ring (any durability):
 
 | Upgrade to | 8× material | Center |
 |-----------|-------------|--------|
-| Stone Flight Ring | Stone | Wooden Flight Ring |
+| Stone Flight Ring | Cobblestone* | Wooden Flight Ring |
 | Iron Flight Ring | Iron Ingot | Stone Flight Ring |
 | Golden Flight Ring | Gold Ingot | Iron Flight Ring |
 | Diamond Flight Ring | Diamond | Golden Flight Ring |
+
+> \* Any cobblestone works (`#c:cobblestones` tag) — regular cobblestone, deepslate cobblestone and cobblestone from other mods are all accepted.
+
+### Repairing (Shapeless)
+Combine a flight ring with its tier material in any arrangement to restore durability:
+
+| Ring | Material | Restored per material |
+|------|----------|----------------------|
+| Wooden Flight Ring | any planks | 25% |
+| Stone Flight Ring | any cobblestone | 25% |
+| Iron Flight Ring | Iron Ingot | 25% |
+| Golden Flight Ring | Gold Ingot | 25% |
+| Diamond Flight Ring | Diamond | 25% |
+| Netherite Flight Ring | Netherite Ingot | **100%** (1 ingot = full repair) |
+
+- A **stacked** input repairs multiple times at once — one slot with 4 iron ingots fully repairs an Iron ring in a single craft; only the actually needed amount is consumed.
+- Enchantments, custom names and lore are **kept** during repair.
+- A fully-durable ring cannot be used in the repair recipe (no waste).
 
 ### Netherite Flight Ring (Smithing Table)
 1. Netherite Upgrade Smithing Template
@@ -84,7 +104,7 @@ Oak Planks  Oak Planks  Oak Planks
 ## Notes
 
 - Creative/Spectator players are not affected (vanilla flight, no durability cost).
-- A fully consumed ring does not break — it becomes inert, and can still be used in upgrade recipes or repaired with Mending/anvil.
+- A fully consumed ring does not break — it becomes inert, and can still be used in upgrade recipes or repaired with the repair recipe / Mending / anvil.
 - The mod id is `flightring`; all features are server-safe and work in multiplayer.
 
 ## License

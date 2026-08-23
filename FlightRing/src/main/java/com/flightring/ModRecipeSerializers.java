@@ -18,6 +18,10 @@ public class ModRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingSmithingRecipe>> RING_SMITHING =
             SERIALIZERS.register("ring_smithing", RingSmithingRecipe.Serializer::new);
 
+    /** Shapeless repair: tier material restores 25% durability per unit, stacked inputs repair multiple times at once. */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingRepairRecipe>> RING_REPAIR =
+            SERIALIZERS.register("ring_repair", RingRepairRecipe.Serializer::new);
+
     private ModRecipeSerializers() {
     }
 }

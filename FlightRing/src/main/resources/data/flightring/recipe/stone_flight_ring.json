@@ -8,7 +8,7 @@
   ],
   "key": {
     "S": {
-      "item": "minecraft:cobblestone"
+      "tag": "c:cobblestones"
     },
     "R": {
       "item": "flightring:wood_flight_ring"
