@@ -46,9 +46,11 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        // Copy the input ring: enchantments, custom name, lore and the current
-        // durability are all kept.
+        // Copy the input ring: enchantments, custom name, lore are all kept.
+        // Durability is reset to full so the indestructible ring shows no
+        // damage bar (it can never lose durability anyway).
         ItemStack assembled = input.base().copy();
+        assembled.setDamageValue(0);
         assembled.set(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE);
         return assembled;
     }
