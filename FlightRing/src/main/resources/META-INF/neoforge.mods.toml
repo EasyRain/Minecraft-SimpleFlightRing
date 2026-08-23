@@ -52,6 +52,3 @@ type="optional"
 versionRange="[3.20,4)"
 ordering="AFTER"
 side="BOTH"
-
-[[mixins]]
-config="flightring.mixins.json"

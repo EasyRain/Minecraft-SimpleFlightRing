@@ -19,7 +19,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
   - The input ring may have **any remaining durability** (even zero).
   - The upgraded ring starts at **full durability**.
 - ⚒️ **Netherite ring via smithing** — Netherite Upgrade Smithing Template + Diamond Flight Ring + Netherite Ingot in the smithing table.
-- 🔧 **Crafting-table repair** — combine a ring with its tier material (shapeless): each material restores 25% durability, a stacked input repairs several times in one craft, and a single Netherite Ingot fully repairs the Netherite ring. Enchantments, names and lore are preserved.
+- 🔧 **Crafting-table repair** — combine a ring with its tier material (shapeless): each craft consumes 1 material unit and restores 25% durability, and a single Netherite Ingot fully repairs the Netherite ring. Enchantments, names and lore are preserved.
 - 🖥️ **HUD flight time countdown** — shows the remaining flight time in the bottom-left corner by default.
   - Multiple rings are **summed up** (Curios slot + inventory + offhand + backpacks).
   - Automatically hidden while the chat is open (configurable).
@@ -66,8 +66,8 @@ Planks        Planks        Planks
 ### Repairing (Shapeless)
 Combine a flight ring with its tier material in any arrangement to restore durability:
 
-| Ring | Material | Restored per material |
-|------|----------|----------------------|
+| Ring | Material | Restored per craft |
+|------|----------|--------------------|
 | Wooden Flight Ring | any planks | 25% |
 | Stone Flight Ring | any cobblestone | 25% |
 | Iron Flight Ring | Iron Ingot | 25% |
@@ -75,7 +75,7 @@ Combine a flight ring with its tier material in any arrangement to restore durab
 | Diamond Flight Ring | Diamond | 25% |
 | Netherite Flight Ring | Netherite Ingot | **100%** (1 ingot = full repair) |
 
-- A **stacked** input repairs multiple times at once — one slot with 4 iron ingots fully repairs an Iron ring in a single craft; only the actually needed amount is consumed.
+- Each craft consumes exactly **1 material unit** (standard vanilla consumption) — repeat the craft to fully repair a ring. This works identically in every crafting system: crafting table, recipe book and modded terminals such as AE2's crafting terminal.
 - Enchantments, custom names and lore are **kept** during repair.
 - A fully-durable ring cannot be used in the repair recipe (no waste).
 

@@ -15,10 +15,12 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 
 /**
- * Shapeless repair recipe: one flight ring + a stack of its tier material.
- * Each material unit repairs 25% durability; a stacked input repairs several
- * units at once and only the actually needed amount is consumed. Netherite
- * repairs with a single ingot. Enchantments, custom name and lore are
+ * Shapeless repair recipe: one flight ring + 1 material unit = one craft.
+ * Each craft restores 25% durability (netherite restores 100% with a single
+ * ingot); repeat the craft to fully repair a ring. Consumes exactly one
+ * material per craft - the standard vanilla per-slot consumption - so the
+ * recipe works identically in every crafting system (crafting table, recipe
+ * book, AE2 crafting terminal, ...). Enchantments, custom name and lore are
  * preserved by copying the input ring. A fully-durable ring cannot be used.
  */
 public class RingRepairRecipe extends ShapelessRecipe {
@@ -59,66 +61,16 @@ public class RingRepairRecipe extends ShapelessRecipe {
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
         ItemStack ring = ItemStack.EMPTY;
-        int materialCount = 0;
         for (ItemStack stack : input.items()) {
-            if (stack.isEmpty()) {
-                continue;
-            }
             if (stack.is(this.result.getItem())) {
                 ring = stack;
-            } else {
-                materialCount += stack.getCount();
+                break;
             }
         }
         ItemStack repaired = ring.copy();
-        int consumed = this.neededCount(ring, materialCount);
-        int maxDamage = ring.getMaxDamage();
-        int repair = this.fullRepair ? maxDamage : (maxDamage / 4) * consumed;
+        int repair = this.fullRepair ? ring.getMaxDamage() : ring.getMaxDamage() / 4;
         repaired.setDamageValue(Math.max(0, ring.getDamageValue() - repair));
         return repaired;
-    }
-
-    @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInput container) {
-        NonNullList<ItemStack> remaining = NonNullList.withSize(container.size(), ItemStack.EMPTY);
-        ItemStack ring = ItemStack.EMPTY;
-        int materialCount = 0;
-        for (int i = 0; i < container.size(); i++) {
-            ItemStack stack = container.getItem(i);
-            if (stack.isEmpty()) {
-                continue;
-            }
-            if (stack.is(this.result.getItem())) {
-                ring = stack;
-            } else {
-                materialCount += stack.getCount();
-            }
-        }
-        if (ring.isEmpty()) {
-            return remaining;
-        }
-        int consumed = this.neededCount(ring, materialCount);
-        for (int i = 0; i < container.size(); i++) {
-            ItemStack stack = container.getItem(i);
-            if (stack.isEmpty() || stack.is(this.result.getItem())) {
-                continue;
-            }
-            int left = stack.getCount() - (this.material.test(stack) ? consumed : 0);
-            remaining.set(i, left > 0 ? stack.copyWithCount(left) : stack.getCraftingRemainingItem());
-        }
-        return remaining;
-    }
-
-    /** How many material units this recipe will actually consume. */
-    private int neededCount(ItemStack ring, int available) {
-        int needed;
-        if (this.fullRepair) {
-            needed = 1;
-        } else {
-            int quarter = ring.getMaxDamage() / 4;
-            needed = (ring.getDamageValue() + quarter - 1) / quarter;
-        }
-        return Math.min(available, needed);
     }
 
     public Ingredient getMaterial() {
