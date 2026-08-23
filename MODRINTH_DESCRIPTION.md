@@ -19,6 +19,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
   - The input ring may have **any remaining durability** (even zero).
   - The upgraded ring starts at **full durability**.
 - ⚒️ **Netherite ring via smithing** — Netherite Upgrade Smithing Template + Diamond Flight Ring + Netherite Ingot in the smithing table.
+- 💜 **Indestructible Core** — craft 1 Netherite Ingot + 1 Nether Star (shapeless) into the dark *Indestructible Core*, then combine it with **any** flight ring in the smithing table: the ring becomes **indestructible** — durability never drains, flight is infinite, the tooltip shows *Infinite* flight time and the HUD countdown disappears (no longer needed).
 - 🔧 **Crafting-table repair** — combine a ring with its tier material (shapeless): each craft consumes 1 material unit and restores 25% durability, and a single Netherite Ingot fully repairs the Netherite ring. Enchantments, names and lore are preserved.
 - 🖥️ **HUD flight time countdown** — shows the remaining flight time in the bottom-left corner by default.
   - Multiple rings are **summed up** (Curios slot + inventory + offhand + backpacks).
