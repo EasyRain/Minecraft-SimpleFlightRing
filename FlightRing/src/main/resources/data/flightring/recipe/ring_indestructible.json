@@ -1,10 +1,10 @@
 {
   "type": "flightring:ring_indestructible",
+  "template": {
+    "item": "flightring:indestructible_core"
+  },
   "base": {
     "tag": "flightring:flight_rings"
-  },
-  "addition": {
-    "item": "flightring:indestructible_core"
   },
   "result": {
     "id": "flightring:wood_flight_ring",

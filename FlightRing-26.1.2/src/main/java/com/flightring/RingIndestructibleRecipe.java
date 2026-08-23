@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Smithing-table recipe: any flight ring (base) + Indestructible Core
- * (addition) produces the same ring marked with the {@code indestructible}
- * data component - it never loses durability and grants infinite flight.
- * The template slot is not required (the custom codec has no template field
- * and {@link #matches} ignores it), so only the core + ring are consumed.
- * Enchantments, custom name, lore and current durability are all preserved.
+ * Smithing-table recipe: the Indestructible Core is used as the smithing
+ * TEMPLATE, any flight ring as the base; the addition slot stays empty.
+ * The result is the same ring marked with the {@code indestructible} data
+ * component - it never loses durability and grants infinite flight. Only the
+ * core + ring are consumed. Enchantments, custom name, lore and the CURRENT
+ * durability are all preserved (the result is assembled from the input stack).
  * <p>
  * Deliberately extends {@link SmithingTransformRecipe} so JEI's smithing
  * category shows it like any vanilla smithing transform recipe.
@@ -37,8 +37,8 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
     public static final MapCodec<RingIndestructibleRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                     Recipe.CommonInfo.MAP_CODEC.forGetter(ring -> ring.commonInfo),
+                    Ingredient.CODEC.fieldOf("template").forGetter(ring -> ring.template),
                     Ingredient.CODEC.fieldOf("base").forGetter(ring -> ring.base),
-                    Ingredient.CODEC.fieldOf("addition").forGetter(ring -> ring.addition),
                     ItemStackTemplate.CODEC.fieldOf("result").forGetter(ring -> ring.result)
             ).apply(instance, RingIndestructibleRecipe::new)
     );
@@ -47,9 +47,9 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
             Recipe.CommonInfo.STREAM_CODEC,
             ring -> ring.commonInfo,
             Ingredient.CONTENTS_STREAM_CODEC,
-            ring -> ring.base,
+            ring -> ring.template,
             Ingredient.CONTENTS_STREAM_CODEC,
-            ring -> ring.addition,
+            ring -> ring.base,
             ItemStackTemplate.STREAM_CODEC,
             ring -> ring.result,
             RingIndestructibleRecipe::new
@@ -61,25 +61,27 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
     public static final RecipeSerializer<SmithingTransformRecipe> SERIALIZER =
             (RecipeSerializer<SmithingTransformRecipe>) (RecipeSerializer<?>) new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
+    private final Ingredient template;
     private final Ingredient base;
-    private final Ingredient addition;
     private final ItemStackTemplate result;
 
-    public RingIndestructibleRecipe(Recipe.CommonInfo commonInfo, Ingredient base, Ingredient addition,
+    public RingIndestructibleRecipe(Recipe.CommonInfo commonInfo, Ingredient template, Ingredient base,
                                     ItemStackTemplate result) {
-        super(commonInfo, Optional.empty(), base, Optional.of(addition), result);
+        super(commonInfo, Optional.of(template), base, Optional.empty(), result);
+        this.template = template;
         this.base = base;
-        this.addition = addition;
         this.result = result;
     }
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return this.base.test(input.base()) && this.addition.test(input.addition());
+        return this.template.test(input.template()) && this.base.test(input.base());
     }
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input) {
+        // Copy the input ring: enchantments, custom name, lore and the current
+        // durability are all kept.
         ItemStack assembled = input.base().copy();
         assembled.set(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE);
         return assembled;
@@ -97,9 +99,9 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
         example.set(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE);
         return List.of(
                 new SmithingRecipeDisplay(
-                        SlotDisplay.Empty.INSTANCE,
+                        this.template.display(),
                         this.base.display(),
-                        this.addition.display(),
+                        SlotDisplay.Empty.INSTANCE,
                         new SlotDisplay.ItemStackSlotDisplay(ItemStackTemplate.fromNonEmptyStack(example)),
                         new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)
                 )

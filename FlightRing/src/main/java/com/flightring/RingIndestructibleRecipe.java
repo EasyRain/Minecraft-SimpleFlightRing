@@ -14,26 +14,26 @@ import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.level.Level;
 
 /**
- * Smithing-table recipe: any flight ring (base) + Indestructible Core
- * (addition) produces the same ring marked with the {@code indestructible}
- * data component - it never loses durability and grants infinite flight.
- * The template slot is not required (the custom codec has no template field
- * and {@link #matches} ignores it), so only the core + ring are consumed.
- * Enchantments, custom name, lore and current durability are all preserved.
+ * Smithing-table recipe: the Indestructible Core is used as the smithing
+ * TEMPLATE, any flight ring as the base; the addition slot stays empty.
+ * The result is the same ring marked with the {@code indestructible} data
+ * component - it never loses durability and grants infinite flight. Only the
+ * core + ring are consumed. Enchantments, custom name, lore and the CURRENT
+ * durability are all preserved (the result is assembled from the input stack).
  * <p>
  * Deliberately extends {@link SmithingTransformRecipe} so JEI's smithing
  * category shows it like any vanilla smithing transform recipe.
  */
 public class RingIndestructibleRecipe extends SmithingTransformRecipe {
 
+    private final Ingredient template;
     private final Ingredient base;
-    private final Ingredient addition;
     private final ItemStack result;
 
-    public RingIndestructibleRecipe(Ingredient base, Ingredient addition, ItemStack result) {
-        super(Ingredient.EMPTY, base, addition, result);
+    public RingIndestructibleRecipe(Ingredient template, Ingredient base, ItemStack result) {
+        super(template, base, Ingredient.EMPTY, result);
+        this.template = template;
         this.base = base;
-        this.addition = addition;
         this.result = result;
         // Example output shown in JEI / recipe preview: the ring with the marker.
         this.result.set(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE);
@@ -41,11 +41,13 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return this.base.test(input.base()) && this.addition.test(input.addition());
+        return this.template.test(input.template()) && this.base.test(input.base());
     }
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
+        // Copy the input ring: enchantments, custom name, lore and the current
+        // durability are all kept.
         ItemStack assembled = input.base().copy();
         assembled.set(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE);
         return assembled;
@@ -61,12 +63,12 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
         return ModRecipeSerializers.RING_INDESTRUCTIBLE.get();
     }
 
-    public Ingredient getBase() {
-        return base;
+    public Ingredient getTemplate() {
+        return template;
     }
 
-    public Ingredient getAddition() {
-        return addition;
+    public Ingredient getBase() {
+        return base;
     }
 
     public ItemStack getResult() {
@@ -76,8 +78,8 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
     public static class Serializer implements RecipeSerializer<RingIndestructibleRecipe> {
 
         public static final MapCodec<RingIndestructibleRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Ingredient.CODEC.fieldOf("template").forGetter(RingIndestructibleRecipe::getTemplate),
                 Ingredient.CODEC.fieldOf("base").forGetter(RingIndestructibleRecipe::getBase),
-                Ingredient.CODEC.fieldOf("addition").forGetter(RingIndestructibleRecipe::getAddition),
                 ItemStack.STRICT_CODEC.fieldOf("result").forGetter(RingIndestructibleRecipe::getResult)
         ).apply(instance, RingIndestructibleRecipe::new));
 
@@ -95,15 +97,15 @@ public class RingIndestructibleRecipe extends SmithingTransformRecipe {
         }
 
         private static RingIndestructibleRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+            Ingredient template = Ingredient.CONTENTS_STREAM_CODEC.decode(buffer);
             Ingredient base = Ingredient.CONTENTS_STREAM_CODEC.decode(buffer);
-            Ingredient addition = Ingredient.CONTENTS_STREAM_CODEC.decode(buffer);
             ItemStack result = ItemStack.STREAM_CODEC.decode(buffer);
-            return new RingIndestructibleRecipe(base, addition, result);
+            return new RingIndestructibleRecipe(template, base, result);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf buffer, RingIndestructibleRecipe recipe) {
+            Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.template);
             Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.base);
-            Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.addition);
             ItemStack.STREAM_CODEC.encode(buffer, recipe.result);
         }
     }
