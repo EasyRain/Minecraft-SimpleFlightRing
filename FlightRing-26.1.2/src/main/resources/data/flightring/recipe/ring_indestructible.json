@@ -1,0 +1,6 @@
+{
+  "type": "flightring:ring_indestructible",
+  "base": "#flightring:flight_rings",
+  "addition": "flightring:indestructible_core",
+  "result": { "id": "flightring:wood_flight_ring", "count": 1 }
+}

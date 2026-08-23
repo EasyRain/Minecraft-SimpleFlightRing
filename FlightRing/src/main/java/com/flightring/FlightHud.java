@@ -88,6 +88,10 @@ public class FlightHud {
      * seconds, i.e. the actual flight time taking the ring's enchantments into account.
      */
     private static int totalRemainingSeconds(Player player) {
+        // An indestructible ring means infinite flight time: hide the countdown (-1).
+        if (hasIndestructibleRing(player)) {
+            return -1;
+        }
         int total = 0;
         if (CuriosCompat.isLoaded()) {
             total += remainingSeconds(player, CuriosCompat.findRingInSlot(player));
@@ -104,6 +108,32 @@ public class FlightHud {
         return total;
     }
 
+    private static boolean hasIndestructibleRing(Player player) {
+        if (CuriosCompat.isLoaded() && isIndestructibleRing(CuriosCompat.findRingInSlot(player))) {
+            return true;
+        }
+        for (ItemStack stack : player.getInventory().items) {
+            if (isIndestructibleRing(stack)) {
+                return true;
+            }
+        }
+        if (isIndestructibleRing(player.getInventory().offhand.get(0))) {
+            return true;
+        }
+        if (BackpackCompat.isLoaded()) {
+            for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
+                if (isIndestructibleRing(ring.stack())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isIndestructibleRing(ItemStack stack) {
+        return stack.getItem() instanceof FlightRingItem && stack.has(ModDataComponents.INDESTRUCTIBLE.get());
+    }
+
     private static int remainingSeconds(Player player, ItemStack stack) {
         if (isUsableRing(stack)) {
             int remainingPoints = stack.getMaxDamage() - stack.getDamageValue();
@@ -114,7 +144,8 @@ public class FlightHud {
     }
 
     private static boolean isUsableRing(ItemStack stack) {
-        return stack.getItem() instanceof FlightRingItem && stack.getDamageValue() < stack.getMaxDamage();
+        return stack.getItem() instanceof FlightRingItem
+                && (stack.has(ModDataComponents.INDESTRUCTIBLE.get()) || stack.getDamageValue() < stack.getMaxDamage());
     }
 
     private FlightHud() {

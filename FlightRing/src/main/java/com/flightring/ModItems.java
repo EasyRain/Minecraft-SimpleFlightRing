@@ -1,5 +1,6 @@
 package com.flightring;
 
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -21,6 +22,10 @@ public class ModItems {
             ITEMS.registerItem("diamond_flight_ring", properties -> new FlightRingItem(RingTier.DIAMOND, properties));
     public static final DeferredItem<FlightRingItem> NETHERITE_FLIGHT_RING =
             ITEMS.registerItem("netherite_flight_ring", properties -> new FlightRingItem(RingTier.NETHERITE, properties));
+
+    /** Indestructible Core: smithing ingredient that makes a ring never lose durability. */
+    public static final DeferredItem<Item> INDESTRUCTIBLE_CORE =
+            ITEMS.registerItem("indestructible_core", Item::new, new Item.Properties());
 
     /** All rings in upgrade order (wood -> stone -> iron -> gold -> diamond -> netherite). */
     public static final List<DeferredItem<FlightRingItem>> ALL = List.of(

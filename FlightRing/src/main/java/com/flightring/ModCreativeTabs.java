@@ -20,6 +20,7 @@ public class ModCreativeTabs {
                         for (var ring : ModItems.ALL) {
                             output.accept(new ItemStack(ring.get()));
                         }
+                        output.accept(new ItemStack(ModItems.INDESTRUCTIBLE_CORE.get()));
                     })
                     .build());
 

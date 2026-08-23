@@ -22,6 +22,7 @@ public class FlightRingMod {
 
     public FlightRingMod(IEventBus modEventBus) {
         ModItems.ITEMS.register(modEventBus);
+        ModDataComponents.COMPONENTS.register(modEventBus);
         ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
 

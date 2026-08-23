@@ -32,6 +32,11 @@ public class FlightRingItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            tooltipComponents.add(Component.translatable("tooltip.flightring.remaining_infinite"));
+            tooltipComponents.add(Component.translatable("tooltip.flightring.infinite_hint"));
+            return;
+        }
         int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
         // Take the Unbreaking enchantment into account: each level makes every
         // durability point last one extra second.

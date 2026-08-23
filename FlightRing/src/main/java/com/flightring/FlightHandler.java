@@ -105,6 +105,11 @@ public class FlightHandler {
                 int interval = 20 * (1 + unbreakingLevel(player, ring));
                 if (state.ticksFlying >= interval) {
                     state.ticksFlying = 0;
+                    if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+                        // Indestructible ring (forged with the Indestructible Core):
+                        // never consumes durability.
+                        return;
+                    }
                     // Deterministic drain: bypass the vanilla probabilistic Unbreaking roll.
                     ring.setDamageValue(ring.getDamageValue() + 1);
                     if (state.activeBackpackRing != null) {
@@ -146,6 +151,11 @@ public class FlightHandler {
      * seconds, i.e. the actual flight time taking the ring's enchantments into account.
      */
     private static int totalFlightSeconds(ServerPlayer player) {
+        // An indestructible ring means infinite flight time; the HUD then hides
+        // the countdown entirely (signalled with -1).
+        if (hasIndestructibleRing(player)) {
+            return -1;
+        }
         int total = 0;
         if (CuriosCompat.isLoaded()) {
             total += usableSeconds(player, CuriosCompat.findRingInSlot(player));
@@ -160,6 +170,32 @@ public class FlightHandler {
             }
         }
         return total;
+    }
+
+    private static boolean hasIndestructibleRing(ServerPlayer player) {
+        if (CuriosCompat.isLoaded() && isIndestructibleRing(CuriosCompat.findRingInSlot(player))) {
+            return true;
+        }
+        for (ItemStack stack : player.getInventory().items) {
+            if (isIndestructibleRing(stack)) {
+                return true;
+            }
+        }
+        if (isIndestructibleRing(player.getInventory().offhand.get(0))) {
+            return true;
+        }
+        if (BackpackCompat.isLoaded()) {
+            for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
+                if (isIndestructibleRing(ring.stack())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isIndestructibleRing(ItemStack stack) {
+        return stack.getItem() instanceof FlightRingItem && stack.has(ModDataComponents.INDESTRUCTIBLE.get());
     }
 
     private static int usableSeconds(ServerPlayer player, ItemStack stack) {
@@ -216,7 +252,8 @@ public class FlightHandler {
     }
 
     private static boolean isUsableRing(ItemStack stack) {
-        return stack.getItem() instanceof FlightRingItem && stack.getDamageValue() < stack.getMaxDamage();
+        return stack.getItem() instanceof FlightRingItem
+                && (stack.has(ModDataComponents.INDESTRUCTIBLE.get()) || stack.getDamageValue() < stack.getMaxDamage());
     }
 
     private static class PlayerState {

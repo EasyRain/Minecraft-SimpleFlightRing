@@ -23,6 +23,10 @@ public class ModRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingRepairRecipe>> RING_REPAIR =
             SERIALIZERS.register("ring_repair", () -> RingRepairRecipe.SERIALIZER);
 
+    /** Smithing: any flight ring + Indestructible Core -> the ring becomes indestructible (infinite flight). */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SmithingTransformRecipe>> RING_INDESTRUCTIBLE =
+            SERIALIZERS.register("ring_indestructible", () -> RingIndestructibleRecipe.SERIALIZER);
+
     private ModRecipeSerializers() {
     }
 }

@@ -23,6 +23,10 @@ public class ModItems {
     public static final DeferredItem<FlightRingItem> NETHERITE_FLIGHT_RING =
             ITEMS.registerItem("netherite_flight_ring", properties -> new FlightRingItem(RingTier.NETHERITE, properties));
 
+    /** Indestructible Core: smithing ingredient that makes a ring never lose durability. */
+    public static final DeferredItem<Item> INDESTRUCTIBLE_CORE =
+            ITEMS.registerItem("indestructible_core", Item::new, properties -> properties);
+
     /** All rings in upgrade order (wood -> stone -> iron -> gold -> diamond -> netherite). */
     public static final List<DeferredItem<FlightRingItem>> ALL = List.of(
             WOOD_FLIGHT_RING,
