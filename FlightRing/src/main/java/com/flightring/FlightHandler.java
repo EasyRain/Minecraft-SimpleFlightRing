@@ -53,12 +53,29 @@ public class FlightHandler {
     }
 
     /**
+     * Generic de-duplication against any other mod that also cancels the
+     * mid-air mining slow-down (BreakSpeed x5 handlers, other mixins, ...).
+     * PlayerMixin already cancels the vanilla /5 divisor while flying with
+     * Flight Stability, so the event's original speed is the un-slow-downed
+     * ground speed. If another mod pushed the speed beyond that (stacking),
+     * clamp it back - anything else is left untouched. Runs last so it sees
+     * all modifications.
+     */
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        Player player = event.getEntity();
+        if (player.getAbilities().flying && !player.onGround() && hasFlightStability(player)) {
+            float groundSpeed = event.getOriginalSpeed();
+            if (event.getNewSpeed() > groundSpeed * 1.01F) {
+                event.setNewSpeed(groundSpeed);
+            }
+        }
+    }
+
+    /**
      * Whether the player carries a flight ring with the Flight Stability
      * enchantment (Curios slot, inventory, offhand or sophisticated backpacks).
-     * Used by {@code PlayerMixin} to cancel the vanilla mid-air mining slow-down
-     * while flying - modifying the vanilla divisor directly (instead of scaling
-     * the final speed) keeps every other speed modifier (vanilla or from other
-     * mods) untouched.
+     * Used by {@code PlayerMixin} and the {@link #onBreakSpeed} de-duplication.
      */
     public static boolean hasFlightStability(Player player) {
         net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> stability =

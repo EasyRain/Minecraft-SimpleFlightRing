@@ -23,11 +23,6 @@ public abstract class PlayerMixin {
     )
     private float flightring$noMidAirMiningSlowdown(float divisor) {
         Player self = (Player) (Object) this;
-        // Mekanism's MekaSuit leggings module (Gyroscopic Stabilization Unit)
-        // already cancels the slow-down; skip ours so the two do not stack.
-        if (com.flightring.MekanismCompat.hasGyroscopicStabilizer(self)) {
-            return divisor;
-        }
         if (self.getAbilities().flying && !self.onGround() && FlightHandler.hasFlightStability(self)) {
             return 1.0F;
         }
