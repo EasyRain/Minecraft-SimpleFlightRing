@@ -57,16 +57,18 @@ public class FlightHandler {
      * mid-air mining slow-down (BreakSpeed x5 handlers, other mixins, ...).
      * PlayerMixin already cancels the vanilla /5 divisor while flying with
      * Flight Stability, so the event's original speed is the un-slow-downed
-     * ground speed. If another mod pushed the speed beyond that (stacking),
-     * clamp it back - anything else is left untouched. Runs last so it sees
-     * all modifications.
+     * ground speed (which already includes attribute/enchantment/potion
+     * bonuses). Only obvious stacking is clamped: speeds above 2x the ground
+     * speed are treated as another mod's slow-down removal and clamped back;
+     * smaller event modifications (normal bonuses up to 2x) are preserved.
+     * Runs last so it sees all modifications.
      */
     @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getEntity();
         if (player.getAbilities().flying && !player.onGround() && hasFlightStability(player)) {
             float groundSpeed = event.getOriginalSpeed();
-            if (event.getNewSpeed() > groundSpeed * 1.01F) {
+            if (event.getNewSpeed() > groundSpeed * 2.0F) {
                 event.setNewSpeed(groundSpeed);
             }
         }
