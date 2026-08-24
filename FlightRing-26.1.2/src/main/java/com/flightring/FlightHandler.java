@@ -54,20 +54,14 @@ public class FlightHandler {
     }
 
     /**
-     * Vanilla slows down mining while not on the ground (speed /= 5). With the
-     * Flight Stability enchantment on a carried ring, that slow-down is cancelled
-     * while actually flying. The event fires after the slow-down was applied, so
-     * multiplying by 5 exactly restores the ground mining speed.
+     * Whether the player carries a flight ring with the Flight Stability
+     * enchantment (Curios slot, inventory, offhand or sophisticated backpacks).
+     * Used by {@code PlayerMixin} to cancel the vanilla mid-air mining slow-down
+     * while flying - modifying the vanilla divisor directly (instead of scaling
+     * the final speed) keeps every other speed modifier (vanilla or from other
+     * mods) untouched.
      */
-    @SubscribeEvent
-    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-        Player player = event.getEntity();
-        if (player.getAbilities().flying && !player.onGround() && hasFlightStability(player)) {
-            event.setNewSpeed(event.getNewSpeed() * 5.0F);
-        }
-    }
-
-    private static boolean hasFlightStability(Player player) {
+    public static boolean hasFlightStability(Player player) {
         net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> stability =
                 player.registryAccess().holderOrThrow(ModEnchantments.FLIGHT_STABILITY);
         if (CuriosCompat.isLoaded() && stabilityLevel(player, CuriosCompat.findRingInSlot(player), stability) > 0) {
