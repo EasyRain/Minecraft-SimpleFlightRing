@@ -131,6 +131,23 @@ public class FlightHandler {
             }
             state.ticksFlying = 0;
         }
+
+        // Efficiency enchantment: each level adds 10% sprint-flight speed.
+        float targetSpeed = 0.05F;
+        if (!ring.isEmpty() && player.getAbilities().flying && player.isSprinting()) {
+            int efficiency = efficiencyLevel(player, ring);
+            if (efficiency > 0) {
+                targetSpeed = 0.05F * (1.0F + 0.1F * efficiency);
+            }
+        }
+        if (Math.abs(player.getAbilities().getFlyingSpeed() - targetSpeed) > 1.0E-4F) {
+            player.getAbilities().setFlyingSpeed(targetSpeed);
+            player.onUpdateAbilities();
+        }
+    }
+
+    private static int efficiencyLevel(ServerPlayer player, ItemStack ring) {
+        return ring.getEnchantmentLevel(player.registryAccess().holderOrThrow(Enchantments.EFFICIENCY));
     }
 
     private static int unbreakingLevel(ServerPlayer player, ItemStack ring) {

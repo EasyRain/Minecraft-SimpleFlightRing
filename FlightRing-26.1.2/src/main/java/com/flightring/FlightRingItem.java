@@ -1,5 +1,6 @@
 package com.flightring;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -12,6 +13,9 @@ import java.util.function.Consumer;
 /**
  * A flight ring item. Grants traditional creative flight while it has durability
  * remaining (see {@link FlightHandler}); durability only drops while actually flying.
+ * Rings are enchantable with Unbreaking, Mending and Efficiency (the rings are added
+ * to the vanilla {@code enchantable/durability} and {@code enchantable/mining} item
+ * tags); Efficiency levels speed up sprint-flight by 10% each.
  */
 public class FlightRingItem extends Item {
 
@@ -54,7 +58,8 @@ public class FlightRingItem extends Item {
             int seconds = remainingSeconds % 60;
             tooltipComponents.accept(Component.translatable("tooltip.flightring.remaining_time", minutes, seconds));
         }
-        tooltipComponents.accept(Component.translatable("tooltip.flightring.hint"));
-        tooltipComponents.accept(Component.translatable("tooltip.flightring.unbreaking_hint"));
+        // Gray hint lines keep the countdown prominent.
+        tooltipComponents.accept(Component.translatable("tooltip.flightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
+        tooltipComponents.accept(Component.translatable("tooltip.flightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
     }
 }
