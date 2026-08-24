@@ -43,9 +43,15 @@ public class FlightRingItem extends Item {
         // Take the Unbreaking enchantment into account: each level makes every
         // durability point last one extra second.
         int unbreaking = 0;
+        int efficiency = 0;
+        int stability = 0;
         if (context.registries() != null) {
             unbreaking = stack.getEnchantments()
                     .getLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING));
+            efficiency = stack.getEnchantments()
+                    .getLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY));
+            stability = stack.getEnchantments()
+                    .getLevel(context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY));
         }
         int remainingSeconds = remainingPoints * (1 + unbreaking);
         if (remainingSeconds >= 60_000) {
@@ -58,8 +64,15 @@ public class FlightRingItem extends Item {
             int seconds = remainingSeconds % 60;
             tooltipComponents.accept(Component.translatable("tooltip.flightring.remaining_time", minutes, seconds));
         }
-        // Gray hint lines keep the countdown prominent.
-        tooltipComponents.accept(Component.translatable("tooltip.flightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
-        tooltipComponents.accept(Component.translatable("tooltip.flightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
+        // Gray hint lines (only for enchantments actually present) keep the countdown prominent.
+        if (unbreaking > 0) {
+            tooltipComponents.accept(Component.translatable("tooltip.flightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
+        }
+        if (efficiency > 0) {
+            tooltipComponents.accept(Component.translatable("tooltip.flightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
+        }
+        if (stability > 0) {
+            tooltipComponents.accept(Component.translatable("tooltip.flightring.stability_hint").withStyle(ChatFormatting.GRAY));
+        }
     }
 }

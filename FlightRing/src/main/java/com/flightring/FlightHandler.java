@@ -52,6 +52,51 @@ public class FlightHandler {
         STATES.remove(event.getOriginal().getUUID());
     }
 
+    /**
+     * Vanilla slows down mining while not on the ground (speed /= 5). With the
+     * Flight Stability enchantment on a carried ring, that slow-down is cancelled
+     * while actually flying. The event fires after the slow-down was applied, so
+     * multiplying by 5 exactly restores the ground mining speed.
+     */
+    @SubscribeEvent
+    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        Player player = event.getEntity();
+        if (player.getAbilities().flying && !player.onGround() && hasFlightStability(player)) {
+            event.setNewSpeed(event.getNewSpeed() * 5.0F);
+        }
+    }
+
+    private static boolean hasFlightStability(Player player) {
+        net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> stability =
+                player.registryAccess().holderOrThrow(ModEnchantments.FLIGHT_STABILITY);
+        if (CuriosCompat.isLoaded() && stabilityLevel(player, CuriosCompat.findRingInSlot(player), stability) > 0) {
+            return true;
+        }
+        for (ItemStack stack : player.getInventory().items) {
+            if (stabilityLevel(player, stack, stability) > 0) {
+                return true;
+            }
+        }
+        if (stabilityLevel(player, player.getInventory().offhand.get(0), stability) > 0) {
+            return true;
+        }
+        if (BackpackCompat.isLoaded()) {
+            for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
+                if (stabilityLevel(player, ring.stack(), stability) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static int stabilityLevel(Player player, ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> stability) {
+        if (stack.getItem() instanceof FlightRingItem) {
+            return stack.getEnchantmentLevel(stability);
+        }
+        return 0;
+    }
+
     private static void tick(ServerPlayer player) {
         PlayerState state = STATES.computeIfAbsent(player.getUUID(), uuid -> new PlayerState());
 

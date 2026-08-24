@@ -7,6 +7,8 @@
   "item.flightring.diamond_flight_ring": "Diamond Flight Ring",
   "item.flightring.netherite_flight_ring": "Netherite Flight Ring",
   "item.flightring.indestructible_core": "Indestructible Core",
+  "enchantment.flightring.flight_stability": "Flight Stability",
+  "tooltip.flightring.stability_hint": "Flight Stability removes mining slow-down while flying",
   "tooltip.flightring.remaining_infinite": "Remaining flight time: Infinite",
   "tooltip.flightring.remaining_time": "Remaining flight time: %s min %s s",
   "tooltip.flightring.remaining_time_long": "Remaining flight time: %s h %s min %s s",
