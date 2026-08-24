@@ -27,7 +27,7 @@ desktop.ini
 
 # Local Minecraft instance / launcher
 .minecraft/
-minecraft/
+/minecraft/
 
 # Other mod projects kept in the same workspace
 Shizuku-Blade/
