@@ -1,6 +1,6 @@
 {
   "replace": false,
   "values": [
-    "flightring:flight_stability"
+    "simpleflightring:flight_stability"
   ]
 }

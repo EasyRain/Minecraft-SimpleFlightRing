@@ -1,0 +1,11 @@
+{
+  "type": "simpleflightring:ring_repair",
+  "category": "equipment",
+  "material": {
+    "tag": "minecraft:planks"
+  },
+  "result": {
+    "id": "simpleflightring:wood_flight_ring",
+    "count": 1
+  }
+}

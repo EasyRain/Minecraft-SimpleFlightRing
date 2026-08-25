@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 @Mod(FlightRingMod.MODID)
 public class FlightRingMod {
 
-    public static final String MODID = "flightring";
+    public static final String MODID = "simpleflightring";
     public static final Logger LOGGER = LoggerFactory.getLogger(FlightRingMod.class);
 
     public FlightRingMod(IEventBus modEventBus) {
@@ -27,7 +27,7 @@ public class FlightRingMod {
         ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
 
-        // Client config (HUD flight timer): config/flightring-client.toml
+        // Client config (HUD flight timer): config/simpleflightring-client.toml
         ModList.get().getModContainerById(MODID).ifPresent(container ->
                 container.registerConfig(ModConfig.Type.CLIENT, FlightRingConfig.SPEC));
 

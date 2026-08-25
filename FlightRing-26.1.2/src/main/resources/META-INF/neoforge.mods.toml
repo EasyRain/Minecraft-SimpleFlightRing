@@ -16,7 +16,7 @@ Features:
 - Nested crafting upgrades: 8 material + lower-tier ring in the center of a 3x3 grid (wood ring uses a feather).
 - Upgrades keep enchantments, custom names and lore; the input ring may have any remaining durability.
 - Netherite ring is crafted via smithing: Netherite Upgrade template + Diamond Flight Ring + Netherite Ingot.
-- HUD flight time countdown with configurable position (config/flightring-client.toml, Cloth Config supported).
+- HUD flight time countdown with configurable position (config/simpleflightring-client.toml, Cloth Config supported).
 - Optional Curios API support (flight ring slot); without Curios the rings simply work from the inventory.
 - Optional Sophisticated Backpacks support: rings inside carried backpacks also grant flight.
 
@@ -49,4 +49,4 @@ ordering="AFTER"
 side="BOTH"
 
 [[mixins]]
-config="flightring.mixins.json"
+config="simpleflightring.mixins.json"

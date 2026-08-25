@@ -14,7 +14,7 @@ public class ModCreativeTabs {
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FLIGHT_RINGS =
             TABS.register("flight_rings", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.flightring"))
+                    .title(Component.translatable("itemGroup.simpleflightring"))
                     .icon(() -> new ItemStack(ModItems.WOOD_FLIGHT_RING.get()))
                     .displayItems((parameters, output) -> {
                         for (var ring : ModItems.ALL) {

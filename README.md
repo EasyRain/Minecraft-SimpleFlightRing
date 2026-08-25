@@ -21,7 +21,7 @@
   升级保留附魔/自定义名称/Lore，接受任意剩余耐久，产物为满耐久新戒指。
 - **下界合金戒指**：锻造台升级（下界合金升级模板 + 钻石飞行戒指 + 下界合金锭）。
 - **HUD 飞行时间倒计时**：默认左下角；多枚戒指剩余时间累加；打开聊天框时自动隐藏。
-  位置与开关可在 `config/flightring-client.toml` 配置，支持 Cloth Config 游戏内调整。
+  位置与开关可在 `config/simpleflightring-client.toml` 配置，支持 Cloth Config 游戏内调整。
 - **可选集成**（均非必须）：
   - **Curios API**：添加「飞行戒指」饰品槽位（可右键佩戴；未安装时背包内生效，背包始终生效）。
   - **Cloth Config API**：游戏内 Mod 列表 → Config 打开配置界面（开关 + 位置滑块）。
@@ -41,7 +41,7 @@
 
 ## 构建
 
-各自目录下运行（构建产物在 `build/libs/flightring-1.0.0.jar`）：
+各自目录下运行（构建产物在 `build/libs/simpleflightring-1.0.0.jar`）：
 
 ```bat
 :: 1.21.1 版（需要 JDK 21）
@@ -61,7 +61,7 @@ gradlew.bat build
 ## 安装
 
 1. 安装对应版本的 NeoForge。
-2. 将对应版本的 `flightring-1.0.0.jar` 放入 `mods` 文件夹。
+2. 将对应版本的 `simpleflightring-1.0.0.jar` 放入 `mods` 文件夹。
 3. （可选）安装对应版本的 Curios API / Cloth Config / Sophisticated Backpacks 以获得额外集成。
 
 ## 许可

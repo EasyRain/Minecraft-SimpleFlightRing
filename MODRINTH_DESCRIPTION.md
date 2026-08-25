@@ -24,7 +24,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
 - 🖥️ **HUD flight time countdown** — shows the remaining flight time in the bottom-left corner by default.
   - Multiple rings are **summed up** (Curios slot + inventory + offhand + backpacks).
   - Automatically hidden while the chat is open (configurable).
-  - Position and visibility configurable in `config/flightring-client.toml`.
+  - Position and visibility configurable in `config/simpleflightring-client.toml`.
 - 🎛️ **Cloth Config support (optional)** — in-game configuration screen from the mod list (toggle + position sliders).
 - 🎒 **Sophisticated Backpacks support (optional)** — rings stored inside sophisticated backpacks also grant flight, including nested backpacks (up to 3 levels) and backpacks worn in the armor/offhand/Curios slots.
 - 🧿 **Curios API support (optional)** — adds an extra **"Flight Ring"** curio slot; rings can be right-click equipped. Without Curios, rings simply work from the inventory (and still do even with Curios installed).
@@ -88,12 +88,12 @@ Combine a flight ring with its tier material in any arrangement to restore durab
 ## Installation
 
 1. Install the matching [NeoForge](https://neoforged.net/) version.
-2. Drop the `flightring` jar into the `mods` folder.
+2. Drop the `simpleflightring` jar into the `mods` folder.
 3. *(Optional)* Install [Curios API](https://modrinth.com/mod/curios) for the flight ring slot, [Cloth Config](https://modrinth.com/mod/cloth-config) for the in-game config screen, and/or [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks) for backpack support.
 
 ## Configuration
 
-`config/flightring-client.toml` (client-side):
+`config/simpleflightring-client.toml` (client-side):
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -106,7 +106,7 @@ Combine a flight ring with its tier material in any arrangement to restore durab
 
 - Creative/Spectator players are not affected (vanilla flight, no durability cost).
 - A fully consumed ring does not break — it becomes inert, and can still be used in upgrade recipes or repaired with the repair recipe / Mending / anvil.
-- The mod id is `flightring`; all features are server-safe and work in multiplayer.
+- The mod id is `simpleflightring`; all features are server-safe and work in multiplayer.
 
 ## License
 

@@ -13,7 +13,7 @@ import net.minecraft.resources.Identifier;
  */
 public record FlightTimePayload(int totalSeconds) implements CustomPacketPayload {
 
-    public static final Type<FlightTimePayload> TYPE = new Type<>(Identifier.parse("flightring:flight_time"));
+    public static final Type<FlightTimePayload> TYPE = new Type<>(Identifier.parse("simpleflightring:flight_time"));
 
     public static final StreamCodec<ByteBuf, FlightTimePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,

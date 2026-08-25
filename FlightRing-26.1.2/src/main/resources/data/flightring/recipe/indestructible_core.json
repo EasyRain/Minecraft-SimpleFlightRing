@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
-  "ingredients": [
-    "minecraft:netherite_ingot",
-    "minecraft:nether_star"
-  ],
-  "result": { "id": "flightring:indestructible_core", "count": 1 }
-}

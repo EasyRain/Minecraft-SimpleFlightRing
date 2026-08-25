@@ -1,6 +1,0 @@
-{
-  "type": "flightring:ring_indestructible",
-  "template": "flightring:indestructible_core",
-  "base": "#flightring:flight_rings",
-  "result": { "id": "flightring:wood_flight_ring", "count": 1 }
-}

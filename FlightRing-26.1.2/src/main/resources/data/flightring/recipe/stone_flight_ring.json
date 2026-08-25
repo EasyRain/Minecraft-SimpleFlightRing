@@ -1,7 +1,0 @@
-{
-  "type": "flightring:ring_upgrade",
-  "category": "equipment",
-  "pattern": ["SSS","SRS","SSS"],
-  "key": { "S": "#c:cobblestones", "R": "flightring:wood_flight_ring" },
-  "result": { "id": "flightring:stone_flight_ring", "count": 1 }
-}

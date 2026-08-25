@@ -1,0 +1,6 @@
+{
+  "type": "simpleflightring:ring_repair",
+  "category": "equipment",
+  "material": "minecraft:gold_ingot",
+  "result": { "id": "simpleflightring:gold_flight_ring", "count": 1 }
+}

@@ -1,6 +1,0 @@
-{
-  "type": "flightring:ring_repair",
-  "category": "equipment",
-  "material": "minecraft:iron_ingot",
-  "result": { "id": "flightring:iron_flight_ring", "count": 1 }
-}

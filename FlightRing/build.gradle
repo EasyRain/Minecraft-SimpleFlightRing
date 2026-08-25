@@ -84,7 +84,7 @@ dependencies {
     localRuntime files("libs/curios-neoforge-9.5.1+1.21.1.jar")
 
     // Cloth Config API - optional dependency for the in-game config screen.
-    // The mod works without it (config can be edited in config/flightring-client.toml).
+    // The mod works without it (config can be edited in config/simpleflightring-client.toml).
     compileOnly files("libs/cloth-config-15.0.140-neoforge.jar")
     localRuntime files("libs/cloth-config-15.0.140-neoforge.jar")
 

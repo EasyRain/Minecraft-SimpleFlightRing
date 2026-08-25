@@ -21,7 +21,7 @@ public abstract class PlayerMixin {
             method = "getDestroySpeed(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)F",
             constant = @Constant(floatValue = 5.0F)
     )
-    private float flightring$noMidAirMiningSlowdown(float divisor) {
+    private float simpleflightring$noMidAirMiningSlowdown(float divisor) {
         Player self = (Player) (Object) this;
         if (self.getAbilities().flying && !self.onGround() && FlightHandler.hasFlightStability(self)) {
             return 1.0F;

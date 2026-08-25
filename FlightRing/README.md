@@ -32,7 +32,7 @@
 
 ## HUD 与配置
 
-配置文件位于 `config/flightring-client.toml`（客户端配置）：
+配置文件位于 `config/simpleflightring-client.toml`（客户端配置）：
 
 | 配置项 | 默认值 | 说明 |
 |--------|--------|------|
@@ -90,7 +90,7 @@
 ## 安装
 
 1. 安装 [NeoForge 21.1.x](https://neoforged.net/)（需 21.1.228 或更高）。
-2. 将 `build/libs/flightring-1.0.0.jar` 放入 `mods` 文件夹。
+2. 将 `build/libs/simpleflightring-1.0.0.jar` 放入 `mods` 文件夹。
 3. （可选）安装 [Curios API 9.5.1+1.21.1](https://modrinth.com/mod/curios) 以获得饰品槽位。
 4. （可选）安装 [Cloth Config API 15.x](https://modrinth.com/mod/cloth-config) 以获得游戏内配置界面。
 5. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
@@ -104,7 +104,7 @@
 gradlew.bat build
 ```
 
-产物位于 `build/libs/flightring-1.0.0.jar`。
+产物位于 `build/libs/simpleflightring-1.0.0.jar`。
 
 开发环境运行（含 Curios，来自本地 `libs/` 目录的 jar）：
 
@@ -119,11 +119,11 @@ FlightRing/
 ├── build.gradle / settings.gradle / gradle.properties   # NeoForge 21.1.228 + ModDevGradle 1.0.17
 ├── libs/                                                # 本地 Curios jar（API/完整版/源码）
 └── src/main/
-    ├── java/com/flightring/
+    ├── java/com/simpleflightring/
     │   ├── FlightRingMod.java        # 主类：注册物品/配方序列化器/创造标签/配置，可选加载 Curios 与 Cloth Config
     │   ├── RingTier.java             # 6 种材质：飞行分钟数、附魔能力（耐久 = 分钟 × 60）
     │   ├── FlightRingItem.java       # 戒指物品（耐久=飞行分钟数×60、Tooltip 显示剩余分/秒）
-    │   ├── FlightRingConfig.java     # 客户端配置（HUD 开关与位置，config/flightring-client.toml）
+    │   ├── FlightRingConfig.java     # 客户端配置（HUD 开关与位置，config/simpleflightring-client.toml）
     │   ├── FlightHud.java            # 客户端 HUD：飞行时间倒计时渲染（多戒指累加）
     │   ├── ClothConfigCompat.java    # Cloth Config 可选集成（游戏内配置界面）
     │   ├── BackpackCompat.java       # 精妙背包可选集成（扫描背包内戒指，支持嵌套）
@@ -137,10 +137,10 @@ FlightRing/
     │   └── CuriosCompat.java         # Curios 可选集成（槽位查询、右键佩戴）
     └── resources/
         ├── META-INF/neoforge.mods.toml
-        ├── assets/flightring/        # 语言(zh_cn/en_us)、模型、贴图
+        ├── assets/simpleflightring/        # 语言(zh_cn/en_us)、模型、贴图
         └── data/
-            ├── flightring/recipe/    # 6 个配方
-            ├── flightring/curios/    # 槽位与实体分配（数据包方式注册槽位）
+            ├── simpleflightring/recipe/    # 6 个配方
+            ├── simpleflightring/curios/    # 槽位与实体分配（数据包方式注册槽位）
             └── curios/tags/item/     # 飞行戒指物品标签
 ```
 

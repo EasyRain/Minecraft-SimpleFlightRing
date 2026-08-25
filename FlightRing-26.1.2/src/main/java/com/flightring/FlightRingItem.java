@@ -36,7 +36,7 @@ public class FlightRingItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.remaining_infinite"));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_infinite"));
             return;
         }
         int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
@@ -58,21 +58,21 @@ public class FlightRingItem extends Item {
             int hours = remainingSeconds / 3600;
             int minutes = (remainingSeconds % 3600) / 60;
             int seconds = remainingSeconds % 60;
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.remaining_time_long", hours, minutes, seconds));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time_long", hours, minutes, seconds));
         } else {
             int minutes = remainingSeconds / 60;
             int seconds = remainingSeconds % 60;
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.remaining_time", minutes, seconds));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time", minutes, seconds));
         }
         // Gray hint lines (only for enchantments actually present) keep the countdown prominent.
         if (unbreaking > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
         }
         if (efficiency > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
         }
         if (stability > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.flightring.stability_hint").withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.stability_hint").withStyle(ChatFormatting.GRAY));
         }
     }
 }

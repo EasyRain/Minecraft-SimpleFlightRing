@@ -1,11 +1,11 @@
 {
   "replace": false,
   "values": [
-    "flightring:wood_flight_ring",
-    "flightring:stone_flight_ring",
-    "flightring:iron_flight_ring",
-    "flightring:gold_flight_ring",
-    "flightring:diamond_flight_ring",
-    "flightring:netherite_flight_ring"
+    "simpleflightring:wood_flight_ring",
+    "simpleflightring:stone_flight_ring",
+    "simpleflightring:iron_flight_ring",
+    "simpleflightring:gold_flight_ring",
+    "simpleflightring:diamond_flight_ring",
+    "simpleflightring:netherite_flight_ring"
   ]
 }

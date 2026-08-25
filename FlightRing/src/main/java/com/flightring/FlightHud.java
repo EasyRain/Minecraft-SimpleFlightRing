@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
  * (Curios flight ring slot, inventory and offhand), their remaining flight
  * times are summed up.
  * Position and visibility are controlled by {@link FlightRingConfig}
- * (config/flightring-client.toml) and can be edited in-game with Cloth Config.
+ * (config/simpleflightring-client.toml) and can be edited in-game with Cloth Config.
  * <p>
  * Registered manually on the mod event bus by {@link FlightRingMod} (client side only).
  */
@@ -67,11 +67,11 @@ public class FlightHud {
             int hours = totalRemainingSeconds / 3600;
             int minutes = (totalRemainingSeconds % 3600) / 60;
             int seconds = totalRemainingSeconds % 60;
-            text = Component.translatable("hud.flightring.flight_time_long", hours, minutes, seconds);
+            text = Component.translatable("hud.simpleflightring.flight_time_long", hours, minutes, seconds);
         } else {
             int minutes = totalRemainingSeconds / 60;
             int seconds = totalRemainingSeconds % 60;
-            text = Component.translatable("hud.flightring.flight_time", minutes, seconds);
+            text = Component.translatable("hud.simpleflightring.flight_time", minutes, seconds);
         }
 
         int x = FlightRingConfig.HUD_X.get();

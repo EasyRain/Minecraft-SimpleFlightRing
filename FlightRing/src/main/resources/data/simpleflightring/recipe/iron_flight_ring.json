@@ -1,0 +1,21 @@
+{
+  "type": "simpleflightring:ring_upgrade",
+  "category": "equipment",
+  "pattern": [
+    "III",
+    "IRI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "simpleflightring:stone_flight_ring"
+    }
+  },
+  "result": {
+    "id": "simpleflightring:iron_flight_ring",
+    "count": 1
+  }
+}

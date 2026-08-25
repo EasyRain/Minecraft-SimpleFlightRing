@@ -1,0 +1,21 @@
+{
+  "type": "simpleflightring:ring_upgrade",
+  "category": "equipment",
+  "pattern": [
+    "SSS",
+    "SRS",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "tag": "c:cobblestones"
+    },
+    "R": {
+      "item": "simpleflightring:wood_flight_ring"
+    }
+  },
+  "result": {
+    "id": "simpleflightring:stone_flight_ring",
+    "count": 1
+  }
+}

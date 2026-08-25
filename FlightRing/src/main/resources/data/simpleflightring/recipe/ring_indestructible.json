@@ -1,0 +1,13 @@
+{
+  "type": "simpleflightring:ring_indestructible",
+  "template": {
+    "item": "simpleflightring:indestructible_core"
+  },
+  "base": {
+    "tag": "simpleflightring:flight_rings"
+  },
+  "result": {
+    "id": "simpleflightring:wood_flight_ring",
+    "count": 1
+  }
+}
