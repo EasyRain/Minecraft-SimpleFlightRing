@@ -7,8 +7,8 @@
 
 | 目录 | 游戏版本 | NeoForge | 工具链 |
 |------|---------|----------|--------|
-| [`FlightRing/`](FlightRing) | Minecraft **1.21.1** | NeoForge 21.1.248 | Gradle 8.14.3 / JDK 21 / ModDevGradle 1.0.17 |
-| [`FlightRing-26.1.2/`](FlightRing-26.1.2) | Minecraft **26.1.2** | NeoForge 26.1.2.97 | Gradle 9.2.1 / JDK 25 / NeoGradle userdev 7.1.38 |
+| [`SimpleFlightRing-1.21.1/`](SimpleFlightRing-1.21.1) | Minecraft **1.21.1** | NeoForge 21.1.248 | Gradle 8.14.3 / JDK 21 / ModDevGradle 1.0.17 |
+| [`SimpleFlightRing-26.1.2/`](SimpleFlightRing-26.1.2) | Minecraft **26.1.2** | NeoForge 26.1.2.97 | Gradle 9.2.1 / JDK 25 / NeoGradle userdev 7.1.38 |
 
 ## 功能特性
 
@@ -45,11 +45,11 @@
 
 ```bat
 :: 1.21.1 版（需要 JDK 21）
-cd FlightRing
+cd SimpleFlightRing-1.21.1
 gradlew.bat build
 
 :: 26.1.2 版（需要 JDK 25，Gradle 会自动下载 toolchain）
-cd ..\FlightRing-26.1.2
+cd ..\SimpleFlightRing-26.1.2
 gradlew.bat build
 ```
 
