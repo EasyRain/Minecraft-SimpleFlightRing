@@ -16,7 +16,8 @@ public final class RingUpgradeHelper {
     private static final Set<DataComponentType<?>> COPIED_COMPONENTS = Set.of(
             DataComponents.ENCHANTMENTS,
             DataComponents.CUSTOM_NAME,
-            DataComponents.LORE
+            DataComponents.LORE,
+            ModDataComponents.INDESTRUCTIBLE.get()
     );
 
     private RingUpgradeHelper() {
