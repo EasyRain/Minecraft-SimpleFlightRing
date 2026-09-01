@@ -143,7 +143,7 @@ tasks.named('jar', Jar).configure {
     }
 }
 
-// Copy the built mod jar to the workspace root (D:\Temp\MCMOD) for easy access.
+// Copy the built mod jar to the workspace root (D:\DshWorkSpace\MCMOD) for easy access.
 // Implemented as an imperative copy so Gradle does not track the workspace root
 // (it contains unrelated files, e.g. gradle caches with lock files).
 tasks.register('copyToWorkspace') {
