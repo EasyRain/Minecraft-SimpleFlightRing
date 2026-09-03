@@ -51,13 +51,6 @@ public final class CuriosCompat {
                         ICurioItem.super.onEquip(slotContext, prevStack, stack);
                     }
                 }
-
-                @Override
-                public boolean canSync(SlotContext slotContext, ItemStack stack) {
-                    // The flight ring has no on-body render, so the cosmetic
-                    // "show/hide" toggle in the Curios GUI is meaningless — hide it.
-                    return false;
-                }
             });
         }
         registered = true;
