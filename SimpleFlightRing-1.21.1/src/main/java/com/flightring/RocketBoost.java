@@ -129,6 +129,10 @@ public class RocketBoost {
         if (!player.isFallFlying()) {
             return;
         }
+        // Creative and spectator players never pay durability (like vanilla flight).
+        if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
         Holder<Enchantment> rocketBoost = rocketBoostHolder(player);
         ItemStack ring = findRingWithBoost(player, rocketBoost);
         if (ring.isEmpty() || ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {

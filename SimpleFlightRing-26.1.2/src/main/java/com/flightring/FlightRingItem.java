@@ -35,13 +35,8 @@ public class FlightRingItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_infinite"));
-            return;
-        }
-        int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
-        // Take the Unbreaking enchantment into account: each level makes every
-        // durability point last one extra second.
+        // Enchantment levels are read first so their hint lines also show on the
+        // indestructible (infinite) ring - only the countdown is replaced there.
         int unbreaking = 0;
         int efficiency = 0;
         int stability = 0;
@@ -56,18 +51,26 @@ public class FlightRingItem extends Item {
             rocketBoost = stack.getEnchantments()
                     .getLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST));
         }
-        int remainingSeconds = remainingPoints * (1 + unbreaking);
-        if (remainingSeconds >= 60_000) {
-            int hours = remainingSeconds / 3600;
-            int minutes = (remainingSeconds % 3600) / 60;
-            int seconds = remainingSeconds % 60;
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time_long", hours, minutes, seconds));
+
+        if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_infinite"));
         } else {
-            int minutes = remainingSeconds / 60;
-            int seconds = remainingSeconds % 60;
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time", minutes, seconds));
+            int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
+            // Unbreaking: each level makes every durability point last one extra second.
+            int remainingSeconds = remainingPoints * (1 + unbreaking);
+            if (remainingSeconds >= 60_000) {
+                int hours = remainingSeconds / 3600;
+                int minutes = (remainingSeconds % 3600) / 60;
+                int seconds = remainingSeconds % 60;
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time_long", hours, minutes, seconds));
+            } else {
+                int minutes = remainingSeconds / 60;
+                int seconds = remainingSeconds % 60;
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time", minutes, seconds));
+            }
         }
-        // Gray hint lines (only for enchantments actually present) keep the countdown prominent.
+
+        // Gray hint lines (only for enchantments actually present).
         if (unbreaking > 0) {
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
         }
