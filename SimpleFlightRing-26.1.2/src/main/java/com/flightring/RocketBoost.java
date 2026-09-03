@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -143,7 +144,11 @@ public class RocketBoost {
         if (level <= 0) {
             return;
         }
-        int cost = level * 10;
+        // Cost is "level * 10 seconds of flight time", not raw durability points.
+        // Unbreaking makes each point last (1 + unbreaking) seconds, so divide the
+        // point cost accordingly to keep the time lost constant.
+        int unbreaking = ring.getEnchantments().getLevel(player.registryAccess().holderOrThrow(Enchantments.UNBREAKING));
+        int cost = Math.max(1, (int) Math.ceil(level * 10.0 / (1 + unbreaking)));
         ring.setDamageValue(Math.min(ring.getDamageValue() + cost, ring.getMaxDamage()));
     }
 
