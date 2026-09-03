@@ -2,11 +2,9 @@ package com.flightring;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -21,7 +19,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * other gliding source such as armour-based flight from other mods - pressing the
  * jump key (space by default) fires a vanilla firework-rocket-style boost. The boost
  * lasts {@code level * 10} ticks (matching a firework rocket of that flight duration)
- * and costs {@code level * 10} durability points of the active flight ring per use.
+ * and costs {@code level * 10} seconds of flight time per use (the durability cost is
+ * accumulated and applied server-side in {@link FlightHandler}).
  * <p>
  * The jump key is reused on purpose: the trigger piggybacks on the existing jump
  * binding, so jumping keeps working and no second key binding conflicts with it.
@@ -125,48 +124,7 @@ public class RocketBoost {
     // Server
     // ------------------------------------------------------------------
 
-    /** Server-authoritative durability cost: {@code level * 10} points of the active ring. */
-    public static void onServerTrigger(ServerPlayer player) {
-        if (!player.isFallFlying()) {
-            return;
-        }
-        // Creative and spectator players never pay durability (like vanilla flight).
-        if (player.isCreative() || player.isSpectator()) {
-            return;
-        }
-        Holder<Enchantment> rocketBoost = rocketBoostHolder(player);
-        ItemStack ring = findRingWithBoost(player, rocketBoost);
-        if (ring.isEmpty() || ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
-            return; // no ring, or an infinite ring (boost is free)
-        }
-        int level = boostLevel(ring, rocketBoost);
-        if (level <= 0) {
-            return;
-        }
-        // Cost is "level * 10 seconds of flight time", not raw durability points.
-        // Unbreaking makes each point last (1 + unbreaking) seconds, so divide the
-        // point cost accordingly to keep the time lost constant.
-        int unbreaking = ring.getEnchantmentLevel(player.registryAccess().holderOrThrow(Enchantments.UNBREAKING));
-        int cost = Math.max(1, (int) Math.ceil(level * 10.0 / (1 + unbreaking)));
-        ring.setDamageValue(Math.min(ring.getDamageValue() + cost, ring.getMaxDamage()));
-    }
-
-    private static ItemStack findRingWithBoost(ServerPlayer player, Holder<Enchantment> rocketBoost) {
-        if (CuriosCompat.isLoaded()) {
-            ItemStack stack = CuriosCompat.findRingInSlot(player);
-            if (boostLevel(stack, rocketBoost) > 0) {
-                return stack;
-            }
-        }
-        for (ItemStack stack : player.getInventory().items) {
-            if (boostLevel(stack, rocketBoost) > 0) {
-                return stack;
-            }
-        }
-        ItemStack offhand = player.getInventory().offhand.get(0);
-        if (boostLevel(offhand, rocketBoost) > 0) {
-            return offhand;
-        }
-        return ItemStack.EMPTY;
-    }
+    // (The server-side durability cost lives in FlightHandler.applyRocketBoost,
+    // which reuses the per-player state, ring lookup and backpack write-back.)
 }
+

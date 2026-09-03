@@ -29,7 +29,7 @@ public final class ModPayloads {
     private static void handleRocketBoost(RocketBoostPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-                RocketBoost.onServerTrigger(serverPlayer);
+                FlightHandler.applyRocketBoost(serverPlayer);
             }
         });
     }

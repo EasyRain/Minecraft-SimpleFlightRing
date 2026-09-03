@@ -213,6 +213,66 @@ public class FlightHandler {
         return ring.getEnchantments().getLevel(player.registryAccess().holderOrThrow(Enchantments.UNBREAKING));
     }
 
+    /**
+     * Rocket Boost durability cost (server-authoritative). Each boost adds
+     * {@code level * 10} seconds to a per-player accumulator; one durability point is
+     * consumed for every {@code 1 + Unbreaking} seconds actually accumulated, with the
+     * remainder carried over to the next boost. This keeps the cost at
+     * "level * 10 seconds" even with very high Unbreaking and avoids per-boost rounding.
+     */
+    public static void applyRocketBoost(ServerPlayer player) {
+        if (!player.isFallFlying()) {
+            return;
+        }
+        // Creative and spectator players never pay durability (like vanilla flight).
+        if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
+        PlayerState state = STATES.computeIfAbsent(player.getUUID(), uuid -> new PlayerState());
+        ItemStack ring = findRocketBoostRing(player);
+        if (ring.isEmpty() || ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            return; // no ring, or an infinite ring (boost is free)
+        }
+        int level = rocketBoostLevel(player, ring);
+        if (level <= 0) {
+            return;
+        }
+        int secondsPerPoint = 1 + unbreakingLevel(player, ring);
+        state.boostTicks += level * 10 * 20; // level * 10 seconds, in ticks
+        int interval = 20 * secondsPerPoint;
+        int points = state.boostTicks / interval;
+        if (points > 0) {
+            state.boostTicks -= points * interval;
+            ring.setDamageValue(Math.min(ring.getDamageValue() + points, ring.getMaxDamage()));
+        }
+    }
+
+    private static int rocketBoostLevel(ServerPlayer player, ItemStack stack) {
+        if (stack.getItem() instanceof FlightRingItem) {
+            return stack.getEnchantments().getLevel(player.registryAccess().holderOrThrow(ModEnchantments.ROCKET_BOOST));
+        }
+        return 0;
+    }
+
+    private static ItemStack findRocketBoostRing(ServerPlayer player) {
+        if (CuriosCompat.isLoaded()) {
+            ItemStack stack = CuriosCompat.findRingInSlot(player);
+            if (rocketBoostLevel(player, stack) > 0) {
+                return stack;
+            }
+        }
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+            if (rocketBoostLevel(player, stack) > 0) {
+                return stack;
+            }
+        }
+        ItemStack offhand = player.getItemBySlot(EquipmentSlot.OFFHAND);
+        if (rocketBoostLevel(player, offhand) > 0) {
+            return offhand;
+        }
+        return ItemStack.EMPTY;
+    }
+
     private static void revokeFlight(ServerPlayer player, PlayerState state) {
         player.getAbilities().mayfly = false;
         player.getAbilities().flying = false;
@@ -346,6 +406,8 @@ public class FlightHandler {
     private static class PlayerState {
         int ticksFlying;
         int ticksSinceSync;
+        /** Accumulated rocket-boost time (ticks) not yet converted into durability. */
+        int boostTicks;
         boolean grantedByUs;
         /** Smooth HUD value (seconds), decreasing 1 per second of actual flight. */
         int displaySeconds;
