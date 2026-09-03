@@ -45,6 +45,7 @@ public class FlightRingItem extends Item {
         int unbreaking = 0;
         int efficiency = 0;
         int stability = 0;
+        int rocketBoost = 0;
         if (context.registries() != null) {
             unbreaking = stack.getEnchantments()
                     .getLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING));
@@ -52,6 +53,8 @@ public class FlightRingItem extends Item {
                     .getLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY));
             stability = stack.getEnchantments()
                     .getLevel(context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY));
+            rocketBoost = stack.getEnchantments()
+                    .getLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST));
         }
         int remainingSeconds = remainingPoints * (1 + unbreaking);
         if (remainingSeconds >= 60_000) {
@@ -73,6 +76,9 @@ public class FlightRingItem extends Item {
         }
         if (stability > 0) {
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.stability_hint").withStyle(ChatFormatting.GRAY));
+        }
+        if (rocketBoost > 0) {
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.rocket_boost_hint").withStyle(ChatFormatting.GRAY));
         }
     }
 }

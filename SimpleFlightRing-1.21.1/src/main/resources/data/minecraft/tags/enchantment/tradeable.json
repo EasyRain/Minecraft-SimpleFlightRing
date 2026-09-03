@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "simpleflightring:flight_stability"
+    "simpleflightring:flight_stability",
+    "simpleflightring:rocket_boost"
   ]
 }

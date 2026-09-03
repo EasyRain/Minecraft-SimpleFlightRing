@@ -19,6 +19,18 @@ public class ModEnchantments {
             ResourceKey.create(Registries.ENCHANTMENT,
                     Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "flight_stability"));
 
+    /**
+     * "Rocket Boost" - while elytra-gliding (or any other form of gliding, e.g.
+     * armour-based flight from other mods), pressing the jump key fires a
+     * firework-rocket-style boost. Three levels by default; each level matches the
+     * equivalent firework-rocket flight duration and costs {@code level * 10}
+     * durability points of the ring per use. Higher levels from mods that raise
+     * the enchantment cap are honoured as-is.
+     */
+    public static final ResourceKey<Enchantment> ROCKET_BOOST =
+            ResourceKey.create(Registries.ENCHANTMENT,
+                    Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "rocket_boost"));
+
     private ModEnchantments() {
     }
 }

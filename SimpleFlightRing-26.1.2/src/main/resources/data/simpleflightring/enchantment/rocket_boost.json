@@ -1,0 +1,20 @@
+{
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.simpleflightring.rocket_boost"
+  },
+  "max_cost": {
+    "base": 30,
+    "per_level_above_first": 10
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 10
+  },
+  "slots": [
+    "any"
+  ],
+  "supported_items": "#simpleflightring:flight_rings",
+  "weight": 1
+}
