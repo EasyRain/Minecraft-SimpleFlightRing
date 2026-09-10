@@ -17,6 +17,7 @@ public final class ModPayloads {
     public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(FlightRingMod.MODID).versioned("1");
         registrar.playToClient(FlightTimePayload.TYPE, FlightTimePayload.STREAM_CODEC, ModPayloads::handleFlightTime);
+        registrar.playToClient(RingEnergyPayload.TYPE, RingEnergyPayload.STREAM_CODEC, ModPayloads::handleRingEnergy);
         registrar.playToServer(RocketBoostPayload.TYPE, RocketBoostPayload.STREAM_CODEC, ModPayloads::handleRocketBoost);
     }
 
@@ -25,6 +26,10 @@ public final class ModPayloads {
             ClientFlightTime.update(payload.totalSeconds());
             FlightRingMod.LOGGER.debug("[FlightRing] received total flight time: {} s", payload.totalSeconds());
         });
+    }
+
+    private static void handleRingEnergy(RingEnergyPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ClientRingEnergy.update(payload.energy(), payload.maxEnergy()));
     }
 
     private static void handleRocketBoost(RocketBoostPayload payload, IPayloadContext context) {

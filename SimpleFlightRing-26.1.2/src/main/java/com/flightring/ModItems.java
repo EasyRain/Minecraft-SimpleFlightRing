@@ -7,8 +7,10 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ModItems {
 
@@ -60,18 +62,28 @@ public class ModItems {
      * <p>
      * AllTheModium is an optional dependency: the recipes only load when it is present.
      * The durability is a placeholder - the INDESTRUCTIBLE component makes it infinite.
+     * <p>
+     * The three abilities are inherited up the chain (Vibranium keeps Allthemodium's,
+     * Unobtainium keeps both). Their own abilities are added tier by tier: so far only
+     * Allthemodium's Magic Lining exists, the other two are still to come.
      */
+    private static final Set<RingAbility> ALLTHEMODIUM_ABILITIES = EnumSet.of(RingAbility.MAGIC_LINING);
+    /** Vibranium inherits every ability of the tiers below it. */
+    private static final Set<RingAbility> VIBRANIUM_ABILITIES = EnumSet.copyOf(ALLTHEMODIUM_ABILITIES);
+    /** Unobtainium inherits every ability of the tiers below it. */
+    private static final Set<RingAbility> UNOBTAINIUM_ABILITIES = EnumSet.copyOf(VIBRANIUM_ABILITIES);
+
     public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING =
             ITEMS.registerItem("allthemodium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(5, 3, 0.04, 2),
+                    new RingBonuses(5, 3, 0.04, 2), ALLTHEMODIUM_ABILITIES, RingEnergy.DEFAULT_MAX,
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     public static final DeferredItem<FlightRingItem> VIBRANIUM_FLIGHT_RING =
             ITEMS.registerItem("vibranium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(10, 6, 0.08, 4),
+                    new RingBonuses(10, 6, 0.08, 4), VIBRANIUM_ABILITIES, RingEnergy.DEFAULT_MAX,
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     public static final DeferredItem<FlightRingItem> UNOBTAINIUM_FLIGHT_RING =
             ITEMS.registerItem("unobtainium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(15, 9, 0.12, 6),
+                    new RingBonuses(15, 9, 0.12, 6), UNOBTAINIUM_ABILITIES, RingEnergy.DEFAULT_MAX,
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
 
     /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain. */

@@ -36,6 +36,7 @@ public final class RingTooltipHandler {
             "tooltip.simpleflightring.remaining_infinite",
             "tooltip.simpleflightring.remaining_time",
             "tooltip.simpleflightring.remaining_time_long",
+            "tooltip.simpleflightring.energy",
             "tooltip.simpleflightring.breaks_when_depleted");
 
     @SubscribeEvent

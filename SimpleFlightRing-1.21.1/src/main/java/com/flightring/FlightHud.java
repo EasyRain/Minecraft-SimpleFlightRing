@@ -31,6 +31,10 @@ public class FlightHud {
     /** Show the hours unit once the remaining flight time reaches 1000 minutes (60 000 seconds). */
     private static final int SHOW_HOURS_THRESHOLD = 60_000;
 
+    /** Size of the energy bar of rings with abilities (Magic Lining). */
+    private static final int ENERGY_BAR_WIDTH = 80;
+    private static final int ENERGY_BAR_HEIGHT = 6;
+
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(LAYER_ID, FlightHud::renderTimer);
     }
@@ -48,35 +52,66 @@ public class FlightHud {
         if (FlightRingConfig.HIDE_WHILE_CHAT_OPEN.get() && minecraft.screen instanceof ChatScreen) {
             return;
         }
+
+        int x = FlightRingConfig.HUD_X.get();
+        int textY = minecraft.getWindow().getGuiScaledHeight() - FlightRingConfig.HUD_Y.get() - 9;
+
+        Component timerText = flightTimeText(minecraft.player);
+        // The energy bar sits right above the countdown. Indestructible rings hide the
+        // countdown, so the bar then takes its place.
+        renderEnergyBar(guiGraphics, minecraft, x, timerText == null ? textY : textY - ENERGY_BAR_HEIGHT - 5);
+        if (timerText != null) {
+            guiGraphics.drawString(minecraft.font, timerText, x, textY, 0xFFFFFF, true);
+        }
+    }
+
+    /** The countdown line, or {@code null} when there is no flight time to show. */
+    private static Component flightTimeText(Player player) {
         // Prefer the server-pushed value: it is authoritative and includes rings
         // inside sophisticated backpacks whose contents are not reliably readable
         // client-side. Fall back to a local calculation when no update was received
         // recently (e.g. just joined the world).
-        int totalRemainingSeconds;
-        if (ClientFlightTime.isFresh()) {
-            totalRemainingSeconds = ClientFlightTime.getSeconds();
-        } else {
-            totalRemainingSeconds = totalRemainingSeconds(minecraft.player);
-        }
+        int totalRemainingSeconds = ClientFlightTime.isFresh()
+                ? ClientFlightTime.getSeconds()
+                : totalRemainingSeconds(player);
         if (totalRemainingSeconds <= 0) {
-            return;
+            return null;
         }
-        Component text;
         if (totalRemainingSeconds >= SHOW_HOURS_THRESHOLD) {
             // Very long flight times (>= 1000 minutes): show hours too.
             int hours = totalRemainingSeconds / 3600;
             int minutes = (totalRemainingSeconds % 3600) / 60;
             int seconds = totalRemainingSeconds % 60;
-            text = Component.translatable("hud.simpleflightring.flight_time_long", hours, minutes, seconds);
-        } else {
-            int minutes = totalRemainingSeconds / 60;
-            int seconds = totalRemainingSeconds % 60;
-            text = Component.translatable("hud.simpleflightring.flight_time", minutes, seconds);
+            return Component.translatable("hud.simpleflightring.flight_time_long", hours, minutes, seconds);
         }
+        int minutes = totalRemainingSeconds / 60;
+        int seconds = totalRemainingSeconds % 60;
+        return Component.translatable("hud.simpleflightring.flight_time", minutes, seconds);
+    }
 
-        int x = FlightRingConfig.HUD_X.get();
-        int y = minecraft.getWindow().getGuiScaledHeight() - FlightRingConfig.HUD_Y.get() - 9;
-        guiGraphics.drawString(minecraft.font, text, x, y, 0xFFFFFF, true);
+    /**
+     * Energy bar of the ability ring worn in the Curios slot (Magic Lining). The values
+     * are pushed by the server, so the bar shows the pool even though the client only
+     * sees the item's synced copy between updates.
+     */
+    private static void renderEnergyBar(GuiGraphics guiGraphics, Minecraft minecraft, int x, int y) {
+        if (!ClientRingEnergy.isActive()) {
+            return;
+        }
+        float max = ClientRingEnergy.maxEnergy();
+        float energy = Math.max(0.0F, Math.min(max, ClientRingEnergy.energy()));
+        int filled = Math.round(ENERGY_BAR_WIDTH * (energy / max));
+        // Magic purple: dark frame, dim track, bright fill.
+        guiGraphics.fill(x - 1, y - 1, x + ENERGY_BAR_WIDTH + 1, y + ENERGY_BAR_HEIGHT + 1, 0xFF1B1230);
+        guiGraphics.fill(x, y, x + ENERGY_BAR_WIDTH, y + ENERGY_BAR_HEIGHT, 0xFF3A2A66);
+        if (filled > 0) {
+            guiGraphics.fill(x, y, x + filled, y + ENERGY_BAR_HEIGHT, 0xFF9A6BFF);
+        }
+        Component label = Component.translatable("hud.simpleflightring.energy",
+                Math.round(energy), Math.round(max));
+        // Dim red while the pool is empty (no more damage absorption).
+        int color = energy > 0.0F ? 0xFFD8C6FF : 0xFFFF8080;
+        guiGraphics.drawString(minecraft.font, label, x + ENERGY_BAR_WIDTH + 4, y - 1, color, true);
     }
 
     /**

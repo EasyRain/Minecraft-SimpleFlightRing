@@ -13,9 +13,12 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A flight ring item. Grants traditional creative flight while it has durability
@@ -53,6 +56,13 @@ public class FlightRingItem extends Item {
      * {@code null} for every ring except the linked (AllTheModium chain) ones.
      */
     private final RingBonuses bonuses;
+    /**
+     * Special abilities of the linked rings; upgrades inherit the lower tiers'
+     * abilities, so Unobtainium has everything. Empty for all other rings.
+     */
+    private final Set<RingAbility> abilities;
+    /** Size of the energy pool the abilities spend; 0 for rings without a pool. */
+    private final float maxEnergy;
 
     public FlightRingItem(RingTier tier, Properties properties) {
         super(properties.durability(tier.getMaxDurability()));
@@ -62,6 +72,8 @@ public class FlightRingItem extends Item {
         this.intrinsicBase = Map.of();
         this.breakSound = null;
         this.bonuses = null;
+        this.abilities = EnumSet.noneOf(RingAbility.class);
+        this.maxEnergy = 0.0F;
     }
 
     /**
@@ -78,6 +90,8 @@ public class FlightRingItem extends Item {
         this.intrinsicBase = Map.copyOf(intrinsicBase);
         this.breakSound = breakSound;
         this.bonuses = null;
+        this.abilities = EnumSet.noneOf(RingAbility.class);
+        this.maxEnergy = 0.0F;
     }
 
     public RingTier getTier() {
@@ -90,7 +104,7 @@ public class FlightRingItem extends Item {
      * INDESTRUCTIBLE component set as their default component (see {@code ModItems}).
      */
     public FlightRingItem(int maxDurability, int enchantmentValue, Properties properties) {
-        this(maxDurability, enchantmentValue, null, properties);
+        this(maxDurability, enchantmentValue, null, Set.of(), 0.0F, properties);
     }
 
     /**
@@ -98,6 +112,16 @@ public class FlightRingItem extends Item {
      * attack damage / reach the ring grants while worn in the Curios slot.
      */
     public FlightRingItem(int maxDurability, int enchantmentValue, RingBonuses bonuses, Properties properties) {
+        this(maxDurability, enchantmentValue, bonuses, Set.of(), 0.0F, properties);
+    }
+
+    /**
+     * Linked ring with attribute bonuses and special abilities: the abilities spend the
+     * ring's energy pool (see {@link RingEnergy}) and only work while the ring is worn
+     * in the Curios "flight ring" slot.
+     */
+    public FlightRingItem(int maxDurability, int enchantmentValue, RingBonuses bonuses,
+                          Set<RingAbility> abilities, float maxEnergy, Properties properties) {
         super(properties.durability(maxDurability));
         this.tier = null;
         this.enchantmentValue = enchantmentValue;
@@ -105,6 +129,25 @@ public class FlightRingItem extends Item {
         this.intrinsicBase = Map.of();
         this.breakSound = null;
         this.bonuses = bonuses;
+        this.abilities = abilities.isEmpty()
+                ? EnumSet.noneOf(RingAbility.class)
+                : EnumSet.copyOf(abilities);
+        this.maxEnergy = maxEnergy;
+    }
+
+    /** Whether this ring has the given special ability (see {@link RingAbility}). */
+    public boolean hasAbility(RingAbility ability) {
+        return abilities.contains(ability);
+    }
+
+    /** The ring's special abilities, in enum order; empty for rings without any. */
+    public Set<RingAbility> getAbilities() {
+        return Collections.unmodifiableSet(abilities);
+    }
+
+    /** Size of the ring's energy pool, or 0 when it has none (see {@link RingEnergy}). */
+    public float getMaxEnergy() {
+        return maxEnergy;
     }
 
     /**
@@ -197,12 +240,18 @@ public class FlightRingItem extends Item {
             }
         }
 
-        // 2. The special rings are destroyed once their durability runs out.
+        // 2. Energy pool of the linked rings (spent by their abilities, e.g. Magic Lining).
+        if (maxEnergy > 0.0F) {
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.energy",
+                    Math.round(RingEnergy.get(stack)), Math.round(maxEnergy)));
+        }
+
+        // 3. The special rings are destroyed once their durability runs out.
         if (breaksWhenDepleted && !infinite) {
             tooltipComponents.add(Component.translatable("tooltip.simpleflightring.breaks_when_depleted").withStyle(ChatFormatting.RED));
         }
 
-        // 3. Built-in (intrinsic) enchantments - never part of the vanilla enchantments
+        // 4. Built-in (intrinsic) enchantments - never part of the vanilla enchantments
         //    component, so they are listed explicitly with a "Built-in" prefix. The
         //    normal enchantments follow, added by the enchantments component itself.
         if (!intrinsicBase.isEmpty() && context.registries() != null) {
@@ -213,11 +262,16 @@ public class FlightRingItem extends Item {
     }
 
     /**
-     * Explanation lines for the enchantments the ring actually has. Kept out of the
-     * tooltip proper and added by {@link RingTooltipHandler} only while Shift is held.
+     * Explanation lines for the enchantments and special abilities the ring actually
+     * has. Kept out of the tooltip proper and added by {@link RingTooltipHandler} only
+     * while Shift is held.
      */
     public List<Component> effectHints(ItemStack stack, TooltipContext context) {
         List<Component> hints = new ArrayList<>();
+        // Special abilities first: they work independently of any enchantment.
+        for (RingAbility ability : abilities) {
+            addHint(hints, ability.key());
+        }
         if (context.registries() == null) {
             return hints;
         }
