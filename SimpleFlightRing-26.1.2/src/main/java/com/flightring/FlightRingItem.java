@@ -183,17 +183,26 @@ public class FlightRingItem extends Item {
             return hints;
         }
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING), stack) > 0) {
-            hints.add(Component.translatable("tooltip.simpleflightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
+            addHint(hints, "unbreaking");
         }
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY), stack) > 0) {
-            hints.add(Component.translatable("tooltip.simpleflightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
+            addHint(hints, "efficiency");
         }
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY), stack) > 0) {
-            hints.add(Component.translatable("tooltip.simpleflightring.stability_hint").withStyle(ChatFormatting.GRAY));
+            addHint(hints, "stability");
         }
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack) > 0) {
-            hints.add(Component.translatable("tooltip.simpleflightring.rocket_boost_hint").withStyle(ChatFormatting.GRAY));
+            addHint(hints, "rocket_boost");
         }
         return hints;
+    }
+
+    /**
+     * Adds one hint block: the enchantment's name on its own line, then what it does.
+     * Future cross-mod ring effects use the same shape.
+     */
+    private static void addHint(List<Component> hints, String name) {
+        hints.add(Component.translatable("tooltip.simpleflightring." + name + "_title").withStyle(ChatFormatting.GRAY));
+        hints.add(Component.translatable("tooltip.simpleflightring." + name + "_desc").withStyle(ChatFormatting.DARK_GRAY));
     }
 }
