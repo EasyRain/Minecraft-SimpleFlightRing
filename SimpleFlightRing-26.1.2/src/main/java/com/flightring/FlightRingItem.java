@@ -14,7 +14,9 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -33,6 +35,10 @@ import java.util.function.Consumer;
  * crafted, taken from the creative tab or spawned with {@code /give} - has them. They
  * are never written to the vanilla enchantments component, so nothing can strip them
  * (grindstone, ...). See {@code EnchantmentHelperMixin} for the effective level.
+ * <p>
+ * Tooltip layout: name, remaining time, destroy warning, built-in enchantments, then
+ * the normal (component) enchantments. The long enchantment EFFECT hints are kept out
+ * of the tooltip proper and added behind Shift by {@link RingTooltipHandler}.
  */
 public class FlightRingItem extends Item {
 
@@ -129,34 +135,14 @@ public class FlightRingItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        // Built-in (intrinsic) enchantments are never part of the vanilla enchantments
-        // component, so list them explicitly with a "Built-in" prefix.
-        if (!intrinsicBase.isEmpty() && context.registries() != null) {
-            getIntrinsicLevels(stack).forEach((key, level) -> tooltipComponents.accept(
-                    Component.translatable("tooltip.simpleflightring.intrinsic_enchant",
-                            Enchantment.getFullname(context.registries().holderOrThrow(key), level))));
-        }
+        boolean infinite = stack.has(ModDataComponents.INDESTRUCTIBLE.get());
 
-        // Effective levels: the higher of the intrinsic and the real enchantment level.
-        // They are read first so their hint lines also show on the indestructible ring.
-        int unbreaking = 0;
-        int efficiency = 0;
-        int stability = 0;
-        int rocketBoost = 0;
-        if (context.registries() != null) {
-            unbreaking = EnchantmentHelper.getItemEnchantmentLevel(
-                    context.registries().holderOrThrow(Enchantments.UNBREAKING), stack);
-            efficiency = EnchantmentHelper.getItemEnchantmentLevel(
-                    context.registries().holderOrThrow(Enchantments.EFFICIENCY), stack);
-            stability = EnchantmentHelper.getItemEnchantmentLevel(
-                    context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY), stack);
-            rocketBoost = EnchantmentHelper.getItemEnchantmentLevel(
-                    context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack);
-        }
-
-        if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+        // 1. Remaining flight time ("Infinite" for a ring forged with the Indestructible Core).
+        if (infinite) {
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_infinite"));
         } else {
+            int unbreaking = context.registries() == null ? 0 : EnchantmentHelper.getItemEnchantmentLevel(
+                    context.registries().holderOrThrow(Enchantments.UNBREAKING), stack);
             int remainingPoints = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
             // Unbreaking: each level makes every durability point last one extra second.
             int remainingSeconds = remainingPoints * (1 + unbreaking);
@@ -172,22 +158,42 @@ public class FlightRingItem extends Item {
             }
         }
 
-        if (breaksWhenDepleted && !stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+        // 2. The special rings are destroyed once their durability runs out.
+        if (breaksWhenDepleted && !infinite) {
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.breaks_when_depleted").withStyle(ChatFormatting.RED));
         }
 
-        // Gray hint lines (only for enchantments actually present).
-        if (unbreaking > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
+        // 3. Built-in (intrinsic) enchantments - never part of the vanilla enchantments
+        //    component, so they are listed explicitly with a "Built-in" prefix. The
+        //    normal enchantments follow, added by the enchantments component itself.
+        if (!intrinsicBase.isEmpty() && context.registries() != null) {
+            getIntrinsicLevels(stack).forEach((key, level) -> tooltipComponents.accept(
+                    Component.translatable("tooltip.simpleflightring.intrinsic_enchant",
+                            Enchantment.getFullname(context.registries().holderOrThrow(key), level))));
         }
-        if (efficiency > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
+    }
+
+    /**
+     * Explanation lines for the enchantments the ring actually has. Kept out of the
+     * tooltip proper and added by {@link RingTooltipHandler} only while Shift is held.
+     */
+    public List<Component> effectHints(ItemStack stack, TooltipContext context) {
+        List<Component> hints = new ArrayList<>();
+        if (context.registries() == null) {
+            return hints;
         }
-        if (stability > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.stability_hint").withStyle(ChatFormatting.GRAY));
+        if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING), stack) > 0) {
+            hints.add(Component.translatable("tooltip.simpleflightring.unbreaking_hint").withStyle(ChatFormatting.GRAY));
         }
-        if (rocketBoost > 0) {
-            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.rocket_boost_hint").withStyle(ChatFormatting.GRAY));
+        if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY), stack) > 0) {
+            hints.add(Component.translatable("tooltip.simpleflightring.efficiency_hint").withStyle(ChatFormatting.GRAY));
         }
+        if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY), stack) > 0) {
+            hints.add(Component.translatable("tooltip.simpleflightring.stability_hint").withStyle(ChatFormatting.GRAY));
+        }
+        if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack) > 0) {
+            hints.add(Component.translatable("tooltip.simpleflightring.rocket_boost_hint").withStyle(ChatFormatting.GRAY));
+        }
+        return hints;
     }
 }
