@@ -4,12 +4,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * KINETIC DEFLECTION (Vibranium ring): ranged attacks never reach the wearer - the
@@ -22,14 +24,21 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
  *       deflection switches off, the Magic Lining absorbs ranged hits as well, and once
  *       the pool is empty the wearer takes damage again.</li>
  * </ul>
- * The deflection happens in {@link ProjectileImpactEvent}, i.e. before the projectile can
- * touch the wearer: no damage, no knockback, no hit effect at all.
+ * The barrier is checked at the START of every server tick ({@link ServerTickEvent.Pre}),
+ * i.e. before any projectile moves, so a shot is turned away while it is still outside the
+ * wearer and never appears to pass through them. 26.1.2 applies a projectile's movement
+ * before {@link ProjectileImpactEvent} fires, which is why deflecting only in that event
+ * looked like the shot went through the player and was then pushed away; it stays as a
+ * fallback for projectiles that get inside the barrier in a single step.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class KineticDeflectionHandler {
 
     /** Deflection only works while more than this fraction of the ring's pool is left. */
     public static final float MIN_ENERGY_FRACTION = 0.5F;
+
+    /** Radius of the barrier sphere around the wearer: shots are turned away out here. */
+    private static final double BARRIER_RADIUS = 1.2D;
 
     /** Slowest speed a deflected projectile keeps, so the bounce stays visible. */
     private static final double MIN_SPEED = 0.7D;
@@ -41,8 +50,36 @@ public final class KineticDeflectionHandler {
     }
 
     /**
-     * The main path: the projectile is stopped the moment it would hit the wearer and is
-     * sent off in a random direction instead.
+     * The barrier itself: checked at the start of every server tick, before any projectile
+     * moves, so incoming shots are turned away while they are still outside the wearer.
+     * This is what makes the deflection look like a sphere around the player in 26.1.2 too.
+     */
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent.Pre event) {
+        for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+            if (!canDeflect(player)) {
+                continue;
+            }
+            Vec3 center = player.position().add(0.0D, player.getBbHeight() * 0.5D, 0.0D);
+            AABB area = new AABB(center, center).inflate(BARRIER_RADIUS);
+            for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, area)) {
+                Vec3 offset = projectile.position().subtract(center);
+                if (offset.lengthSqr() > BARRIER_RADIUS * BARRIER_RADIUS) {
+                    continue;
+                }
+                // Only turn away projectiles that are still coming in; one that was just
+                // bounced off is already leaving and must not be scattered again.
+                if (projectile.getDeltaMovement().dot(offset) >= 0.0D) {
+                    continue;
+                }
+                deflect(player, projectile);
+            }
+        }
+    }
+
+    /**
+     * Fallback for a projectile that got inside the barrier in a single step (very fast or
+     * modded ones): it is bounced here instead, and the hit itself is still cancelled.
      */
     @SubscribeEvent
     public static void onProjectileImpact(ProjectileImpactEvent event) {
