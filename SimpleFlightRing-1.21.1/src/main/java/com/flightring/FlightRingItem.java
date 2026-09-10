@@ -182,11 +182,15 @@ public class FlightRingItem extends Item {
         if (context.registries() == null) {
             return hints;
         }
-        if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING), stack) > 0) {
-            addHint(hints, "unbreaking");
+        int unbreaking = EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING), stack);
+        if (unbreaking > 0) {
+            // Each durability point lasts (level + 1) seconds.
+            addHint(hints, "unbreaking", unbreaking + 1);
         }
-        if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY), stack) > 0) {
-            addHint(hints, "efficiency");
+        int efficiency = EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY), stack);
+        if (efficiency > 0) {
+            // +10% sprint-flight speed per level.
+            addHint(hints, "efficiency", efficiency * 10);
         }
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY), stack) > 0) {
             addHint(hints, "stability");
@@ -199,10 +203,11 @@ public class FlightRingItem extends Item {
 
     /**
      * Adds one hint block: the enchantment's name on its own line, then what it does.
-     * Future cross-mod ring effects use the same shape.
+     * {@code args} fill the {@code %s} placeholders of the description (e.g. the
+     * seconds one durability point lasts). Future cross-mod ring effects use the same shape.
      */
-    private static void addHint(List<Component> hints, String name) {
+    private static void addHint(List<Component> hints, String name, Object... args) {
         hints.add(Component.translatable("tooltip.simpleflightring." + name + "_title").withStyle(ChatFormatting.GRAY));
-        hints.add(Component.translatable("tooltip.simpleflightring." + name + "_desc").withStyle(ChatFormatting.DARK_GRAY));
+        hints.add(Component.translatable("tooltip.simpleflightring." + name + "_desc", args).withStyle(ChatFormatting.DARK_GRAY));
     }
 }
