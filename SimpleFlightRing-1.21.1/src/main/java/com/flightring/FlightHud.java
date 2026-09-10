@@ -35,9 +35,10 @@ public class FlightHud {
     /**
      * Size of the energy bar of rings with abilities (Magic Lining). The label is drawn
      * inside the bar, so the bar itself is the only thing that can overlap other HUD
-     * elements and no text runs off towards the hotbar.
+     * elements and no text runs off towards the hotbar. Kept at 80 px wide: any wider
+     * and the bar itself reaches the hotbar.
      */
-    private static final int ENERGY_BAR_WIDTH = 120;
+    private static final int ENERGY_BAR_WIDTH = 80;
     private static final int ENERGY_BAR_HEIGHT = 10;
 
     /**

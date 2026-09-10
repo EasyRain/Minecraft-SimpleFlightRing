@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
  */public final class RingEnergy {
 
     /** Energy of a ring that has not been touched yet. */
-    public static final float DEFAULT_MAX = 50.0F;
+    public static final float DEFAULT_MAX = 100.0F;
 
     /** Seconds without damage before the pool starts refilling. */
     public static final int IDLE_SECONDS = 10;
