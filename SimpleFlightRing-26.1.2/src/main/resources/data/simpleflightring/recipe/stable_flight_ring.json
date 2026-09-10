@@ -10,7 +10,7 @@
     "id": "simpleflightring:stable_flight_ring",
     "count": 1,
     "components": {
-      "minecraft:enchantments": { "levels": { "simpleflightring:flight_stability": 1 } }
+      "simpleflightring:intrinsic_enchantments": { "simpleflightring:flight_stability": 1 }
     }
   }
 }

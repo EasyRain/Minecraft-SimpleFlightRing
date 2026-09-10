@@ -1,12 +1,17 @@
 package com.flightring;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import java.util.function.Consumer;
 
@@ -56,24 +61,49 @@ public class FlightRingItem extends Item {
         return breaksWhenDepleted;
     }
 
+    /**
+     * Level of one of the ring's INTRINSIC (built-in) enchantments, or 0 if it has none.
+     * Intrinsic enchantments live outside the vanilla enchantments component, so they
+     * cannot be removed; {@code EnchantmentHelperMixin} feeds them into the vanilla
+     * lookup, using whichever of the intrinsic and the real level is higher.
+     */
+    public int getIntrinsicEnchantLevel(ItemInstance instance, Holder<Enchantment> enchantment) {
+        ItemEnchantments intrinsic = instance.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        return intrinsic == null ? 0 : intrinsic.getLevel(enchantment);
+    }
+
+    /** The ring glints when it carries intrinsic enchantments (they are not in the component). */
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        return (intrinsic != null && !intrinsic.isEmpty()) || super.isFoil(stack);
+    }
+
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        // Enchantment levels are read first so their hint lines also show on the
-        // indestructible (infinite) ring - only the countdown is replaced there.
+        // The built-in (intrinsic) enchantments are not part of the vanilla enchantments
+        // component, so list them explicitly, exactly like normal enchantment lines.
+        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        if (intrinsic != null && !intrinsic.isEmpty()) {
+            intrinsic.addToTooltip(context, tooltipComponents, tooltipFlag, stack);
+        }
+
+        // Effective levels: the higher of the intrinsic and the real enchantment level.
+        // They are read first so their hint lines also show on the indestructible ring.
         int unbreaking = 0;
         int efficiency = 0;
         int stability = 0;
         int rocketBoost = 0;
         if (context.registries() != null) {
-            unbreaking = stack.getEnchantments()
-                    .getLevel(context.registries().holderOrThrow(Enchantments.UNBREAKING));
-            efficiency = stack.getEnchantments()
-                    .getLevel(context.registries().holderOrThrow(Enchantments.EFFICIENCY));
-            stability = stack.getEnchantments()
-                    .getLevel(context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY));
-            rocketBoost = stack.getEnchantments()
-                    .getLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST));
+            unbreaking = EnchantmentHelper.getItemEnchantmentLevel(
+                    context.registries().holderOrThrow(Enchantments.UNBREAKING), stack);
+            efficiency = EnchantmentHelper.getItemEnchantmentLevel(
+                    context.registries().holderOrThrow(Enchantments.EFFICIENCY), stack);
+            stability = EnchantmentHelper.getItemEnchantmentLevel(
+                    context.registries().holderOrThrow(ModEnchantments.FLIGHT_STABILITY), stack);
+            rocketBoost = EnchantmentHelper.getItemEnchantmentLevel(
+                    context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack);
         }
 
         if (stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {

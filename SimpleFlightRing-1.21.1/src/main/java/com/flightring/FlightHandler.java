@@ -3,6 +3,7 @@ package com.flightring;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -105,7 +106,7 @@ public class FlightHandler {
 
     private static int stabilityLevel(Player player, ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> stability) {
         if (stack.getItem() instanceof FlightRingItem) {
-            return stack.getEnchantmentLevel(stability);
+            return EnchantmentHelper.getItemEnchantmentLevel(stability, stack);
         }
         return 0;
     }
@@ -201,11 +202,13 @@ public class FlightHandler {
     }
 
     private static int efficiencyLevel(ServerPlayer player, ItemStack ring) {
-        return ring.getEnchantmentLevel(player.registryAccess().holderOrThrow(Enchantments.EFFICIENCY));
+        return EnchantmentHelper.getItemEnchantmentLevel(
+                player.registryAccess().holderOrThrow(Enchantments.EFFICIENCY), ring);
     }
 
     private static int unbreakingLevel(ServerPlayer player, ItemStack ring) {
-        return ring.getEnchantmentLevel(player.registryAccess().holderOrThrow(Enchantments.UNBREAKING));
+        return EnchantmentHelper.getItemEnchantmentLevel(
+                player.registryAccess().holderOrThrow(Enchantments.UNBREAKING), ring);
     }
 
     /**
@@ -245,7 +248,8 @@ public class FlightHandler {
 
     private static int rocketBoostLevel(ServerPlayer player, ItemStack stack) {
         if (stack.getItem() instanceof FlightRingItem) {
-            return stack.getEnchantmentLevel(player.registryAccess().holderOrThrow(ModEnchantments.ROCKET_BOOST));
+            return EnchantmentHelper.getItemEnchantmentLevel(
+                    player.registryAccess().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack);
         }
         return 0;
     }

@@ -123,28 +123,50 @@ public class RingEnchantUpgradeRecipe extends NormalCraftingRecipe {
 
     /** Whether the ring carries the enchantment below the cap. */
     private static boolean canRaise(ItemStack stack, ResourceKey<Enchantment> key) {
-        for (var entry : stack.getEnchantments().entrySet()) {
-            if (matches(entry.getKey(), key)) {
-                return entry.getValue() < MAX_LEVEL;
-            }
-        }
-        return false;
+        Holder<Enchantment> holder = findHolder(stack, key);
+        return holder != null && effectiveLevel(stack, holder) < MAX_LEVEL;
     }
 
-    /** Raises an existing built-in enchantment by one level (never above the cap). */
+    /**
+     * Raises the ring's INTRINSIC (built-in) level by one, never above the cap. The
+     * intrinsic level is the permanent part; a higher level added with an anvil is
+     * respected and simply carried over, so only enchantments below the cap are raised.
+     */
     private static void raise(ItemStack stack, ResourceKey<Enchantment> key) {
-        ItemEnchantments current = stack.getEnchantments();
-        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(current);
-        boolean changed = false;
-        for (var entry : current.entrySet()) {
-            if (matches(entry.getKey(), key) && entry.getValue() < MAX_LEVEL) {
-                mutable.set(entry.getKey(), entry.getValue() + 1);
-                changed = true;
+        Holder<Enchantment> holder = findHolder(stack, key);
+        if (holder == null) {
+            return;
+        }
+        int effective = effectiveLevel(stack, holder);
+        if (effective < MAX_LEVEL) {
+            SpecialRings.setIntrinsic(stack, holder, effective + 1);
+        }
+    }
+
+    /** The higher of the intrinsic (built-in) level and the real enchantment level. */
+    private static int effectiveLevel(ItemStack stack, Holder<Enchantment> holder) {
+        int intrinsic = stack.getItem() instanceof FlightRingItem ring
+                ? ring.getIntrinsicEnchantLevel(stack, holder)
+                : 0;
+        return Math.max(intrinsic, stack.getEnchantments().getLevel(holder));
+    }
+
+    /** The existing holder for the key, from the ring's intrinsic or real enchantments. */
+    private static Holder<Enchantment> findHolder(ItemStack stack, ResourceKey<Enchantment> key) {
+        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        if (intrinsic != null) {
+            for (var entry : intrinsic.entrySet()) {
+                if (matches(entry.getKey(), key)) {
+                    return entry.getKey();
+                }
             }
         }
-        if (changed) {
-            stack.set(net.minecraft.core.component.DataComponents.ENCHANTMENTS, mutable.toImmutable());
+        for (var entry : stack.getEnchantments().entrySet()) {
+            if (matches(entry.getKey(), key)) {
+                return entry.getKey();
+            }
         }
+        return null;
     }
 
     private static boolean matches(Holder<Enchantment> holder, ResourceKey<Enchantment> key) {

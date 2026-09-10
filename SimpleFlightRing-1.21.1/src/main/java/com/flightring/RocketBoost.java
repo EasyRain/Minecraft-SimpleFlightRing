@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -45,7 +46,8 @@ public class RocketBoost {
 
     private static int boostLevel(ItemStack stack, Holder<Enchantment> rocketBoost) {
         if (isUsableRing(stack)) {
-            return stack.getEnchantmentLevel(rocketBoost);
+            // EnchantmentHelper so the special rings' built-in (intrinsic) level counts too.
+            return EnchantmentHelper.getItemEnchantmentLevel(rocketBoost, stack);
         }
         return 0;
     }

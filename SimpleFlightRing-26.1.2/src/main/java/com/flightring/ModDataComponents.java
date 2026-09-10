@@ -4,6 +4,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Unit;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -11,6 +12,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * Data components added by this mod. {@link #INDESTRUCTIBLE} marks a flight
  * ring forged with the Indestructible Core: it never loses durability, its
  * tooltip shows infinite flight time and the HUD countdown is hidden.
+ * {@link #INTRINSIC_ENCHANTMENTS} holds the special rings' built-in enchantments:
+ * they are kept outside the vanilla enchantments component, so they cannot be
+ * removed (grindstone, ...) - see {@code EnchantmentHelperMixin}.
  */
 public class ModDataComponents {
 
@@ -21,6 +25,11 @@ public class ModDataComponents {
             COMPONENTS.registerComponentType("indestructible", builder -> builder
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemEnchantments>> INTRINSIC_ENCHANTMENTS =
+            COMPONENTS.registerComponentType("intrinsic_enchantments", builder -> builder
+                    .persistent(ItemEnchantments.CODEC)
+                    .networkSynchronized(ItemEnchantments.STREAM_CODEC));
 
     private ModDataComponents() {
     }

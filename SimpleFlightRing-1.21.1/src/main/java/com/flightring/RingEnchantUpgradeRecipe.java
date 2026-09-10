@@ -92,16 +92,26 @@ public class RingEnchantUpgradeRecipe extends ShapelessRecipe {
     }
 
     private static boolean canRaise(ItemStack stack, HolderLookup.Provider registries, ResourceKey<Enchantment> key) {
-        Holder<Enchantment> enchantment = registries.holderOrThrow(key);
-        return stack.getEnchantmentLevel(enchantment) < MAX_LEVEL;
+        return effectiveLevel(stack, registries.holderOrThrow(key)) < MAX_LEVEL;
     }
 
     private static void raise(ItemStack stack, HolderLookup.Provider registries, ResourceKey<Enchantment> key) {
         Holder<Enchantment> enchantment = registries.holderOrThrow(key);
-        int current = stack.getEnchantmentLevel(enchantment);
-        if (current < MAX_LEVEL) {
-            EnchantmentHelper.updateEnchantments(stack, enchantments -> enchantments.set(enchantment, current + 1));
+        int effective = effectiveLevel(stack, enchantment);
+        if (effective < MAX_LEVEL) {
+            // The upgrade raises the ring's INTRINSIC (built-in) level - it is the
+            // permanent part. A higher level added with an anvil is respected and
+            // simply carried over, so only enchantments below the cap are raised.
+            SpecialRings.setIntrinsic(stack, enchantment, effective + 1);
         }
+    }
+
+    /** The higher of the intrinsic (built-in) level and the real enchantment level. */
+    private static int effectiveLevel(ItemStack stack, Holder<Enchantment> enchantment) {
+        int intrinsic = stack.getItem() instanceof FlightRingItem ring
+                ? ring.getIntrinsicEnchantLevel(stack, enchantment)
+                : 0;
+        return Math.max(intrinsic, stack.getEnchantmentLevel(enchantment));
     }
 
     public Ingredient getRing() {

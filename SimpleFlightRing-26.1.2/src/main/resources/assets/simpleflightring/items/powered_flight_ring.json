@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "simpleflightring:item/powered_flight_ring"
+  }
+}
