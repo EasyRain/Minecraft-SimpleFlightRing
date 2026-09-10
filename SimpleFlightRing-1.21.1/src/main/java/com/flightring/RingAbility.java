@@ -21,7 +21,7 @@ public enum RingAbility {
     KINETIC_DEFLECTION("kinetic_deflection", 0xFF4BE3A8, 3),
 
     /** Unobtainium: survives a fatal hit with a block-safe explosion around the wearer. */
-    BURST_TOTEM("burst_totem", 0xFFC06BF5, 3);
+    BURST_TOTEM("burst_totem", 0xFFC06BF5, 4);
 
     private final String key;
     private final int color;

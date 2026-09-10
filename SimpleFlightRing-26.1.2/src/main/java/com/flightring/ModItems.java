@@ -76,11 +76,10 @@ public class ModItems {
     private static final Set<RingAbility> UNOBTAINIUM_ABILITIES = EnumSet.of(
             RingAbility.MAGIC_LINING, RingAbility.KINETIC_DEFLECTION, RingAbility.BURST_TOTEM);
 
-    /** Energy pool of each tier: it grows from Allthemodium to Vibranium. */
+    /** Energy pool of each tier: it grows with the chain, 100 -> 300 -> 700. */
     private static final float ALLTHEMODIUM_ENERGY = RingEnergy.DEFAULT_MAX;
     private static final float VIBRANIUM_ENERGY = 300.0F;
-    /** Unobtainium keeps Vibranium's pool until its own ability is designed. */
-    private static final float UNOBTAINIUM_ENERGY = VIBRANIUM_ENERGY;
+    private static final float UNOBTAINIUM_ENERGY = 700.0F;
 
     public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING =
             ITEMS.registerItem("allthemodium_flight_ring", properties -> new FlightRingItem(100, 22,
