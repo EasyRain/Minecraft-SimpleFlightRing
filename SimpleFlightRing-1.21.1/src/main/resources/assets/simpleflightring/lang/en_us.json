@@ -35,7 +35,7 @@
   "curios.modifiers.flight_ring": "When worn as a flight ring:",
   "hud.simpleflightring.flight_time": "Flight time: %sM %sS",
   "hud.simpleflightring.flight_time_long": "Flight time: %sH %sM %sS",
-  "hud.simpleflightring.energy": "Energy %s/%s",
+  "hud.simpleflightring.energy": "%s/%s",
   "cloth.simpleflightring.title": "Simple Flight Ring Config",
   "cloth.simpleflightring.category.hud": "HUD Settings",
   "cloth.simpleflightring.show_timer": "Show flight time countdown",

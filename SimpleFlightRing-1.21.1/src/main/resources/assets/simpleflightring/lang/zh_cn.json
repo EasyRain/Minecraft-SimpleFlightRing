@@ -35,7 +35,7 @@
   "curios.modifiers.flight_ring": "装备于飞行戒指槽时：",
   "hud.simpleflightring.flight_time": "飞行时间：%sM %sS",
   "hud.simpleflightring.flight_time_long": "飞行时间：%sH %sM %sS",
-  "hud.simpleflightring.energy": "能量 %s/%s",
+  "hud.simpleflightring.energy": "%s/%s",
   "cloth.simpleflightring.title": "简易飞行戒指 配置",
   "cloth.simpleflightring.category.hud": "HUD 设置",
   "cloth.simpleflightring.show_timer": "显示飞行时间倒计时",
