@@ -5,15 +5,21 @@
       "modid": "allthemodium"
     }
   ],
-  "type": "simpleflightring:linked_ring_smithing",
+  "type": "minecraft:smithing_transform",
   "template": "allthemodium:unobtainium_upgrade_smithing_template",
   "base": {
-    "type": "neoforge:components",
+    "neoforge:ingredient_type": "neoforge:components",
     "items": "simpleflightring:vibranium_flight_ring",
     "components": {
       "simpleflightring:indestructible": {}
     }
   },
   "addition": "allthemodium:unobtainium_ingot",
-  "result": { "id": "simpleflightring:unobtainium_flight_ring", "count": 1 }
+  "result": {
+    "id": "simpleflightring:unobtainium_flight_ring",
+    "count": 1,
+    "components": {
+      "minecraft:damage": 0
+    }
+  }
 }

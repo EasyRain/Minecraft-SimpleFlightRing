@@ -5,15 +5,21 @@
       "modid": "allthemodium"
     }
   ],
-  "type": "simpleflightring:linked_ring_smithing",
+  "type": "minecraft:smithing_transform",
   "template": "allthemodium:allthemodium_upgrade_smithing_template",
   "base": {
-    "type": "neoforge:components",
+    "neoforge:ingredient_type": "neoforge:components",
     "items": "simpleflightring:netherite_flight_ring",
     "components": {
       "simpleflightring:indestructible": {}
     }
   },
   "addition": "allthemodium:allthemodium_ingot",
-  "result": { "id": "simpleflightring:allthemodium_flight_ring", "count": 1 }
+  "result": {
+    "id": "simpleflightring:allthemodium_flight_ring",
+    "count": 1,
+    "components": {
+      "minecraft:damage": 0
+    }
+  }
 }

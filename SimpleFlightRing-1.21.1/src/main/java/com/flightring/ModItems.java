@@ -55,8 +55,8 @@ public class ModItems {
      * indestructible: the INDESTRUCTIBLE component is their DEFAULT component, so every
      * instance - smithed, taken from the creative tab or spawned with {@code /give} -
      * has infinite flight time and never breaks. They are upgraded in the smithing table
-     * with the matching AllTheModium upgrade template (see {@link LinkedRingSmithingRecipe});
-     * the netherite ring must be forged with the Indestructible Core first.
+     * with the matching AllTheModium upgrade template (plain vanilla smithing recipes, see
+     * the data files); the netherite ring must be forged with the Indestructible Core first.
      * <p>
      * AllTheModium is an optional dependency: the recipes only load when it is present.
      * The durability is a placeholder - the INDESTRUCTIBLE component makes it infinite.

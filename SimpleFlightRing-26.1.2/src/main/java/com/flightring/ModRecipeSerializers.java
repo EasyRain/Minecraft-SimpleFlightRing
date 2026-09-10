@@ -32,11 +32,13 @@ public class ModRecipeSerializers {
             SERIALIZERS.register("ring_enchant_upgrade", () -> RingEnchantUpgradeRecipe.SERIALIZER);
 
     /**
-     * Smithing: AllTheModium integration chain (indestructible ring + that mod's upgrade
-     * template + the matching metal ingot). Only loads when AllTheModium is installed.
+     * Note: the AllTheModium chain (indestructible ring + that mod's upgrade template + the
+     * matching metal ingot) needs no serializer of its own - it is a plain vanilla
+     * {@code minecraft:smithing_transform} recipe exactly like AllTheModium's own gear
+     * upgrades, with the base written as a {@code neoforge:components} ingredient (26.1.2
+     * spells its dispatch key {@code neoforge:ingredient_type}) so the ring must already be
+     * indestructible and JEI shows the right ring.
      */
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SmithingTransformRecipe>> LINKED_RING_SMITHING =
-            SERIALIZERS.register("linked_ring_smithing", () -> LinkedRingSmithingRecipe.SERIALIZER);
 
     private ModRecipeSerializers() {
     }

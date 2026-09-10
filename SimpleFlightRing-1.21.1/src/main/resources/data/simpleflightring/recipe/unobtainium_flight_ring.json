@@ -5,7 +5,7 @@
       "modid": "allthemodium"
     }
   ],
-  "type": "simpleflightring:linked_ring_smithing",
+  "type": "minecraft:smithing_transform",
   "template": {
     "item": "allthemodium:unobtainium_upgrade_smithing_template"
   },
@@ -21,6 +21,9 @@
   },
   "result": {
     "id": "simpleflightring:unobtainium_flight_ring",
-    "count": 1
+    "count": 1,
+    "components": {
+      "minecraft:damage": 0
+    }
   }
 }
