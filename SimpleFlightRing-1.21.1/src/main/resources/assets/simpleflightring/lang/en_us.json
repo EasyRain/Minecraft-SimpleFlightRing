@@ -30,7 +30,7 @@
   "tooltip.simpleflightring.efficiency_title": "Efficiency:",
   "tooltip.simpleflightring.efficiency_desc": "Increases sprint-flight speed by %s%%",
   "tooltip.simpleflightring.magic_lining_title": "Magic Lining:",
-  "tooltip.simpleflightring.magic_lining_desc": "Absorbs damage with the ring's magic energy, fully while it lasts; refills after 10 s without a hit (full in 3 s)",
+  "tooltip.simpleflightring.magic_lining_desc": "Spends magic energy to absorb damage\nFully immune while the energy lasts\nStarts refilling 10 s after the last hit",
   "curios.identifier.flight_ring": "Flight Ring",
   "curios.modifiers.flight_ring": "When worn as a flight ring:",
   "hud.simpleflightring.flight_time": "Flight time: %sM %sS",

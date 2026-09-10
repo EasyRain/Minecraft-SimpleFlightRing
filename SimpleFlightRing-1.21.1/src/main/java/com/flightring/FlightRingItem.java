@@ -268,9 +268,13 @@ public class FlightRingItem extends Item {
      */
     public List<Component> effectHints(ItemStack stack, TooltipContext context) {
         List<Component> hints = new ArrayList<>();
-        // Special abilities first: they work independently of any enchantment.
+        // Special abilities first: they work independently of any enchantment and their
+        // title carries the colour of the ring they belong to.
         for (RingAbility ability : abilities) {
-            addHint(hints, ability.key());
+            hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + "_title")
+                    .withColor(ability.color()));
+            hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + "_desc")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         }
         if (context.registries() == null) {
             return hints;

@@ -30,7 +30,7 @@
   "tooltip.simpleflightring.efficiency_title": "效率附魔：",
   "tooltip.simpleflightring.efficiency_desc": "增加%s%%疾跑飞行速度",
   "tooltip.simpleflightring.magic_lining_title": "魔法内衬：",
-  "tooltip.simpleflightring.magic_lining_desc": "消耗魔法能量抵挡伤害，能量足够时完全免疫；10 秒未受伤后开始回复（3 秒回满）",
+  "tooltip.simpleflightring.magic_lining_desc": "消耗魔法能量抵挡伤害\n能量足够时完全免疫\n10 秒未受伤后开始回复能量",
   "curios.identifier.flight_ring": "飞行戒指",
   "curios.modifiers.flight_ring": "装备于飞行戒指槽时：",
   "hud.simpleflightring.flight_time": "飞行时间：%sM %sS",
