@@ -47,6 +47,12 @@ public class FlightHud {
     private static float displayedEnergy = -1.0F;
     private static long lastEnergyFrameMillis;
 
+    /** The bar hides itself once a full pool has been unchanged for this long. */
+    private static final long HIDE_WHEN_FULL_MILLIS = 3000L;
+    /** Last pool value the HUD saw, used to notice any change (which shows the bar again). */
+    private static float lastSeenEnergy = Float.NaN;
+    private static long lastEnergyChangeMillis;
+
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(LAYER_ID, FlightHud::renderTimer);
     }
@@ -115,9 +121,21 @@ public class FlightHud {
         float max = ClientRingEnergy.maxEnergy();
         float target = Math.max(0.0F, Math.min(max, ClientRingEnergy.energy()));
 
+        // The bar keeps itself out of the way: any change of the pool brings it back, and a
+        // full pool that has not moved for a moment hides it again.
+        long now = Util.getMillis();
+        if (Float.isNaN(lastSeenEnergy) || Math.abs(target - lastSeenEnergy) > 0.01F) {
+            lastSeenEnergy = target;
+            lastEnergyChangeMillis = now;
+        }
+        if (target >= max - 0.01F && now - lastEnergyChangeMillis >= HIDE_WHEN_FULL_MILLIS) {
+            displayedEnergy = target;
+            lastEnergyFrameMillis = now;
+            return;
+        }
+
         // Smooth the refill: the server sends steps, so the drawn value advances at the
         // pool's own refill rate (a full refill in REFILL_SECONDS). Damage is instant.
-        long now = Util.getMillis();
         float elapsed = lastEnergyFrameMillis == 0L ? 0.0F : Math.min(0.25F, (now - lastEnergyFrameMillis) / 1000.0F);
         lastEnergyFrameMillis = now;
         if (displayedEnergy < 0.0F || target < displayedEnergy) {

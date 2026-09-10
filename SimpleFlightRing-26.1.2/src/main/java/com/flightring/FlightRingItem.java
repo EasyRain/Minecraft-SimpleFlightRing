@@ -242,9 +242,10 @@ public class FlightRingItem extends Item {
         }
 
         // 2. Energy pool of the linked rings (spent by their abilities, e.g. Magic Lining).
+        //    The maximum already includes the Energy Amplification enchantment.
         if (maxEnergy > 0.0F) {
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.energy",
-                    Math.round(RingEnergy.get(stack)), Math.round(maxEnergy)));
+                    Math.round(RingEnergy.get(stack)), Math.round(RingEnergy.max(stack))));
         }
 
         // 3. The special rings are destroyed once their durability runs out.
@@ -298,6 +299,11 @@ public class FlightRingItem extends Item {
     /** Effect hints of the enchantments the ring actually has (always after the abilities). */
     private List<Component> enchantmentHints(ItemStack stack, TooltipContext context) {
         List<Component> hints = new ArrayList<>();
+        int amplification = RingEnergy.enchantLevel(stack, ModEnchantments.ENERGY_AMPLIFICATION);
+        if (amplification > 0) {
+            // Every level adds the ring's base pool once, so level n means (n + 1) times base.
+            addHint(hints, "energy_amplification", amplification + 1);
+        }
         if (context.registries() == null) {
             return hints;
         }

@@ -1,6 +1,13 @@
 package com.flightring;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+
+import java.util.Map;
 
 /**
  * The energy pool of the linked rings, currently used by the Magic Lining ability.
@@ -19,7 +26,8 @@ import net.minecraft.world.item.ItemStack;
  *       {@value #REFILL_SECONDS} seconds regardless of the pool size. Taking damage
  *       interrupts the refill.</li>
  * </ul>
- */public final class RingEnergy {
+ */
+public final class RingEnergy {
 
     /** Energy of a ring that has not been touched yet. */
     public static final float DEFAULT_MAX = 100.0F;
@@ -50,9 +58,44 @@ import net.minecraft.world.item.ItemStack;
     private RingEnergy() {
     }
 
-    /** Size of the ring's energy pool, or 0 when the ring has no pool at all. */
+    /**
+     * Size of the ring's energy pool, or 0 when the ring has no pool at all.
+     * <p>
+     * The <i>Energy Amplification</i> enchantment multiplies the ring's base pool:
+     * level {@code n} makes the maximum {@code base * (n + 1)}.
+     */
     public static float max(ItemStack stack) {
-        return stack.getItem() instanceof FlightRingItem item ? item.getMaxEnergy() : 0.0F;
+        if (!(stack.getItem() instanceof FlightRingItem item)) {
+            return 0.0F;
+        }
+        float base = item.getMaxEnergy();
+        if (base <= 0.0F) {
+            return 0.0F;
+        }
+        int amplification = enchantLevel(stack, ModEnchantments.ENERGY_AMPLIFICATION);
+        return amplification <= 0 ? base : base * (amplification + 1);
+    }
+
+    /**
+     * Level of one of this mod's enchantments on the stack, or 0 when absent. The lookup
+     * goes through the enchantment component and the ring's own intrinsic levels, so it
+     * needs no registry access and works on the client (HUD) as well as on the server.
+     */
+    public static int enchantLevel(ItemStack stack, ResourceKey<Enchantment> enchantment) {
+        int level = 0;
+        ItemEnchantments enchantments = stack.get(DataComponents.ENCHANTMENTS);
+        if (enchantments != null) {
+            for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
+                if (entry.getKey().unwrapKey().filter(enchantment::equals).isPresent()) {
+                    level = Math.max(level, entry.getValue());
+                }
+            }
+        }
+        IntrinsicEnchants intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        if (intrinsic != null) {
+            level = Math.max(level, intrinsic.level(enchantment));
+        }
+        return level;
     }
 
     /** Current energy; an absent component means the pool is full. */
