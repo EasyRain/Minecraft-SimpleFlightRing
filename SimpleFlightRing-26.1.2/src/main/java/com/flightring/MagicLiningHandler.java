@@ -42,18 +42,6 @@ public final class MagicLiningHandler {
     private MagicLiningHandler() {
     }
 
-    /** The worn ring, when it has the given ability. */
-    private static ItemStack wornRing(ServerPlayer player, RingAbility ability) {
-        if (!CuriosCompat.isLoaded()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack ring = CuriosCompat.findRingInSlot(player);
-        if (ring.getItem() instanceof FlightRingItem item && item.hasAbility(ability)) {
-            return ring;
-        }
-        return ItemStack.EMPTY;
-    }
-
     /**
      * The whole lining: the hit is paid for with the ring's energy and, when the pool
      * covers it completely, the hit is CANCELLED outright - no health loss, but also no
@@ -66,14 +54,15 @@ public final class MagicLiningHandler {
      */
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        // A hit another ability already took care of (e.g. Kinetic Deflection) costs nothing.
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
         float damage = event.getAmount();
         if (damage <= 0.0F || ignoresEnergy(event.getSource())) {
             return;
         }
-        ItemStack ring = wornRing(player, RingAbility.MAGIC_LINING);
+        ItemStack ring = RingAbilities.wornRing(player, RingAbility.MAGIC_LINING);
         if (ring.isEmpty()) {
             return;
         }
@@ -99,7 +88,8 @@ public final class MagicLiningHandler {
             return;
         }
         long now = player.level().getGameTime();
-        ItemStack ring = wornRing(player, RingAbility.MAGIC_LINING);
+        // Any ring with an energy pool is ticked here, no matter which ability spends it.
+        ItemStack ring = RingAbilities.wornEnergyRing(player);
         if (ring.isEmpty()) {
             LAST_DAMAGE.remove(player.getUUID());
             // Push "no ring" now and then, just often enough to hide the bar client-side.

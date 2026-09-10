@@ -14,11 +14,13 @@ package com.flightring;
  */
 public enum RingAbility {
 
-    // Still to come: KINETIC_DEFLECTION (Vibranium, teal 0xFF4BE3A8) and
-    // BURST_TOTEM (Unobtainium, violet 0xFFC06BF5).
+    // Still to come: BURST_TOTEM (Unobtainium, violet 0xFFC06BF5).
 
     /** Allthemodium: spends the ring's energy pool to absorb incoming damage. */
-    MAGIC_LINING("magic_lining", 0xFFFFC24A, 3);
+    MAGIC_LINING("magic_lining", 0xFFFFC24A, 3),
+
+    /** Vibranium: bounces ranged attacks away while more than half of the pool is left. */
+    KINETIC_DEFLECTION("kinetic_deflection", 0xFF4BE3A8, 3);
 
     private final String key;
     private final int color;
@@ -46,9 +48,10 @@ public enum RingAbility {
     }
 
     /**
-     * RGB colour of the ring that owns this ability (Allthemodium base
-     * {@code 0xFFFF8B04} to highlight {@code 0xFFFFFFBA}, kept in between so the
-     * title stays readable on the dark tooltip background).
+     * RGB colour of the ring that owns this ability, taken from that ring's metal palette
+     * (Allthemodium {@code 0xFFFF8B04}→{@code 0xFFFFFFBA}, Vibranium {@code 0x1BB38A}→
+     * {@code 0x73FFB9}, Unobtainium {@code 0xA82CE3}→{@code 0xEA84F5}), kept in the
+     * readable middle so the title stands out on the dark tooltip background.
      */
     public int color() {
         return color;

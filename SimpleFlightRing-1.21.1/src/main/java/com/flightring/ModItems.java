@@ -64,26 +64,34 @@ public class ModItems {
      * The durability is a placeholder - the INDESTRUCTIBLE component makes it infinite.
      * <p>
      * The three abilities are inherited up the chain (Vibranium keeps Allthemodium's,
-     * Unobtainium keeps both). Their own abilities are added tier by tier: so far only
-     * Allthemodium's Magic Lining exists, the other two are still to come.
+     * Unobtainium keeps both) and the energy pool grows with it: 100 for Allthemodium,
+     * 300 from Vibranium on. So far Allthemodium's Magic Lining and Vibranium's Kinetic
+     * Deflection exist, the Burst Totem of Unobtainium is still to come.
      */
     private static final Set<RingAbility> ALLTHEMODIUM_ABILITIES = EnumSet.of(RingAbility.MAGIC_LINING);
-    /** Vibranium inherits every ability of the tiers below it. */
-    private static final Set<RingAbility> VIBRANIUM_ABILITIES = EnumSet.copyOf(ALLTHEMODIUM_ABILITIES);
+    /** Vibranium inherits every ability of the tiers below it and adds its own. */
+    private static final Set<RingAbility> VIBRANIUM_ABILITIES =
+            EnumSet.of(RingAbility.MAGIC_LINING, RingAbility.KINETIC_DEFLECTION);
     /** Unobtainium inherits every ability of the tiers below it. */
     private static final Set<RingAbility> UNOBTAINIUM_ABILITIES = EnumSet.copyOf(VIBRANIUM_ABILITIES);
 
+    /** Energy pool of each tier: it grows from Allthemodium to Vibranium. */
+    private static final float ALLTHEMODIUM_ENERGY = RingEnergy.DEFAULT_MAX;
+    private static final float VIBRANIUM_ENERGY = 300.0F;
+    /** Unobtainium keeps Vibranium's pool until its own ability is designed. */
+    private static final float UNOBTAINIUM_ENERGY = VIBRANIUM_ENERGY;
+
     public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING =
             ITEMS.registerItem("allthemodium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(5, 3, 0.04, 2), ALLTHEMODIUM_ABILITIES, RingEnergy.DEFAULT_MAX,
+                    new RingBonuses(5, 3, 0.04, 2), ALLTHEMODIUM_ABILITIES, ALLTHEMODIUM_ENERGY,
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     public static final DeferredItem<FlightRingItem> VIBRANIUM_FLIGHT_RING =
             ITEMS.registerItem("vibranium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(10, 6, 0.08, 4), VIBRANIUM_ABILITIES, RingEnergy.DEFAULT_MAX,
+                    new RingBonuses(10, 6, 0.08, 4), VIBRANIUM_ABILITIES, VIBRANIUM_ENERGY,
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     public static final DeferredItem<FlightRingItem> UNOBTAINIUM_FLIGHT_RING =
             ITEMS.registerItem("unobtainium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(15, 9, 0.12, 6), UNOBTAINIUM_ABILITIES, RingEnergy.DEFAULT_MAX,
+                    new RingBonuses(15, 9, 0.12, 6), UNOBTAINIUM_ABILITIES, UNOBTAINIUM_ENERGY,
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
 
     /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain. */
