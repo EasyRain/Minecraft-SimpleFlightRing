@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "simpleflightring:allthemodium_flight_ring",
-    "simpleflightring:vibranium_flight_ring",
-    "simpleflightring:unobtainium_flight_ring"
+    { "id": "simpleflightring:allthemodium_flight_ring", "required": false },
+    { "id": "simpleflightring:vibranium_flight_ring", "required": false },
+    { "id": "simpleflightring:unobtainium_flight_ring", "required": false }
   ]
 }

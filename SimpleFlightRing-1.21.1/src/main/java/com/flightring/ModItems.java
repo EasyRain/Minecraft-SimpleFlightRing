@@ -7,6 +7,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +61,11 @@ public class ModItems {
      * with the matching AllTheModium upgrade template (plain vanilla smithing recipes, see
      * the data files); the netherite ring must be forged with the Indestructible Core first.
      * <p>
-     * AllTheModium is an optional dependency: the recipes only load when it is present.
-     * The durability is a placeholder - the INDESTRUCTIBLE component makes it infinite.
+     * AllTheModium is an optional dependency: the whole chain is only registered when it
+     * is present (otherwise these fields stay {@code null} and the rings are simply not in
+     * the game), and the recipes/data files carry a {@code neoforge:mod_loaded} condition
+     * as well. The durability is a placeholder - the INDESTRUCTIBLE component makes it
+     * infinite.
      * <p>
      * The three abilities are inherited up the chain (Vibranium keeps Allthemodium's,
      * Unobtainium keeps both) and the energy pool grows with it: 100 for Allthemodium,
@@ -81,33 +85,46 @@ public class ModItems {
     private static final float VIBRANIUM_ENERGY = 300.0F;
     private static final float UNOBTAINIUM_ENERGY = 700.0F;
 
-    public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING =
-            ITEMS.registerItem("allthemodium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(5, 3, 0.04, 2), ALLTHEMODIUM_ABILITIES, ALLTHEMODIUM_ENERGY,
-                    properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
-    public static final DeferredItem<FlightRingItem> VIBRANIUM_FLIGHT_RING =
-            ITEMS.registerItem("vibranium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(10, 6, 0.08, 4), VIBRANIUM_ABILITIES, VIBRANIUM_ENERGY,
-                    properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
-    public static final DeferredItem<FlightRingItem> UNOBTAINIUM_FLIGHT_RING =
-            ITEMS.registerItem("unobtainium_flight_ring", properties -> new FlightRingItem(100, 22,
-                    new RingBonuses(15, 9, 0.12, 6), UNOBTAINIUM_ABILITIES, UNOBTAINIUM_ENERGY,
-                    properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
+    /** {@code null} while AllTheModium is not installed. */
+    public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING = registerLinkedRing(
+            "allthemodium_flight_ring", new RingBonuses(5, 3, 0.04, 2), ALLTHEMODIUM_ABILITIES, ALLTHEMODIUM_ENERGY);
+    /** {@code null} while AllTheModium is not installed. */
+    public static final DeferredItem<FlightRingItem> VIBRANIUM_FLIGHT_RING = registerLinkedRing(
+            "vibranium_flight_ring", new RingBonuses(10, 6, 0.08, 4), VIBRANIUM_ABILITIES, VIBRANIUM_ENERGY);
+    /** {@code null} while AllTheModium is not installed. */
+    public static final DeferredItem<FlightRingItem> UNOBTAINIUM_FLIGHT_RING = registerLinkedRing(
+            "unobtainium_flight_ring", new RingBonuses(15, 9, 0.12, 6), UNOBTAINIUM_ABILITIES, UNOBTAINIUM_ENERGY);
 
-    /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain. */
-    public static final List<DeferredItem<FlightRingItem>> ALL = List.of(
-            WOOD_FLIGHT_RING,
-            STONE_FLIGHT_RING,
-            IRON_FLIGHT_RING,
-            GOLD_FLIGHT_RING,
-            DIAMOND_FLIGHT_RING,
-            NETHERITE_FLIGHT_RING,
-            STABLE_FLIGHT_RING,
-            POWERED_FLIGHT_RING,
-            ALLTHEMODIUM_FLIGHT_RING,
-            VIBRANIUM_FLIGHT_RING,
-            UNOBTAINIUM_FLIGHT_RING
-    );
+    /** Registers one ring of the AllTheModium chain, or returns {@code null} without that mod. */
+    private static DeferredItem<FlightRingItem> registerLinkedRing(String name, RingBonuses bonuses,
+                                                                   Set<RingAbility> abilities, float energy) {
+        if (!AllthemodiumCompat.isLoaded()) {
+            return null;
+        }
+        return ITEMS.registerItem(name, properties -> new FlightRingItem(100, 22, bonuses, abilities, energy,
+                properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
+    }
+
+    /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain when present. */
+    public static final List<DeferredItem<FlightRingItem>> ALL = collectRings();
+
+    private static List<DeferredItem<FlightRingItem>> collectRings() {
+        List<DeferredItem<FlightRingItem>> rings = new ArrayList<>(List.of(
+                WOOD_FLIGHT_RING,
+                STONE_FLIGHT_RING,
+                IRON_FLIGHT_RING,
+                GOLD_FLIGHT_RING,
+                DIAMOND_FLIGHT_RING,
+                NETHERITE_FLIGHT_RING,
+                STABLE_FLIGHT_RING,
+                POWERED_FLIGHT_RING));
+        if (AllthemodiumCompat.isLoaded()) {
+            rings.add(ALLTHEMODIUM_FLIGHT_RING);
+            rings.add(VIBRANIUM_FLIGHT_RING);
+            rings.add(UNOBTAINIUM_FLIGHT_RING);
+        }
+        return List.copyOf(rings);
+    }
 
     private ModItems() {
     }
