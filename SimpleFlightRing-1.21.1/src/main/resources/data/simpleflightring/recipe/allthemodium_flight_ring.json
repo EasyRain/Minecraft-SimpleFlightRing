@@ -10,7 +10,11 @@
     "item": "allthemodium:allthemodium_upgrade_smithing_template"
   },
   "base": {
-    "item": "simpleflightring:netherite_flight_ring"
+    "type": "neoforge:components",
+    "items": "simpleflightring:netherite_flight_ring",
+    "components": {
+      "simpleflightring:indestructible": {}
+    }
   },
   "addition": {
     "item": "allthemodium:allthemodium_ingot"

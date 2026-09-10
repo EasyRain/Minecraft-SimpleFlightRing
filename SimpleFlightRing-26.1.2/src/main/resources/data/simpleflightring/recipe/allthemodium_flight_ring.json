@@ -7,7 +7,13 @@
   ],
   "type": "simpleflightring:linked_ring_smithing",
   "template": "allthemodium:allthemodium_upgrade_smithing_template",
-  "base": "simpleflightring:netherite_flight_ring",
+  "base": {
+    "type": "neoforge:components",
+    "items": "simpleflightring:netherite_flight_ring",
+    "components": {
+      "simpleflightring:indestructible": {}
+    }
+  },
   "addition": "allthemodium:allthemodium_ingot",
   "result": { "id": "simpleflightring:allthemodium_flight_ring", "count": 1 }
 }

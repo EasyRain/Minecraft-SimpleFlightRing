@@ -10,7 +10,11 @@
     "item": "allthemodium:vibranium_upgrade_smithing_template"
   },
   "base": {
-    "item": "simpleflightring:allthemodium_flight_ring"
+    "type": "neoforge:components",
+    "items": "simpleflightring:allthemodium_flight_ring",
+    "components": {
+      "simpleflightring:indestructible": {}
+    }
   },
   "addition": {
     "item": "allthemodium:vibranium_ingot"

@@ -7,7 +7,13 @@
   ],
   "type": "simpleflightring:linked_ring_smithing",
   "template": "allthemodium:vibranium_upgrade_smithing_template",
-  "base": "simpleflightring:allthemodium_flight_ring",
+  "base": {
+    "type": "neoforge:components",
+    "items": "simpleflightring:allthemodium_flight_ring",
+    "components": {
+      "simpleflightring:indestructible": {}
+    }
+  },
   "addition": "allthemodium:vibranium_ingot",
   "result": { "id": "simpleflightring:vibranium_flight_ring", "count": 1 }
 }
