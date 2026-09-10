@@ -77,6 +77,20 @@ public class FlightRingItem extends Item {
         return tier;
     }
 
+    /**
+     * Linked ring (the AllTheModium chain): explicit durability and enchantability, no
+     * built-in enchantments. Those rings are indestructible, which is provided by the
+     * INDESTRUCTIBLE component set as their default component (see {@code ModItems}).
+     */
+    public FlightRingItem(int maxDurability, int enchantmentValue, Properties properties) {
+        super(properties.durability(maxDurability));
+        this.tier = null;
+        this.enchantmentValue = enchantmentValue;
+        this.breaksWhenDepleted = false;
+        this.intrinsicBase = Map.of();
+        this.breakSound = null;
+    }
+
     /** True for the special rings, which are destroyed instead of turning inert. */
     public boolean breaksWhenDepleted() {
         return breaksWhenDepleted;

@@ -1,0 +1,22 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "allthemodium"
+    }
+  ],
+  "type": "simpleflightring:linked_ring_smithing",
+  "template": {
+    "item": "allthemodium:allthemodium_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "simpleflightring:netherite_flight_ring"
+  },
+  "addition": {
+    "item": "allthemodium:allthemodium_ingot"
+  },
+  "result": {
+    "id": "simpleflightring:allthemodium_flight_ring",
+    "count": 1
+  }
+}

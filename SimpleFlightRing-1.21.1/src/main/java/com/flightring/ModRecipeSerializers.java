@@ -30,6 +30,13 @@ public class ModRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingEnchantUpgradeRecipe>> RING_ENCHANT_UPGRADE =
             SERIALIZERS.register("ring_enchant_upgrade", RingEnchantUpgradeRecipe.Serializer::new);
 
+    /**
+     * Smithing: AllTheModium integration chain (indestructible ring + that mod's upgrade
+     * template + the matching metal ingot). Only loads when AllTheModium is installed.
+     */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<LinkedRingSmithingRecipe>> LINKED_RING_SMITHING =
+            SERIALIZERS.register("linked_ring_smithing", LinkedRingSmithingRecipe.Serializer::new);
+
     private ModRecipeSerializers() {
     }
 }

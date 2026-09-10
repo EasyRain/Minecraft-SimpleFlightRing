@@ -1,6 +1,7 @@
 package com.flightring;
 
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -49,7 +50,28 @@ public class ModItems {
     public static final DeferredItem<Item> INDESTRUCTIBLE_CORE =
             ITEMS.registerItem("indestructible_core", Item::new, new Item.Properties());
 
-    /** All rings: the six tiered rings in upgrade order, then the two special rings. */
+    /**
+     * AllTheModium integration chain. Like that mod's own gear these three rings are
+     * indestructible: the INDESTRUCTIBLE component is their DEFAULT component, so every
+     * instance - smithed, taken from the creative tab or spawned with {@code /give} -
+     * has infinite flight time and never breaks. They are upgraded in the smithing table
+     * with the matching AllTheModium upgrade template (see {@link LinkedRingSmithingRecipe});
+     * the netherite ring must be forged with the Indestructible Core first.
+     * <p>
+     * AllTheModium is an optional dependency: the recipes only load when it is present.
+     * The durability is a placeholder - the INDESTRUCTIBLE component makes it infinite.
+     */
+    public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING =
+            ITEMS.registerItem("allthemodium_flight_ring", properties -> new FlightRingItem(100, 22,
+                    properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
+    public static final DeferredItem<FlightRingItem> VIBRANIUM_FLIGHT_RING =
+            ITEMS.registerItem("vibranium_flight_ring", properties -> new FlightRingItem(100, 22,
+                    properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
+    public static final DeferredItem<FlightRingItem> UNOBTAINIUM_FLIGHT_RING =
+            ITEMS.registerItem("unobtainium_flight_ring", properties -> new FlightRingItem(100, 22,
+                    properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
+
+    /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain. */
     public static final List<DeferredItem<FlightRingItem>> ALL = List.of(
             WOOD_FLIGHT_RING,
             STONE_FLIGHT_RING,
@@ -58,7 +80,10 @@ public class ModItems {
             DIAMOND_FLIGHT_RING,
             NETHERITE_FLIGHT_RING,
             STABLE_FLIGHT_RING,
-            POWERED_FLIGHT_RING
+            POWERED_FLIGHT_RING,
+            ALLTHEMODIUM_FLIGHT_RING,
+            VIBRANIUM_FLIGHT_RING,
+            UNOBTAINIUM_FLIGHT_RING
     );
 
     private ModItems() {

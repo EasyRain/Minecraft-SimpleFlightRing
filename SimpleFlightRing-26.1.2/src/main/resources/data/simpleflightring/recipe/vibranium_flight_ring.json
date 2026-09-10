@@ -1,0 +1,13 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "allthemodium"
+    }
+  ],
+  "type": "simpleflightring:linked_ring_smithing",
+  "template": "allthemodium:vibranium_upgrade_smithing_template",
+  "base": "simpleflightring:allthemodium_flight_ring",
+  "addition": "allthemodium:vibranium_ingot",
+  "result": { "id": "simpleflightring:vibranium_flight_ring", "count": 1 }
+}
