@@ -1,14 +1,9 @@
 package com.flightring;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import net.minecraft.core.Holder;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
+import top.theillusivec4.curios.api.CurioAttributeModifiers;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.SlotResult;
@@ -60,16 +55,26 @@ public final class CuriosCompat {
 
                 /**
                  * The linked (AllTheModium chain) rings grant armour, armour toughness,
-                 * attack damage and reach while worn. Curios applies these to the wearer
-                 * every tick and also lists them in the tooltip; a ring carried in the
-                 * inventory is never consulted here, so it only gives flight time.
+                 * attack damage and reach while worn.
+                 * <p>
+                 * Curios 15 collects curio attributes through the STATIC
+                 * {@code ICurioItem#forEachModifier(stack, slotContext, consumer)}, which only
+                 * looks at the {@code curios:attribute_modifiers} component and - when that
+                 * component is absent - at this method. Overriding the legacy instance
+                 * {@code getAttributeModifiers(SlotContext, Identifier, ItemStack)} does
+                 * nothing here: both the per-tick attribute application and the tooltip use
+                 * the static path, so the bonuses must come from this method.
                  */
                 @Override
-                public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext,
-                                                                                            Identifier id,
-                                                                                            ItemStack stack) {
+                public CurioAttributeModifiers getDefaultCurioAttributeModifiers(ItemStack stack) {
                     RingBonuses bonuses = ring.get().getBonuses();
-                    return bonuses == null ? ImmutableMultimap.of() : bonuses.attributeModifiers();
+                    if (bonuses == null) {
+                        return CurioAttributeModifiers.EMPTY;
+                    }
+                    CurioAttributeModifiers.Builder builder = CurioAttributeModifiers.builder();
+                    bonuses.attributeModifiers()
+                            .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
+                    return builder.build().withTooltip(true);
                 }
             });
         }
