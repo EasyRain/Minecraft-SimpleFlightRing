@@ -32,13 +32,13 @@ public class ModEnchantments {
                     ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "rocket_boost"));
 
     /**
-     * "Energy Amplification" - a treasure-style enchantment with nine levels: every level
-     * multiplies the ring's energy pool by the ring's base pool, i.e. the maximum becomes
-     * {@code base * (level + 1)} (see {@link RingEnergy#max}).
+     * "Arcane Amplification" (Chinese: 魔能增幅) - a treasure-style enchantment with nine
+     * levels: every level multiplies the ring's energy pool by the ring's base pool, i.e.
+     * the maximum becomes {@code base * (level + 1)} (see {@link RingEnergy#max}).
      */
-    public static final ResourceKey<Enchantment> ENERGY_AMPLIFICATION =
+    public static final ResourceKey<Enchantment> ARCANE_AMPLIFICATION =
             ResourceKey.create(Registries.ENCHANTMENT,
-                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "energy_amplification"));
+                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "arcane_amplification"));
 
     private ModEnchantments() {
     }

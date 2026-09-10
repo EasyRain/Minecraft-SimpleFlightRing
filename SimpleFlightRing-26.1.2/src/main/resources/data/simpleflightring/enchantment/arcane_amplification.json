@@ -1,7 +1,7 @@
 {
   "anvil_cost": 4,
   "description": {
-    "translate": "enchantment.simpleflightring.energy_amplification"
+    "translate": "enchantment.simpleflightring.arcane_amplification"
   },
   "max_cost": {
     "base": 40,

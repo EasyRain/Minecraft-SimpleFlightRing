@@ -72,7 +72,7 @@ public final class RingEnergy {
         if (base <= 0.0F) {
             return 0.0F;
         }
-        int amplification = enchantLevel(stack, ModEnchantments.ENERGY_AMPLIFICATION);
+        int amplification = enchantLevel(stack, ModEnchantments.ARCANE_AMPLIFICATION);
         return amplification <= 0 ? base : base * (amplification + 1);
     }
 

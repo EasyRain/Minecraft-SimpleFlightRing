@@ -298,10 +298,10 @@ public class FlightRingItem extends Item {
     /** Effect hints of the enchantments the ring actually has (always after the abilities). */
     private List<Component> enchantmentHints(ItemStack stack, TooltipContext context) {
         List<Component> hints = new ArrayList<>();
-        int amplification = RingEnergy.enchantLevel(stack, ModEnchantments.ENERGY_AMPLIFICATION);
+        int amplification = RingEnergy.enchantLevel(stack, ModEnchantments.ARCANE_AMPLIFICATION);
         if (amplification > 0) {
             // Every level adds the ring's base pool once, so level n means (n + 1) times base.
-            addHint(hints, "energy_amplification", amplification + 1);
+            addHint(hints, "arcane_amplification", amplification + 1);
         }
         if (context.registries() == null) {
             return hints;
