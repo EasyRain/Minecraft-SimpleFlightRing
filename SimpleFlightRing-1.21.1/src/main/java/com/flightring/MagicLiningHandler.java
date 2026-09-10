@@ -6,7 +6,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -20,8 +19,9 @@ import java.util.UUID;
  * MAGIC LINING (Allthemodium ring): while the ring is worn in the Curios slot, its
  * energy pool absorbs incoming damage.
  * <ul>
- *   <li>Damage is paid with energy 1:1. If the pool cannot cover the whole hit, it is
- *       emptied and only the remainder is applied to the player.</li>
+ *   <li>Damage is paid with energy 1:1. A hit the pool covers completely is cancelled
+ *       outright (no damage, and no red flash / hurt sound / knockback either); if the
+ *       pool cannot cover it, the pool is emptied and only the remainder lands.</li>
  *   <li>The pool starts refilling once the wearer has taken no damage for 10 seconds;
  *       a full refill always takes 3 seconds. Taking a hit interrupts and restarts
  *       that delay.</li>
@@ -55,34 +55,21 @@ public final class MagicLiningHandler {
     }
 
     /**
-     * Any hit taken interrupts the refill, even a hit that was fully absorbed, and an
-     * uninterrupted {@value RingEnergy#IDLE_SECONDS} seconds are required before the
-     * pool starts refilling again.
+     * The whole lining: the hit is paid for with the ring's energy and, when the pool
+     * covers it completely, the hit is CANCELLED outright - no health loss, but also no
+     * red flash, hurt sound, knockback or invulnerability frames, exactly as if the blow
+     * never landed. Only the remainder of a hit the pool cannot cover keeps its effects.
+     * <p>
+     * The event fires before armour/enchantment reduction, so the pool pays the incoming
+     * damage of the blow itself. Any hit also restarts the refill delay, even a hit that
+     * was fully absorbed.
      */
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (event.getAmount() <= 0.0F || ignoresEnergy(event.getSource())) {
-            return;
-        }
-        if (wornRing(player, RingAbility.MAGIC_LINING).isEmpty()) {
-            return;
-        }
-        LAST_DAMAGE.put(player.getUUID(), player.level().getGameTime());
-    }
-
-    /**
-     * The actual absorption. This event fires after armour and potion reduction, so the
-     * energy is spent on the damage the player would really take.
-     */
-    @SubscribeEvent
-    public static void onDamage(LivingDamageEvent.Pre event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        float damage = event.getNewDamage();
+        float damage = event.getAmount();
         if (damage <= 0.0F || ignoresEnergy(event.getSource())) {
             return;
         }
@@ -90,13 +77,20 @@ public final class MagicLiningHandler {
         if (ring.isEmpty()) {
             return;
         }
+        LAST_DAMAGE.put(player.getUUID(), player.level().getGameTime());
+
         float energy = RingEnergy.get(ring);
         if (energy <= 0.0F) {
             return; // empty pool: nothing to absorb, the hit lands in full
         }
         float absorbed = Math.min(energy, damage);
         RingEnergy.set(ring, energy - absorbed);
-        event.setNewDamage(damage - absorbed);
+        float remaining = damage - absorbed;
+        if (remaining <= 0.0F) {
+            event.setCanceled(true);
+        } else {
+            event.setAmount(remaining);
+        }
     }
 
     @SubscribeEvent
@@ -106,32 +100,35 @@ public final class MagicLiningHandler {
         }
         long now = player.level().getGameTime();
         ItemStack ring = wornRing(player, RingAbility.MAGIC_LINING);
-
-        // Push the pool to the client for the HUD (twice a second while a ring is worn,
-        // only every other second otherwise, just often enough to hide the bar).
-        boolean syncNow = ring.isEmpty() ? now % (SYNC_INTERVAL * 4) == 0 : now % SYNC_INTERVAL == 0;
-        if (syncNow) {
-            float max = ring.isEmpty() ? 0.0F : RingEnergy.max(ring);
-            float energy = ring.isEmpty() ? -1.0F : RingEnergy.get(ring);
-            PacketDistributor.sendToPlayer(player, new RingEnergyPayload(energy, max));
-        }
-
         if (ring.isEmpty()) {
             LAST_DAMAGE.remove(player.getUUID());
+            // Push "no ring" now and then, just often enough to hide the bar client-side.
+            if (now % (SYNC_INTERVAL * 8) == 0) {
+                PacketDistributor.sendToPlayer(player, new RingEnergyPayload(-1.0F, 0.0F));
+            }
             return;
         }
+
         float max = RingEnergy.max(ring);
         float energy = RingEnergy.get(ring);
-        if (energy >= max) {
-            return; // full: nothing to do until the next hit
+
+        // Refill: IDLE_TICKS without damage, then one step every REFILL_STEP_TICKS, so a
+        // full pool always takes REFILL_SECONDS (see RingEnergy).
+        if (energy < max) {
+            long lastDamage = LAST_DAMAGE.computeIfAbsent(player.getUUID(), uuid -> now - RingEnergy.IDLE_TICKS);
+            long idle = now - lastDamage;
+            if (idle >= RingEnergy.IDLE_TICKS && (idle - RingEnergy.IDLE_TICKS) % RingEnergy.REFILL_STEP_TICKS == 0) {
+                energy = Math.min(max, energy + RingEnergy.refillStep(max));
+                RingEnergy.set(ring, energy);
+            }
         }
-        // No damage for IDLE_TICKS, then one refill step per second.
-        long lastDamage = LAST_DAMAGE.computeIfAbsent(player.getUUID(), uuid -> now - RingEnergy.IDLE_TICKS);
-        long idle = now - lastDamage;
-        if (idle < RingEnergy.IDLE_TICKS || (idle - RingEnergy.IDLE_TICKS) % RingEnergy.REFILL_STEP_TICKS != 0) {
-            return;
+
+        // Push the pool to the client for the HUD: with every refill step while it fills
+        // (so the bar animates smoothly), once a second while it is full.
+        int interval = energy < max ? RingEnergy.REFILL_STEP_TICKS : SYNC_INTERVAL;
+        if (now % interval == 0) {
+            PacketDistributor.sendToPlayer(player, new RingEnergyPayload(energy, max));
         }
-        RingEnergy.set(ring, energy + RingEnergy.refillStep(max));
     }
 
     @SubscribeEvent

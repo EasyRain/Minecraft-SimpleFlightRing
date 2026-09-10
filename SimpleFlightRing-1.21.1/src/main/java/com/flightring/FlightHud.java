@@ -1,5 +1,6 @@
 package com.flightring;
 
+import net.minecraft.Util;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,9 +32,20 @@ public class FlightHud {
     /** Show the hours unit once the remaining flight time reaches 1000 minutes (60 000 seconds). */
     private static final int SHOW_HOURS_THRESHOLD = 60_000;
 
-    /** Size of the energy bar of rings with abilities (Magic Lining). */
-    private static final int ENERGY_BAR_WIDTH = 80;
-    private static final int ENERGY_BAR_HEIGHT = 6;
+    /**
+     * Size of the energy bar of rings with abilities (Magic Lining). The label is drawn
+     * inside the bar, so the bar itself is the only thing that can overlap other HUD
+     * elements and no text runs off towards the hotbar.
+     */
+    private static final int ENERGY_BAR_WIDTH = 120;
+    private static final int ENERGY_BAR_HEIGHT = 10;
+
+    /**
+     * Energy actually drawn: the server sends refill steps, this value chases them at
+     * the pool's refill rate so the bar grows smoothly instead of jumping in steps.
+     */
+    private static float displayedEnergy = -1.0F;
+    private static long lastEnergyFrameMillis;
 
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(LAYER_ID, FlightHud::renderTimer);
@@ -59,7 +71,7 @@ public class FlightHud {
         Component timerText = flightTimeText(minecraft.player);
         // The energy bar sits right above the countdown. Indestructible rings hide the
         // countdown, so the bar then takes its place.
-        renderEnergyBar(guiGraphics, minecraft, x, timerText == null ? textY : textY - ENERGY_BAR_HEIGHT - 5);
+        renderEnergyBar(guiGraphics, minecraft, x, timerText == null ? textY : textY - ENERGY_BAR_HEIGHT - 3);
         if (timerText != null) {
             guiGraphics.drawString(minecraft.font, timerText, x, textY, 0xFFFFFF, true);
         }
@@ -96,22 +108,39 @@ public class FlightHud {
      */
     private static void renderEnergyBar(GuiGraphics guiGraphics, Minecraft minecraft, int x, int y) {
         if (!ClientRingEnergy.isActive()) {
+            displayedEnergy = -1.0F;
+            lastEnergyFrameMillis = 0L;
             return;
         }
         float max = ClientRingEnergy.maxEnergy();
-        float energy = Math.max(0.0F, Math.min(max, ClientRingEnergy.energy()));
-        int filled = Math.round(ENERGY_BAR_WIDTH * (energy / max));
+        float target = Math.max(0.0F, Math.min(max, ClientRingEnergy.energy()));
+
+        // Smooth the refill: the server sends steps, so the drawn value advances at the
+        // pool's own refill rate (a full refill in REFILL_SECONDS). Damage is instant.
+        long now = Util.getMillis();
+        float elapsed = lastEnergyFrameMillis == 0L ? 0.0F : Math.min(0.25F, (now - lastEnergyFrameMillis) / 1000.0F);
+        lastEnergyFrameMillis = now;
+        if (displayedEnergy < 0.0F || target < displayedEnergy) {
+            displayedEnergy = target;
+        } else if (target > displayedEnergy) {
+            displayedEnergy = Math.min(target, displayedEnergy + (max / RingEnergy.REFILL_SECONDS) * elapsed);
+        }
+
+        int filled = Math.round(ENERGY_BAR_WIDTH * (displayedEnergy / max));
         // Magic purple: dark frame, dim track, bright fill.
         guiGraphics.fill(x - 1, y - 1, x + ENERGY_BAR_WIDTH + 1, y + ENERGY_BAR_HEIGHT + 1, 0xFF1B1230);
         guiGraphics.fill(x, y, x + ENERGY_BAR_WIDTH, y + ENERGY_BAR_HEIGHT, 0xFF3A2A66);
         if (filled > 0) {
             guiGraphics.fill(x, y, x + filled, y + ENERGY_BAR_HEIGHT, 0xFF9A6BFF);
         }
+
+        // The label lives inside the bar, so nothing sticks out towards the hotbar.
         Component label = Component.translatable("hud.simpleflightring.energy",
-                Math.round(energy), Math.round(max));
+                Math.round(displayedEnergy), Math.round(max));
         // Dim red while the pool is empty (no more damage absorption).
-        int color = energy > 0.0F ? 0xFFD8C6FF : 0xFFFF8080;
-        guiGraphics.drawString(minecraft.font, label, x + ENERGY_BAR_WIDTH + 4, y - 1, color, true);
+        int color = displayedEnergy > 0.0F ? 0xFFFFFFFF : 0xFFFF8080;
+        int labelX = x + (ENERGY_BAR_WIDTH - minecraft.font.width(label)) / 2;
+        guiGraphics.drawString(minecraft.font, label, labelX, y + 1, color, true);
     }
 
     /**

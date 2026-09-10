@@ -19,8 +19,7 @@ import net.minecraft.world.item.ItemStack;
  *       {@value #REFILL_SECONDS} seconds regardless of the pool size. Taking damage
  *       interrupts the refill.</li>
  * </ul>
- */
-public final class RingEnergy {
+ */public final class RingEnergy {
 
     /** Energy of a ring that has not been touched yet. */
     public static final float DEFAULT_MAX = 50.0F;
@@ -34,12 +33,18 @@ public final class RingEnergy {
     /** A refill always takes this many seconds, no matter how large the pool is. */
     public static final int REFILL_SECONDS = 3;
 
-    /** Interval of the refill steps (one step per second). */
-    public static final int REFILL_STEP_TICKS = 20;
+    /** Ticks a complete refill takes. */
+    public static final int REFILL_TICKS = REFILL_SECONDS * 20;
 
-    /** Energy added by one refill step, i.e. a full refill takes {@value #REFILL_SECONDS} steps. */
+    /**
+     * One refill step every 5 ticks (4 steps per second). Small enough for the bar to
+     * look continuous, large enough to keep the item component (and its syncing) cheap.
+     */
+    public static final int REFILL_STEP_TICKS = 5;
+
+    /** Energy added by one refill step, i.e. a full refill takes {@value #REFILL_SECONDS} seconds. */
     public static float refillStep(float max) {
-        return max / (float) REFILL_SECONDS;
+        return max * REFILL_STEP_TICKS / (float) REFILL_TICKS;
     }
 
     private RingEnergy() {
