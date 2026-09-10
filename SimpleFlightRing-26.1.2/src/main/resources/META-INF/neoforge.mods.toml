@@ -20,7 +20,15 @@ Features:
 - Optional Curios API support (flight ring slot); without Curios the rings simply work from the inventory.
 - Optional Sophisticated Backpacks support: rings inside carried backpacks also grant flight.
 
-飞行时间(分钟/耐久): 木5/300 · 石15/900 · 铁30/1800 · 金60/3600 · 钻石120/7200 · 下界合金240/14400，每飞行1秒消耗1耐久'''
+Allthemodium integration (registered only when Allthemodium is installed):
+- 3 linked endgame rings: Allthemodium / Vibranium / Unobtainium Flight Ring, forged from the Netherite Flight Ring with the Indestructible Core and upgraded with Allthemodium smithing templates.
+- All three are already indestructible; their attributes and abilities only apply while the ring is worn in the Curios slot.
+- Ring energy pools: 100 / 300 / 700. Abilities consume energy, which starts refilling 10 seconds after the last use.
+- Abilities are inherited up the chain: Allthemodium = Magic Lining (damage is absorbed while energy lasts); Vibranium adds Kinetic Deflection (incoming projectiles are deflected away); Unobtainium adds Burst Totem (survives lethal damage and detonates a shockwave that damages and knocks back nearby enemies, then needs a full pool to recharge).
+- Arcane Amplification enchantment (levels 1-9, from the enchanting table, only for the three linked rings): max energy = base energy x (level + 1).
+
+飞行时间(分钟/耐久): 木5/300 · 石15/900 · 铁30/1800 · 金60/3600 · 钻石120/7200 · 下界合金240/14400，每飞行1秒消耗1耐久
+Allthemodium 联动(需安装 Allthemodium): ATM/振金/难得素 三枚联动戒指自带不毁，能力沿链条继承(魔法内衬 → 动能偏转 → 爆裂图腾)，能量池 100/300/700，可附魔"魔能增幅"(1-9级，能量上限 = 基础 × (等级+1))'''
 
 [[dependencies.${mod_id}]]
 modId="neoforge"

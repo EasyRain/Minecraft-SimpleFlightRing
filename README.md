@@ -27,6 +27,9 @@
   - **Cloth Config API**：游戏内 Mod 列表 → Config 打开配置界面（开关 + 位置滑块）。
   - **精妙背包 Sophisticated Backpacks**：戒指放在精妙背包内同样生效
     （主物品栏/盔甲栏/副手/Curios 槽中的背包均可，支持嵌套背包）。
+  - **Allthemodium**：新增 ATM / 振金 / 难得素 三枚联动戒指（自带不毁、能量池 100/300/700、
+    能力沿链条继承：魔法内衬 → 动能偏转 → 爆裂图腾）与仅限联动戒指的「魔能增幅」附魔（1~9 级，
+    能量上限 = 基础 × (等级+1)）。未安装 Allthemodium 时这些内容不会注册，也不会报错。
 
 ## 各材质飞行时间
 
@@ -41,7 +44,7 @@
 
 ## 构建
 
-各自目录下运行（构建产物在 `build/libs/simpleflightring-1.0.0.jar`）：
+各自目录下运行（构建产物在 `build/libs/simpleflightring-<版本>-<游戏版本>.jar`）：
 
 ```bat
 :: 1.21.1 版（需要 JDK 21）
@@ -61,8 +64,8 @@ gradlew.bat build
 ## 安装
 
 1. 安装对应版本的 NeoForge。
-2. 将对应版本的 `simpleflightring-1.0.0.jar` 放入 `mods` 文件夹。
-3. （可选）安装对应版本的 Curios API / Cloth Config / Sophisticated Backpacks 以获得额外集成。
+2. 将对应版本的 `simpleflightring-1.2.0-<游戏版本>.jar` 放入 `mods` 文件夹。
+3. （可选）安装对应版本的 Curios API / Cloth Config / Sophisticated Backpacks / Allthemodium 以获得额外集成。
 
 ## 许可
 

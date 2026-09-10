@@ -1,6 +1,6 @@
 # Simple Flight Ring
 
-**A small Minecraft mod that adds six tiers of flight rings: Wood, Stone, Iron, Gold, Diamond and Netherite.**
+**A small Minecraft mod that adds six tiers of flight rings: Wood, Stone, Iron, Gold, Diamond and Netherite** — plus an optional, fully gated Allthemodium endgame chain of three linked rings with their own abilities and enchantment.
 
 Fly like in Creative mode by simply wearing (or carrying) a ring — no elytra, no rockets, just **traditional Creative flight**: double-tap Space to take off and land, hold Space to ascend, hold Shift to descend.
 
@@ -28,6 +28,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
 - 🎛️ **Cloth Config support (optional)** — in-game configuration screen from the mod list (toggle + position sliders).
 - 🎒 **Sophisticated Backpacks support (optional)** — rings stored inside sophisticated backpacks also grant flight, including nested backpacks (up to 3 levels) and backpacks worn in the armor/offhand/Curios slots.
 - 🧿 **Curios API support (optional)** — adds an extra **"Flight Ring"** curio slot; rings can be right-click equipped. Without Curios, rings simply work from the inventory (and still do even with Curios installed).
+- 🌌 **Allthemodium integration (optional)** — with [Allthemodium](https://modrinth.com/mod/allthemodium) installed, three linked endgame rings (Allthemodium / Vibranium / Unobtainium) are added, each with an energy pool, inherited abilities (Magic Lining → Kinetic Deflection → Burst Totem) and the *Arcane Amplification* enchantment. Without Allthemodium **nothing** is registered — no items, no recipes, no errors. See [Allthemodium integration](#allthemodium-integration-optional).
 
 ## Flight time per tier
 
@@ -84,6 +85,44 @@ Combine a flight ring with its tier material in any arrangement to restore durab
 1. Netherite Upgrade Smithing Template
 2. Diamond Flight Ring (any durability)
 3. Netherite Ingot
+
+## Allthemodium integration (optional)
+
+When [Allthemodium](https://modrinth.com/mod/allthemodium) is installed, three linked endgame rings are added on top of the six classic tiers.
+
+| Ring | Energy pool | Abilities |
+|------|-------------|-----------|
+| Allthemodium Flight Ring | 100 | Magic Lining |
+| Vibranium Flight Ring | 300 | Magic Lining + Kinetic Deflection |
+| Unobtainium Flight Ring | 700 | Magic Lining + Kinetic Deflection + Burst Totem |
+
+- All three are **indestructible the moment they are crafted** — no Indestructible Core is needed for them (the Netherite ring must be made indestructible *first*, see below).
+- Their attributes (armour, toughness, attack damage, reach) and abilities **only apply while the ring is worn in the Curios slot** — one carried in the inventory still grants flight only.
+- Abilities are **inherited up the chain**: Allthemodium ⊂ Vibranium ⊂ Unobtainium.
+
+### Crafting the linked rings (Smithing Table)
+
+The Netherite Flight Ring must be **indestructible first** — combine it with the **Indestructible Core** (1 Netherite Ingot + 1 Nether Star, shapeless) in the smithing table. Then upgrade it along the chain with Allthemodium's own smithing templates:
+
+| Result | Template | Base | Addition |
+|--------|----------|------|----------|
+| Allthemodium Flight Ring | Allthemodium Upgrade Smithing Template | Indestructible Netherite Flight Ring | Allthemodium Ingot |
+| Vibranium Flight Ring | Vibranium Upgrade Smithing Template | Indestructible Allthemodium Flight Ring | Vibranium Ingot |
+| Unobtainium Flight Ring | Unobtainium Upgrade Smithing Template | Indestructible Vibranium Flight Ring | Unobtainium Ingot |
+
+### Energy
+
+Each linked ring has an energy pool (100 / 300 / 700) that its abilities draw on. Energy starts refilling **10 seconds after the last use**, fills the pool in 3 seconds regardless of its size, and taking another hit interrupts the refill. The HUD shows the pool as a bar that hides itself 3 seconds after it has been sitting full (any change brings it back).
+
+### Abilities
+
+- 🟡 **Magic Lining** (Allthemodium) — incoming damage is absorbed by the ring's energy 1:1; when the pool can cover the whole hit, the hit is cancelled outright (no knockback, no damage flash, no invulnerability window).
+- 🟢 **Kinetic Deflection** (Vibranium) — incoming projectiles bounce off a sphere-shaped barrier around the wearer in a random direction. Free of charge while the pool is above half; below half it stops working and Magic Lining takes over.
+- 🟣 **Burst Totem** (Unobtainium) — a lethal hit is cancelled: the wearer survives (health restored, harmful effects cleared, Regeneration II / Absorption II / Fire Resistance) while a TNT-style, block-safe explosion (8 blocks, 20 damage) damages and knocks back everything around. The pool then waits 60 seconds **and** must refill completely before the totem can fire again.
+
+### Arcane Amplification (enchantment)
+
+An enchanting-table enchantment for the three linked rings only, levels 1–9: **max energy = base energy × (level + 1)** — an Unobtainium ring at level 9 holds 7000 energy. It also appears in villager trades and loot as usual.
 
 ## Installation
 
