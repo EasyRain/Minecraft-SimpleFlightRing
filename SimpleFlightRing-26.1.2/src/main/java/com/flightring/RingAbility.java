@@ -18,19 +18,31 @@ public enum RingAbility {
     // BURST_TOTEM (Unobtainium, violet 0xFFC06BF5).
 
     /** Allthemodium: spends the ring's energy pool to absorb incoming damage. */
-    MAGIC_LINING("magic_lining", 0xFFFFC24A);
+    MAGIC_LINING("magic_lining", 0xFFFFC24A, 3);
 
     private final String key;
     private final int color;
+    private final int descriptionLines;
 
-    RingAbility(String key, int color) {
+    RingAbility(String key, int color, int descriptionLines) {
         this.key = key;
         this.color = color;
+        this.descriptionLines = descriptionLines;
     }
 
     /** Suffix of this ability's translation keys ({@code tooltip.simpleflightring.<key>_title/_desc}). */
     public String key() {
         return key;
+    }
+
+    /**
+     * Number of description lines this ability shows: the first uses the {@code _desc}
+     * key and the following ones {@code _desc2}, {@code _desc3}, ... Every line is its
+     * own component, because a {@code \n} inside a component is NOT turned into a line
+     * break by the vanilla tooltip (1.21.1 renders it as a missing glyph box).
+     */
+    public int descriptionLines() {
+        return descriptionLines;
     }
 
     /**
