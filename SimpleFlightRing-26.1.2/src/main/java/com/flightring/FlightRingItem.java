@@ -16,20 +16,44 @@ import java.util.function.Consumer;
  * Rings are enchantable with Unbreaking, Mending and Efficiency (the rings are added
  * to the vanilla {@code enchantable/durability} and {@code enchantable/mining} item
  * tags); Efficiency levels speed up sprint-flight by 10% each.
+ * <p>
+ * The two special rings (Stable / Powered) are built with an explicit durability and
+ * are DESTROYED once fully consumed, unlike the tiered rings which merely become inert.
  */
 public class FlightRingItem extends Item {
 
+    /** Tier of the six crafting rings; {@code null} for the special rings. */
     private final RingTier tier;
+    /** Special rings are destroyed when drained; tiered rings just become inert. */
+    private final boolean breaksWhenDepleted;
 
     public FlightRingItem(RingTier tier, Properties properties) {
         super(properties
                 .durability(tier.getMaxDurability())
                 .enchantable(tier.getEnchantmentValue()));
         this.tier = tier;
+        this.breaksWhenDepleted = false;
+    }
+
+    /**
+     * Special ring: explicit durability (1 point = 1 second of flight) and
+     * enchantability. Destroyed once its durability runs out.
+     */
+    public FlightRingItem(int maxDurability, int enchantmentValue, Properties properties) {
+        super(properties
+                .durability(maxDurability)
+                .enchantable(enchantmentValue));
+        this.tier = null;
+        this.breaksWhenDepleted = true;
     }
 
     public RingTier getTier() {
         return tier;
+    }
+
+    /** True for the special rings, which are destroyed instead of turning inert. */
+    public boolean breaksWhenDepleted() {
+        return breaksWhenDepleted;
     }
 
     @Override
@@ -68,6 +92,10 @@ public class FlightRingItem extends Item {
                 int seconds = remainingSeconds % 60;
                 tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.remaining_time", minutes, seconds));
             }
+        }
+
+        if (breaksWhenDepleted && !stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.breaks_when_depleted").withStyle(ChatFormatting.RED));
         }
 
         // Gray hint lines (only for enchantments actually present).

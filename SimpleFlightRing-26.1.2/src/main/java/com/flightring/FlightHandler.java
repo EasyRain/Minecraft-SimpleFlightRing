@@ -170,14 +170,10 @@ public class FlightHandler {
                         return;
                     }
                     // Deterministic drain: bypass the vanilla probabilistic Unbreaking roll.
-                    ring.setDamageValue(ring.getDamageValue() + 1);
-                    if (state.activeBackpackRing != null) {
-                        // Persist the change into the backpack's item data, otherwise it is
-                        // lost whenever the backpack is reloaded (e.g. moved between slots).
-                        BackpackCompat.writeBack(state.activeBackpackRing);
-                    }
-                    if (ring.getDamageValue() >= ring.getMaxDamage()) {
-                        // Ring fully consumed: stop flight right away (the ring itself stays).
+                    damageRing(ring, state.activeBackpackRing, 1);
+                    if (ring.isEmpty() || ring.getDamageValue() >= ring.getMaxDamage()) {
+                        // Ring fully consumed (special rings are destroyed outright):
+                        // stop flight right away.
                         revokeFlight(player, state);
                     }
                 }
@@ -243,7 +239,8 @@ public class FlightHandler {
         int points = state.boostTicks / interval;
         if (points > 0) {
             state.boostTicks -= points * interval;
-            ring.setDamageValue(Math.min(ring.getDamageValue() + points, ring.getMaxDamage()));
+            // The boost ring never comes from a backpack (see findRocketBoostRing).
+            damageRing(ring, null, points);
         }
     }
 
@@ -271,6 +268,31 @@ public class FlightHandler {
             return offhand;
         }
         return ItemStack.EMPTY;
+    }
+
+    /**
+     * Applies durability damage to a ring and persists it (including into sophisticated
+     * backpacks). The two special rings are DESTROYED once their durability is fully
+     * consumed; the tiered rings merely become inert and can still be repaired.
+     */
+    private static void damageRing(ItemStack ring, BackpackCompat.BackpackRing backpackRing, int amount) {
+        if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            return;
+        }
+        int newDamage = Math.min(ring.getDamageValue() + amount, ring.getMaxDamage());
+        ring.setDamageValue(newDamage);
+        if (backpackRing != null) {
+            // Persist the change into the backpack's item data, otherwise it is lost
+            // whenever the backpack is reloaded (e.g. moved between slots).
+            BackpackCompat.writeBack(backpackRing);
+        }
+        if (newDamage >= ring.getMaxDamage()
+                && ring.getItem() instanceof FlightRingItem item && item.breaksWhenDepleted()) {
+            ring.shrink(1);
+            if (backpackRing != null) {
+                BackpackCompat.writeBack(backpackRing);
+            }
+        }
     }
 
     private static void revokeFlight(ServerPlayer player, PlayerState state) {

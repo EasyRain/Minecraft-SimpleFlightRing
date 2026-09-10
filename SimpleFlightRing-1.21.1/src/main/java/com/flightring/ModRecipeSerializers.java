@@ -26,6 +26,10 @@ public class ModRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingIndestructibleRecipe>> RING_INDESTRUCTIBLE =
             SERIALIZERS.register("ring_indestructible", RingIndestructibleRecipe.Serializer::new);
 
+    /** Shapeless: Powered Flight Ring + gunpowder + redstone dust raises its built-in enchants by one (max 3). */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RingEnchantUpgradeRecipe>> RING_ENCHANT_UPGRADE =
+            SERIALIZERS.register("ring_enchant_upgrade", RingEnchantUpgradeRecipe.Serializer::new);
+
     private ModRecipeSerializers() {
     }
 }

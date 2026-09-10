@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["AAA","ARA","AAA"],
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "R": "simpleflightring:iron_flight_ring"
+  },
+  "result": {
+    "id": "simpleflightring:stable_flight_ring",
+    "count": 1,
+    "components": {
+      "minecraft:enchantments": { "levels": { "simpleflightring:flight_stability": 1 } }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "simpleflightring:ring_enchant_upgrade",
+  "category": "equipment",
+  "ring": "simpleflightring:powered_flight_ring",
+  "catalyst": "minecraft:gunpowder",
+  "binder": "minecraft:redstone",
+  "result": { "id": "simpleflightring:powered_flight_ring", "count": 1 }
+}

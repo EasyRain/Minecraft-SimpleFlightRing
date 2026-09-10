@@ -6,6 +6,8 @@
     "simpleflightring:iron_flight_ring",
     "simpleflightring:gold_flight_ring",
     "simpleflightring:diamond_flight_ring",
-    "simpleflightring:netherite_flight_ring"
+    "simpleflightring:netherite_flight_ring",
+    "simpleflightring:stable_flight_ring",
+    "simpleflightring:powered_flight_ring"
   ]
 }
