@@ -121,56 +121,40 @@ public class RingEnchantUpgradeRecipe extends NormalCraftingRecipe {
         return upgraded;
     }
 
-    /** Whether the ring carries the enchantment below the cap. */
+    /** True when the ring carries this built-in enchantment and it is still below the cap. */
     private static boolean canRaise(ItemStack stack, ResourceKey<Enchantment> key) {
-        Holder<Enchantment> holder = findHolder(stack, key);
-        return holder != null && effectiveLevel(stack, holder) < MAX_LEVEL;
+        if (!(stack.getItem() instanceof FlightRingItem ring) || !ring.getIntrinsicLevels(stack).containsKey(key)) {
+            return false;
+        }
+        return effectiveLevel(stack, key) < MAX_LEVEL;
+    }
+
+    /** Raises one built-in enchantment by a level (never above the cap). */
+    private static void raise(ItemStack stack, ResourceKey<Enchantment> key) {
+        int effective = effectiveLevel(stack, key);
+        if (effective < MAX_LEVEL) {
+            IntrinsicEnchants stored = stack.getOrDefault(
+                    ModDataComponents.INTRINSIC_ENCHANTMENTS.get(), IntrinsicEnchants.EMPTY);
+            stack.set(ModDataComponents.INTRINSIC_ENCHANTMENTS.get(), stored.with(key, effective + 1));
+        }
     }
 
     /**
-     * Raises the ring's INTRINSIC (built-in) level by one, never above the cap. The
-     * intrinsic level is the permanent part; a higher level added with an anvil is
-     * respected and simply carried over, so only enchantments below the cap are raised.
+     * Effective level of one of the ring's built-in enchantments: the highest of the
+     * item's base level, the level stored on this stack and any level added with an anvil.
      */
-    private static void raise(ItemStack stack, ResourceKey<Enchantment> key) {
-        Holder<Enchantment> holder = findHolder(stack, key);
-        if (holder == null) {
-            return;
+    private static int effectiveLevel(ItemStack stack, ResourceKey<Enchantment> key) {
+        if (!(stack.getItem() instanceof FlightRingItem ring)) {
+            return 0;
         }
-        int effective = effectiveLevel(stack, holder);
-        if (effective < MAX_LEVEL) {
-            SpecialRings.setIntrinsic(stack, holder, effective + 1);
-        }
-    }
-
-    /** The higher of the intrinsic (built-in) level and the real enchantment level. */
-    private static int effectiveLevel(ItemStack stack, Holder<Enchantment> holder) {
-        int intrinsic = stack.getItem() instanceof FlightRingItem ring
-                ? ring.getIntrinsicEnchantLevel(stack, holder)
-                : 0;
-        return Math.max(intrinsic, stack.getEnchantments().getLevel(holder));
-    }
-
-    /** The existing holder for the key, from the ring's intrinsic or real enchantments. */
-    private static Holder<Enchantment> findHolder(ItemStack stack, ResourceKey<Enchantment> key) {
-        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
-        if (intrinsic != null) {
-            for (var entry : intrinsic.entrySet()) {
-                if (matches(entry.getKey(), key)) {
-                    return entry.getKey();
-                }
-            }
-        }
+        int level = ring.getIntrinsicLevels(stack).getOrDefault(key, 0);
+        // Levels added with an anvil live in the vanilla enchantments component.
         for (var entry : stack.getEnchantments().entrySet()) {
-            if (matches(entry.getKey(), key)) {
-                return entry.getKey();
+            if (entry.getKey().unwrapKey().filter(key::equals).isPresent()) {
+                level = Math.max(level, entry.getValue());
             }
         }
-        return null;
-    }
-
-    private static boolean matches(Holder<Enchantment> holder, ResourceKey<Enchantment> key) {
-        return holder.unwrapKey().filter(key::equals).isPresent();
+        return level;
     }
 
     @Override

@@ -19,12 +19,6 @@
   },
   "result": {
     "id": "simpleflightring:powered_flight_ring",
-    "count": 1,
-    "components": {
-      "simpleflightring:intrinsic_enchantments": {
-        "simpleflightring:rocket_boost": 1,
-        "minecraft:efficiency": 1
-      }
-    }
+    "count": 1
   }
 }

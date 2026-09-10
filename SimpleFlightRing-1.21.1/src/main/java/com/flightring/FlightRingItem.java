@@ -3,15 +3,18 @@ package com.flightring;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A flight ring item. Grants traditional creative flight while it has durability
@@ -20,8 +23,14 @@ import java.util.List;
  * to the vanilla {@code enchantable/durability} and {@code enchantable/mining} item
  * tags); Efficiency levels speed up sprint-flight by 10% each.
  * <p>
- * The two special rings (Stable / Powered) are built with an explicit durability and
- * are DESTROYED once fully consumed, unlike the tiered rings which merely become inert.
+ * The two special rings (Stable / Powered) are built with an explicit durability,
+ * INTRINSIC (built-in) enchantments and are DESTROYED once fully consumed, unlike the
+ * tiered rings which merely become inert.
+ * <p>
+ * The intrinsic enchantments' base levels live on the item itself, so every ring -
+ * crafted, taken from the creative tab or spawned with {@code /give} - has them. They
+ * are never written to the vanilla enchantments component, so nothing can strip them
+ * (grindstone, ...). See {@code EnchantmentHelperMixin} for the effective level.
  */
 public class FlightRingItem extends Item {
 
@@ -30,23 +39,33 @@ public class FlightRingItem extends Item {
     private final int enchantmentValue;
     /** Special rings are destroyed when drained; tiered rings just become inert. */
     private final boolean breaksWhenDepleted;
+    /** Built-in (intrinsic) enchantments and their base levels; empty for the tiered rings. */
+    private final Map<ResourceKey<Enchantment>, Integer> intrinsicBase;
+    /** Sound played when a special ring is destroyed; {@code null} for the tiered rings. */
+    private final SoundEvent breakSound;
 
     public FlightRingItem(RingTier tier, Properties properties) {
         super(properties.durability(tier.getMaxDurability()));
         this.tier = tier;
         this.enchantmentValue = tier.getEnchantmentValue();
         this.breaksWhenDepleted = false;
+        this.intrinsicBase = Map.of();
+        this.breakSound = null;
     }
 
     /**
-     * Special ring: explicit durability (1 point = 1 second of flight) and
-     * enchantability. Destroyed once its durability runs out.
+     * Special ring: explicit durability (1 point = 1 second of flight), built-in
+     * (intrinsic) enchantments and the sound played when it is destroyed.
      */
-    public FlightRingItem(int maxDurability, int enchantmentValue, Properties properties) {
+    public FlightRingItem(int maxDurability, int enchantmentValue,
+                          Map<ResourceKey<Enchantment>, Integer> intrinsicBase,
+                          SoundEvent breakSound, Properties properties) {
         super(properties.durability(maxDurability));
         this.tier = null;
         this.enchantmentValue = enchantmentValue;
         this.breaksWhenDepleted = true;
+        this.intrinsicBase = Map.copyOf(intrinsicBase);
+        this.breakSound = breakSound;
     }
 
     public RingTier getTier() {
@@ -58,22 +77,50 @@ public class FlightRingItem extends Item {
         return breaksWhenDepleted;
     }
 
-    /**
-     * Level of one of the ring's INTRINSIC (built-in) enchantments, or 0 if it has none.
-     * Intrinsic enchantments live outside the vanilla enchantments component, so they
-     * cannot be removed; {@code EnchantmentHelperMixin} feeds them into the vanilla
-     * lookup, using whichever of the intrinsic and the real level is higher.
-     */
-    public int getIntrinsicEnchantLevel(ItemStack stack, Holder<Enchantment> enchantment) {
-        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
-        return intrinsic == null ? 0 : intrinsic.getLevel(enchantment);
+    /** Sound played when the ring is destroyed; {@code null} for the tiered rings. */
+    public SoundEvent getBreakSound() {
+        return breakSound;
     }
 
-    /** The ring glints when it carries intrinsic enchantments (they are not in the component). */
+    /**
+     * Effective levels of the ring's built-in enchantments: the item's base levels plus
+     * any levels raised above them and stored on this stack (Powered ring upgrades).
+     */
+    public Map<ResourceKey<Enchantment>, Integer> getIntrinsicLevels(ItemStack stack) {
+        IntrinsicEnchants stored = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        if (intrinsicBase.isEmpty()) {
+            return stored == null ? Map.of() : stored.levels();
+        }
+        Map<ResourceKey<Enchantment>, Integer> merged = new LinkedHashMap<>(intrinsicBase);
+        if (stored != null) {
+            stored.levels().forEach((key, level) -> merged.merge(key, level, Math::max));
+        }
+        return merged;
+    }
+
+    /**
+     * Level of one of the ring's INTRINSIC (built-in) enchantments, or 0 if it has none.
+     * {@code EnchantmentHelperMixin} feeds this into the vanilla enchantment lookup,
+     * using whichever of the intrinsic and the real level is higher.
+     */
+    public int getIntrinsicEnchantLevel(ItemStack stack, Holder<Enchantment> enchantment) {
+        return enchantment.unwrapKey()
+                .map(key -> {
+                    IntrinsicEnchants stored = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+                    int base = intrinsicBase.getOrDefault(key, 0);
+                    return Math.max(base, stored == null ? 0 : stored.level(key));
+                })
+                .orElse(0);
+    }
+
+    /** The ring glints while it carries intrinsic enchantments (they are not in the component). */
     @Override
     public boolean isFoil(ItemStack stack) {
-        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
-        return (intrinsic != null && !intrinsic.isEmpty()) || super.isFoil(stack);
+        if (!intrinsicBase.isEmpty()) {
+            return true;
+        }
+        IntrinsicEnchants stored = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
+        return (stored != null && !stored.isEmpty()) || super.isFoil(stack);
     }
 
     @Override
@@ -83,11 +130,12 @@ public class FlightRingItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        // The built-in (intrinsic) enchantments are not part of the vanilla enchantments
-        // component, so list them explicitly, exactly like normal enchantment lines.
-        ItemEnchantments intrinsic = stack.get(ModDataComponents.INTRINSIC_ENCHANTMENTS.get());
-        if (intrinsic != null && !intrinsic.isEmpty()) {
-            intrinsic.addToTooltip(context, tooltipComponents::add, tooltipFlag);
+        // Built-in (intrinsic) enchantments are never part of the vanilla enchantments
+        // component, so list them explicitly with a "Built-in" prefix.
+        if (!intrinsicBase.isEmpty() && context.registries() != null) {
+            getIntrinsicLevels(stack).forEach((key, level) -> tooltipComponents.add(
+                    Component.translatable("tooltip.simpleflightring.intrinsic_enchant",
+                            Enchantment.getFullname(context.registries().holderOrThrow(key), level))));
         }
 
         // Effective levels: the higher of the intrinsic and the real enchantment level.

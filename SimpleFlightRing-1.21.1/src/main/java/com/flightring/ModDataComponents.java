@@ -4,7 +4,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Unit;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -26,10 +25,10 @@ public class ModDataComponents {
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemEnchantments>> INTRINSIC_ENCHANTMENTS =
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<IntrinsicEnchants>> INTRINSIC_ENCHANTMENTS =
             COMPONENTS.registerComponentType("intrinsic_enchantments", builder -> builder
-                    .persistent(ItemEnchantments.CODEC)
-                    .networkSynchronized(ItemEnchantments.STREAM_CODEC));
+                    .persistent(IntrinsicEnchants.CODEC)
+                    .networkSynchronized(IntrinsicEnchants.STREAM_CODEC));
 
     private ModDataComponents() {
     }

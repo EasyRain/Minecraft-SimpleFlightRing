@@ -3,7 +3,6 @@ package com.flightring;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -16,16 +15,16 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 /**
  * Shapeless upgrade for the Powered Flight Ring: ring + gunpowder + redstone dust.
- * Raises each of the ring's BUILT-IN enchantments (Rocket Boost and Efficiency) by one
- * level, capped at 3 - an enchantment already at (or above) the cap is left untouched,
- * so levels added with an anvil are respected. No other enchantment is ever modified.
- * The recipe does not match when nothing can be raised (both already at the cap).
+ * Raises each of the ring's BUILT-IN (intrinsic) enchantments - Rocket Boost and
+ * Efficiency - by one level, capped at 3. The effective level is the highest of the
+ * ring's base level, the level already stored on it and any level added with an anvil,
+ * so an enchantment that is already at the cap is left untouched. No other
+ * enchantment is ever modified, and the recipe does not match when nothing can be raised.
  */
 public class RingEnchantUpgradeRecipe extends ShapelessRecipe {
 
@@ -68,12 +67,8 @@ public class RingEnchantUpgradeRecipe extends ShapelessRecipe {
                 return false;
             }
         }
-        if (found.isEmpty() || catalysts != 1 || binders != 1) {
-            return false;
-        }
-        HolderLookup.Provider registries = level.registryAccess();
-        return canRaise(found, registries, ModEnchantments.ROCKET_BOOST)
-                || canRaise(found, registries, Enchantments.EFFICIENCY);
+        return !found.isEmpty() && catalysts == 1 && binders == 1
+                && (canRaise(found, ModEnchantments.ROCKET_BOOST) || canRaise(found, Enchantments.EFFICIENCY));
     }
 
     @Override
@@ -86,32 +81,45 @@ public class RingEnchantUpgradeRecipe extends ShapelessRecipe {
             }
         }
         ItemStack upgraded = ringStack.copy();
-        raise(upgraded, registries, ModEnchantments.ROCKET_BOOST);
-        raise(upgraded, registries, Enchantments.EFFICIENCY);
+        raise(upgraded, ModEnchantments.ROCKET_BOOST);
+        raise(upgraded, Enchantments.EFFICIENCY);
         return upgraded;
     }
 
-    private static boolean canRaise(ItemStack stack, HolderLookup.Provider registries, ResourceKey<Enchantment> key) {
-        return effectiveLevel(stack, registries.holderOrThrow(key)) < MAX_LEVEL;
+    /** True when the ring carries this built-in enchantment and it is still below the cap. */
+    private static boolean canRaise(ItemStack stack, ResourceKey<Enchantment> key) {
+        if (!(stack.getItem() instanceof FlightRingItem ring) || !ring.getIntrinsicLevels(stack).containsKey(key)) {
+            return false;
+        }
+        return effectiveLevel(stack, key) < MAX_LEVEL;
     }
 
-    private static void raise(ItemStack stack, HolderLookup.Provider registries, ResourceKey<Enchantment> key) {
-        Holder<Enchantment> enchantment = registries.holderOrThrow(key);
-        int effective = effectiveLevel(stack, enchantment);
+    /** Raises one built-in enchantment by a level (never above the cap). */
+    private static void raise(ItemStack stack, ResourceKey<Enchantment> key) {
+        int effective = effectiveLevel(stack, key);
         if (effective < MAX_LEVEL) {
-            // The upgrade raises the ring's INTRINSIC (built-in) level - it is the
-            // permanent part. A higher level added with an anvil is respected and
-            // simply carried over, so only enchantments below the cap are raised.
-            SpecialRings.setIntrinsic(stack, enchantment, effective + 1);
+            IntrinsicEnchants stored = stack.getOrDefault(
+                    ModDataComponents.INTRINSIC_ENCHANTMENTS.get(), IntrinsicEnchants.EMPTY);
+            stack.set(ModDataComponents.INTRINSIC_ENCHANTMENTS.get(), stored.with(key, effective + 1));
         }
     }
 
-    /** The higher of the intrinsic (built-in) level and the real enchantment level. */
-    private static int effectiveLevel(ItemStack stack, Holder<Enchantment> enchantment) {
-        int intrinsic = stack.getItem() instanceof FlightRingItem ring
-                ? ring.getIntrinsicEnchantLevel(stack, enchantment)
-                : 0;
-        return Math.max(intrinsic, stack.getEnchantmentLevel(enchantment));
+    /**
+     * Effective level of one of the ring's built-in enchantments: the highest of the
+     * item's base level, the level stored on this stack and any level added with an anvil.
+     */
+    private static int effectiveLevel(ItemStack stack, ResourceKey<Enchantment> key) {
+        if (!(stack.getItem() instanceof FlightRingItem ring)) {
+            return 0;
+        }
+        int level = ring.getIntrinsicLevels(stack).getOrDefault(key, 0);
+        // Levels added with an anvil live in the vanilla enchantments component.
+        for (var entry : stack.getEnchantments().entrySet()) {
+            if (entry.getKey().unwrapKey().filter(key::equals).isPresent()) {
+                level = Math.max(level, entry.getValue());
+            }
+        }
+        return level;
     }
 
     public Ingredient getRing() {

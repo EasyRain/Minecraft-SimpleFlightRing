@@ -18,10 +18,7 @@ public class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.WOOD_FLIGHT_RING.get()))
                     .displayItems((parameters, output) -> {
                         for (var ring : ModItems.ALL) {
-                            ItemStack stack = new ItemStack(ring.get());
-                            // The special rings are handed out with their built-in enchantments.
-                            SpecialRings.applyIntrinsic(stack, parameters.holders());
-                            output.accept(stack);
+                            output.accept(new ItemStack(ring.get()));
                         }
                         output.accept(new ItemStack(ModItems.INDESTRUCTIBLE_CORE.get()));
                     })

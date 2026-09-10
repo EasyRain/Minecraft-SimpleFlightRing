@@ -1,6 +1,8 @@
 package com.flightring;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -170,7 +172,7 @@ public class FlightHandler {
                         return;
                     }
                     // Deterministic drain: bypass the vanilla probabilistic Unbreaking roll.
-                    damageRing(ring, state.activeBackpackRing, 1);
+                    damageRing(player, ring, state.activeBackpackRing, 1);
                     if (ring.isEmpty() || ring.getDamageValue() >= ring.getMaxDamage()) {
                         // Ring fully consumed (special rings are destroyed outright):
                         // stop flight right away.
@@ -242,7 +244,7 @@ public class FlightHandler {
         if (points > 0) {
             state.boostTicks -= points * interval;
             // The boost ring never comes from a backpack (see findRocketBoostRing).
-            damageRing(ring, null, points);
+            damageRing(player, ring, null, points);
         }
     }
 
@@ -278,7 +280,7 @@ public class FlightHandler {
      * backpacks). The two special rings are DESTROYED once their durability is fully
      * consumed; the tiered rings merely become inert and can still be repaired.
      */
-    private static void damageRing(ItemStack ring, BackpackCompat.BackpackRing backpackRing, int amount) {
+    private static void damageRing(ServerPlayer player, ItemStack ring, BackpackCompat.BackpackRing backpackRing, int amount) {
         if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
             return;
         }
@@ -294,6 +296,11 @@ public class FlightHandler {
             ring.shrink(1);
             if (backpackRing != null) {
                 BackpackCompat.writeBack(backpackRing);
+            }
+            SoundEvent breakSound = item.getBreakSound();
+            if (breakSound != null) {
+                player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                        breakSound, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
         }
     }

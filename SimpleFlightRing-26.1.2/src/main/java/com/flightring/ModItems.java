@@ -1,10 +1,13 @@
 package com.flightring;
 
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.List;
+import java.util.Map;
 
 public class ModItems {
 
@@ -32,7 +35,8 @@ public class ModItems {
      * in. 2400 durability (40 minutes of flight); destroyed once fully drained.
      */
     public static final DeferredItem<FlightRingItem> STABLE_FLIGHT_RING =
-            ITEMS.registerItem("stable_flight_ring", properties -> new FlightRingItem(2400, 22, properties));
+            ITEMS.registerItem("stable_flight_ring", properties -> new FlightRingItem(2400, 22,
+                    Map.of(ModEnchantments.FLIGHT_STABILITY, 1), SoundEvents.GLASS_BREAK, properties));
 
     /**
      * Powered Flight Ring: iron ring + gunpowder + redstone dust, with Rocket Boost I
@@ -41,7 +45,9 @@ public class ModItems {
      * shapeless gunpowder + redstone recipe.
      */
     public static final DeferredItem<FlightRingItem> POWERED_FLIGHT_RING =
-            ITEMS.registerItem("powered_flight_ring", properties -> new FlightRingItem(3000, 22, properties));
+            ITEMS.registerItem("powered_flight_ring", properties -> new FlightRingItem(3000, 22,
+                    Map.of(ModEnchantments.ROCKET_BOOST, 1, Enchantments.EFFICIENCY, 1),
+                    SoundEvents.ITEM_BREAK.value(), properties));
 
     /** All rings: the six tiered rings in upgrade order, then the two special rings. */
     public static final List<DeferredItem<FlightRingItem>> ALL = List.of(

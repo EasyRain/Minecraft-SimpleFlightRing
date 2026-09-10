@@ -16,11 +16,6 @@
   },
   "result": {
     "id": "simpleflightring:stable_flight_ring",
-    "count": 1,
-    "components": {
-      "simpleflightring:intrinsic_enchantments": {
-        "simpleflightring:flight_stability": 1
-      }
-    }
+    "count": 1
   }
 }

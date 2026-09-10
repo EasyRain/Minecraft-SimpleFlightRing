@@ -14,6 +14,7 @@
   "tooltip.simpleflightring.stability_hint": "Flight Stability removes mining slow-down while flying",
   "tooltip.simpleflightring.rocket_boost_hint": "Rocket Boost lets you fire a firework-rocket boost by pressing jump while gliding",
   "tooltip.simpleflightring.breaks_when_depleted": "Destroyed once its durability runs out",
+  "tooltip.simpleflightring.intrinsic_enchant": "Built-in %s",
   "tooltip.simpleflightring.remaining_infinite": "Remaining flight time: Infinite",
   "tooltip.simpleflightring.remaining_time": "Remaining flight time: %s min %s s",
   "tooltip.simpleflightring.remaining_time_long": "Remaining flight time: %s h %s min %s s",

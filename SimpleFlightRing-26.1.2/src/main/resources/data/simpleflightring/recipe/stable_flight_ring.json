@@ -6,11 +6,5 @@
     "A": "minecraft:amethyst_shard",
     "R": "simpleflightring:iron_flight_ring"
   },
-  "result": {
-    "id": "simpleflightring:stable_flight_ring",
-    "count": 1,
-    "components": {
-      "simpleflightring:intrinsic_enchantments": { "simpleflightring:flight_stability": 1 }
-    }
-  }
+  "result": { "id": "simpleflightring:stable_flight_ring", "count": 1 }
 }
