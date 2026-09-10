@@ -263,15 +263,26 @@ public class FlightRingItem extends Item {
     }
 
     /**
-     * Explanation lines for the enchantments and special abilities the ring actually
+     * Explanation lines for the special abilities and the enchantments the ring actually
      * has. Kept out of the tooltip proper and added by {@link RingTooltipHandler} only
      * while Shift is held.
+     * <p>
+     * Order inside that block is fixed: first every special ability (each title tinted
+     * with the ring it belongs to, in chain order), then the enchantment effect hints.
      */
     public List<Component> effectHints(ItemStack stack, TooltipContext context) {
+        List<Component> hints = new ArrayList<>(abilityHints());
+        hints.addAll(enchantmentHints(stack, context));
+        return hints;
+    }
+
+    /**
+     * The special abilities' blocks: title plus its description lines. Each description
+     * line is its own component, because the vanilla tooltip does not break lines on
+     * {@code \n}.
+     */
+    private List<Component> abilityHints() {
         List<Component> hints = new ArrayList<>();
-        // Special abilities first: they work independently of any enchantment and their
-        // title carries the colour of the ring they belong to. Each description line is
-        // its own component (the vanilla tooltip does not break lines on '\n').
         for (RingAbility ability : abilities) {
             hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + "_title")
                     .withColor(ability.color()));
@@ -281,6 +292,12 @@ public class FlightRingItem extends Item {
                         .withStyle(ChatFormatting.DARK_GRAY));
             }
         }
+        return hints;
+    }
+
+    /** Effect hints of the enchantments the ring actually has (always after the abilities). */
+    private List<Component> enchantmentHints(ItemStack stack, TooltipContext context) {
+        List<Component> hints = new ArrayList<>();
         if (context.registries() == null) {
             return hints;
         }
