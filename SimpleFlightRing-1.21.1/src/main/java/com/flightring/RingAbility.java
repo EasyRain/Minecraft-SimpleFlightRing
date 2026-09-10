@@ -14,13 +14,14 @@ package com.flightring;
  */
 public enum RingAbility {
 
-    // Still to come: BURST_TOTEM (Unobtainium, violet 0xFFC06BF5).
-
     /** Allthemodium: spends the ring's energy pool to absorb incoming damage. */
     MAGIC_LINING("magic_lining", 0xFFFFC24A, 3),
 
     /** Vibranium: bounces ranged attacks away while more than half of the pool is left. */
-    KINETIC_DEFLECTION("kinetic_deflection", 0xFF4BE3A8, 3);
+    KINETIC_DEFLECTION("kinetic_deflection", 0xFF4BE3A8, 3),
+
+    /** Unobtainium: survives a fatal hit with a block-safe explosion around the wearer. */
+    BURST_TOTEM("burst_totem", 0xFFC06BF5, 3);
 
     private final String key;
     private final int color;

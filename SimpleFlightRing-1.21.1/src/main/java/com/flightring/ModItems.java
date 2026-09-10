@@ -65,15 +65,16 @@ public class ModItems {
      * <p>
      * The three abilities are inherited up the chain (Vibranium keeps Allthemodium's,
      * Unobtainium keeps both) and the energy pool grows with it: 100 for Allthemodium,
-     * 300 from Vibranium on. So far Allthemodium's Magic Lining and Vibranium's Kinetic
-     * Deflection exist, the Burst Totem of Unobtainium is still to come.
+     * 300 from Vibranium on. All three abilities now exist: Magic Lining, Kinetic
+     * Deflection and the Burst Totem.
      */
     private static final Set<RingAbility> ALLTHEMODIUM_ABILITIES = EnumSet.of(RingAbility.MAGIC_LINING);
     /** Vibranium inherits every ability of the tiers below it and adds its own. */
     private static final Set<RingAbility> VIBRANIUM_ABILITIES =
             EnumSet.of(RingAbility.MAGIC_LINING, RingAbility.KINETIC_DEFLECTION);
-    /** Unobtainium inherits every ability of the tiers below it. */
-    private static final Set<RingAbility> UNOBTAINIUM_ABILITIES = EnumSet.copyOf(VIBRANIUM_ABILITIES);
+    /** Unobtainium inherits every ability of the tiers below it and adds its own. */
+    private static final Set<RingAbility> UNOBTAINIUM_ABILITIES = EnumSet.of(
+            RingAbility.MAGIC_LINING, RingAbility.KINETIC_DEFLECTION, RingAbility.BURST_TOTEM);
 
     /** Energy pool of each tier: it grows from Allthemodium to Vibranium. */
     private static final float ALLTHEMODIUM_ENERGY = RingEnergy.DEFAULT_MAX;

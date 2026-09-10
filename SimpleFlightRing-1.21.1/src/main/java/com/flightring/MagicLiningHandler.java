@@ -33,13 +33,40 @@ import java.util.UUID;
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class MagicLiningHandler {
 
-    /** Game time of the last hit each player took: drives the refill delay. */
-    private static final Map<UUID, Long> LAST_DAMAGE = new HashMap<>();
+    /** Ticks without a hit before the pool starts refilling: the normal 10 s. */
+    private static final int DEFAULT_REFILL_DELAY = RingEnergy.IDLE_TICKS;
 
     /** The HUD sync runs every 10 ticks (0.5 s), like the flight time sync. */
     private static final int SYNC_INTERVAL = 10;
 
+    /** Refill bookkeeping per player. */
+    private static final Map<UUID, Refill> REFILLS = new HashMap<>();
+
+    private static final class Refill {
+        /** Game time of the last hit that interrupted the refill. */
+        private long lastHit;
+        /**
+         * Ticks without a hit before the refill starts. Normally 10 s; the Burst Totem
+         * raises it to 60 s, and it drops back to normal once the pool is full again.
+         */
+        private int delay = DEFAULT_REFILL_DELAY;
+    }
+
     private MagicLiningHandler() {
+    }
+
+    private static Refill refill(ServerPlayer player) {
+        return REFILLS.computeIfAbsent(player.getUUID(), uuid -> new Refill());
+    }
+
+    /**
+     * Called by the Burst Totem: after a rescue the pool only starts refilling again after
+     * {@code ticks} ticks without a hit, and the totem stays discharged until it is full.
+     */
+    static void delayRefill(ServerPlayer player, int ticks) {
+        Refill state = refill(player);
+        state.delay = ticks;
+        state.lastHit = player.level().getGameTime();
     }
 
     /**
@@ -66,7 +93,7 @@ public final class MagicLiningHandler {
         if (ring.isEmpty()) {
             return;
         }
-        LAST_DAMAGE.put(player.getUUID(), player.level().getGameTime());
+        refill(player).lastHit = player.level().getGameTime();
 
         float energy = RingEnergy.get(ring);
         if (energy <= 0.0F) {
@@ -91,7 +118,7 @@ public final class MagicLiningHandler {
         // Any ring with an energy pool is ticked here, no matter which ability spends it.
         ItemStack ring = RingAbilities.wornEnergyRing(player);
         if (ring.isEmpty()) {
-            LAST_DAMAGE.remove(player.getUUID());
+            REFILLS.remove(player.getUUID());
             // Push "no ring" now and then, just often enough to hide the bar client-side.
             if (now % (SYNC_INTERVAL * 8) == 0) {
                 PacketDistributor.sendToPlayer(player, new RingEnergyPayload(-1.0F, 0.0F));
@@ -101,13 +128,18 @@ public final class MagicLiningHandler {
 
         float max = RingEnergy.max(ring);
         float energy = RingEnergy.get(ring);
-
-        // Refill: IDLE_TICKS without damage, then one step every REFILL_STEP_TICKS, so a
-        // full pool always takes REFILL_SECONDS (see RingEnergy).
-        if (energy < max) {
-            long lastDamage = LAST_DAMAGE.computeIfAbsent(player.getUUID(), uuid -> now - RingEnergy.IDLE_TICKS);
-            long idle = now - lastDamage;
-            if (idle >= RingEnergy.IDLE_TICKS && (idle - RingEnergy.IDLE_TICKS) % RingEnergy.REFILL_STEP_TICKS == 0) {
+        Refill state = refill(player);
+        if (energy >= max) {
+            // Full again: a Burst Totem's longer delay is over.
+            state.delay = DEFAULT_REFILL_DELAY;
+        } else {
+            // Refill: state.delay ticks without damage, then one step every
+            // REFILL_STEP_TICKS, so a full pool always takes REFILL_SECONDS (see RingEnergy).
+            if (state.lastHit == 0L) {
+                state.lastHit = now - state.delay;
+            }
+            long idle = now - state.lastHit;
+            if (idle >= state.delay && (idle - state.delay) % RingEnergy.REFILL_STEP_TICKS == 0) {
                 energy = Math.min(max, energy + RingEnergy.refillStep(max));
                 RingEnergy.set(ring, energy);
             }
@@ -123,12 +155,12 @@ public final class MagicLiningHandler {
 
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_DAMAGE.remove(event.getEntity().getUUID());
+        REFILLS.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        LAST_DAMAGE.remove(event.getOriginal().getUUID());
+        REFILLS.remove(event.getOriginal().getUUID());
     }
 
     /** Void damage and {@code /kill} stay lethal: the lining cannot pay for them. */
