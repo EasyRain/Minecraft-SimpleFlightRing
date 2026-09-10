@@ -63,12 +63,15 @@ public class ModItems {
      */
     public static final DeferredItem<FlightRingItem> ALLTHEMODIUM_FLIGHT_RING =
             ITEMS.registerItem("allthemodium_flight_ring", properties -> new FlightRingItem(100, 22,
+                    new RingBonuses(5, 3, 0.04, 2),
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     public static final DeferredItem<FlightRingItem> VIBRANIUM_FLIGHT_RING =
             ITEMS.registerItem("vibranium_flight_ring", properties -> new FlightRingItem(100, 22,
+                    new RingBonuses(10, 6, 0.08, 4),
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     public static final DeferredItem<FlightRingItem> UNOBTAINIUM_FLIGHT_RING =
             ITEMS.registerItem("unobtainium_flight_ring", properties -> new FlightRingItem(100, 22,
+                    new RingBonuses(15, 9, 0.12, 6),
                     properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
 
     /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain. */

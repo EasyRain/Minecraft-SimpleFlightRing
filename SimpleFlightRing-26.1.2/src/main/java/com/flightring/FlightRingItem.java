@@ -50,6 +50,11 @@ public class FlightRingItem extends Item {
     private final Map<ResourceKey<Enchantment>, Integer> intrinsicBase;
     /** Sound played when a special ring is destroyed; {@code null} for the tiered rings. */
     private final SoundEvent breakSound;
+    /**
+     * Attribute bonuses granted while the ring is worn in the Curios slot;
+     * {@code null} for every ring except the linked (AllTheModium chain) ones.
+     */
+    private final RingBonuses bonuses;
 
     public FlightRingItem(RingTier tier, Properties properties) {
         super(properties
@@ -59,6 +64,7 @@ public class FlightRingItem extends Item {
         this.breaksWhenDepleted = false;
         this.intrinsicBase = Map.of();
         this.breakSound = null;
+        this.bonuses = null;
     }
 
     /**
@@ -75,6 +81,7 @@ public class FlightRingItem extends Item {
         this.breaksWhenDepleted = true;
         this.intrinsicBase = Map.copyOf(intrinsicBase);
         this.breakSound = breakSound;
+        this.bonuses = null;
     }
 
     public RingTier getTier() {
@@ -87,6 +94,14 @@ public class FlightRingItem extends Item {
      * INDESTRUCTIBLE component set as their default component (see {@code ModItems}).
      */
     public FlightRingItem(int maxDurability, int enchantmentValue, Properties properties) {
+        this(maxDurability, enchantmentValue, null, properties);
+    }
+
+    /**
+     * Linked ring with attribute bonuses: same as above, plus the armour / toughness /
+     * attack damage / reach the ring grants while worn in the Curios slot.
+     */
+    public FlightRingItem(int maxDurability, int enchantmentValue, RingBonuses bonuses, Properties properties) {
         super(properties
                 .durability(maxDurability)
                 .enchantable(enchantmentValue));
@@ -94,6 +109,16 @@ public class FlightRingItem extends Item {
         this.breaksWhenDepleted = false;
         this.intrinsicBase = Map.of();
         this.breakSound = null;
+        this.bonuses = bonuses;
+    }
+
+    /**
+     * Attribute bonuses granted while the ring is worn in the Curios slot, or
+     * {@code null} when the ring grants none. Curios reads this through
+     * {@code CuriosCompat}; a ring in the inventory grants nothing.
+     */
+    public RingBonuses getBonuses() {
+        return bonuses;
     }
 
     /** True for the special rings, which are destroyed instead of turning inert. */

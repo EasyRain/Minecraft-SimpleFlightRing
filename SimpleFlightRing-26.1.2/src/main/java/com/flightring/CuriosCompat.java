@@ -1,5 +1,11 @@
 package com.flightring;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
@@ -50,6 +56,20 @@ public final class CuriosCompat {
                     if (!ItemStack.isSameItem(prevStack, stack)) {
                         ICurioItem.super.onEquip(slotContext, prevStack, stack);
                     }
+                }
+
+                /**
+                 * The linked (AllTheModium chain) rings grant armour, armour toughness,
+                 * attack damage and reach while worn. Curios applies these to the wearer
+                 * every tick and also lists them in the tooltip; a ring carried in the
+                 * inventory is never consulted here, so it only gives flight time.
+                 */
+                @Override
+                public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext,
+                                                                                            Identifier id,
+                                                                                            ItemStack stack) {
+                    RingBonuses bonuses = ring.get().getBonuses();
+                    return bonuses == null ? ImmutableMultimap.of() : bonuses.attributeModifiers();
                 }
             });
         }

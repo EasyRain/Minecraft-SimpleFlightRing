@@ -29,6 +29,7 @@
   "tooltip.simpleflightring.efficiency_title": "Efficiency:",
   "tooltip.simpleflightring.efficiency_desc": "Increases sprint-flight speed by %s%%",
   "curios.identifier.flight_ring": "Flight Ring",
+  "curios.modifiers.flight_ring": "When worn as a flight ring:",
   "hud.simpleflightring.flight_time": "Flight time: %sM %sS",
   "hud.simpleflightring.flight_time_long": "Flight time: %sH %sM %sS",
   "cloth.simpleflightring.title": "Simple Flight Ring Config",
