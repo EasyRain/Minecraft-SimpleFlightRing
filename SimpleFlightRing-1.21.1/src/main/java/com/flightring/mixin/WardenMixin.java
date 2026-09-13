@@ -19,14 +19,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * wearer makes the warden ignore them completely.
  * <p>
  * The wearer still gets a fight if they start one: attacking a warden is remembered by
- * {@link SculkSoulAbility#wardenMayTarget}, which lets the warden target them again.
+ * {@link SculkSoulAbility#wardenMayTarget}, which lets that warden target them again until
+ * the wearer dies or leaves its follow range.
  */
 @Mixin(Warden.class)
 public abstract class WardenMixin {
 
     @Inject(method = "canTargetEntity", at = @At("HEAD"), cancellable = true)
     private void simpleflightring$sculkSoulNeutrality(Entity target, CallbackInfoReturnable<Boolean> cir) {
-        if (!SculkSoulAbility.wardenMayTarget(target)) {
+        if (!SculkSoulAbility.wardenMayTarget((Warden) (Object) this, target)) {
             cir.setReturnValue(false);
         }
     }

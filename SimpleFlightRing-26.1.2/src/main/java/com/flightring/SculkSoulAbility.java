@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.biome.Biomes;
@@ -25,14 +26,17 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.PlayLevelSoundEvent;
 import net.neoforged.neoforge.event.VanillaGameEvent;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -67,11 +71,18 @@ public final class SculkSoulAbility {
     /** Effect 3: sounds played within this distance of the wearer are silenced too. */
     private static final double SILENCE_RADIUS = 4.0;
 
-    /** Effect 2: how long attacking a warden keeps it allowed to fight back. */
-    private static final long ANGER_MEMORY_TICKS = 200L;
-
+    /** Effect 4: the ability key's internal cooldown. */
     private static final Map<UUID, Long> SONIC_BOOM_READY_AT = new HashMap<>();
-    private static final Map<UUID, Long> ANGERED_WARDEN_AT = new HashMap<>();
+    /**
+     * Effect 1: wearers whose leftover Blindness/Darkness have already been cleared for the
+     * current "wearing session". Putting the ring on clears them ONCE, not every tick.
+     */
+    private static final Set<UUID> EFFECTS_CLEARED = new HashSet<>();
+    /**
+     * Effect 2: the wardens each wearer has provoked. A provoked warden keeps hunting the
+     * wearer until the wearer dies or leaves that warden's follow range - there is no timer.
+     */
+    private static final Map<UUID, Set<UUID>> PROVOKED_WARDENS = new HashMap<>();
 
     // ------------------------------------------------------------------
     // Effect 1: no Blindness / Darkness
@@ -90,12 +101,22 @@ public final class SculkSoulAbility {
 
     /**
      * Blindness and Darkness that were already on the player when the ring was equipped
-     * must go as well: the event above only stops new ones.
+     * must go as well. This is edge triggered: only the tick that notices the ring being
+     * worn (after it was not) clears the two effects, so the per tick cost is one ring
+     * lookup and nothing else.
      */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || !wearsSculkRing(player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
+        }
+        UUID id = player.getUUID();
+        if (!wearsSculkRing(player)) {
+            EFFECTS_CLEARED.remove(id);     // next time the ring goes on, clear again
+            return;
+        }
+        if (!EFFECTS_CLEARED.add(id)) {
+            return;                          // already handled for this wearing session
         }
         if (player.hasEffect(MobEffects.BLINDNESS)) {
             player.removeEffect(MobEffects.BLINDNESS);
@@ -109,14 +130,23 @@ public final class SculkSoulAbility {
     // Effect 2: wardens are neutral (but still hit back)
     // ------------------------------------------------------------------
 
-    /** Remembers that the player attacked a warden, so that warden may retaliate. */
+    /** Remembers WHICH warden the player attacked, so that one may retaliate. */
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         if (event.getEntity().getType() != EntityType.WARDEN) {
             return;
         }
         if (event.getSource().getEntity() instanceof Player player && wearsSculkRing(player)) {
-            ANGERED_WARDEN_AT.put(player.getUUID(), event.getEntity().level().getGameTime());
+            PROVOKED_WARDENS.computeIfAbsent(player.getUUID(), key -> new HashSet<>())
+                    .add(event.getEntity().getUUID());
+        }
+    }
+
+    /** The wearer died: the provoked wardens forget them again. */
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            PROVOKED_WARDENS.remove(player.getUUID());
         }
     }
 
@@ -128,9 +158,7 @@ public final class SculkSoulAbility {
         if (!(event.getNewAboutToBeSetTarget() instanceof Player player) || !wearsSculkRing(player)) {
             return;
         }
-        long now = player.level().getGameTime();
-        Long angeredAt = ANGERED_WARDEN_AT.get(player.getUUID());
-        if (angeredAt != null && now - angeredAt <= ANGER_MEMORY_TICKS) {
+        if (isProvokedBy(player, event.getEntity())) {
             return; // the wearer picked that fight: let the warden answer
         }
         event.setNewAboutToBeSetTarget(null);
@@ -301,18 +329,35 @@ public final class SculkSoulAbility {
     }
 
     /**
-     * False for a ring wearer the warden must not notice at all. Attacking a warden is
-     * remembered for {@link #ANGER_MEMORY_TICKS}, so it still gets to fight back.
+     * False for a ring wearer the warden must not notice at all. A warden the wearer has
+     * attacked stays allowed to fight back until the wearer dies or walks out of that
+     * warden's follow range - there is deliberately no timer.
      */
-    public static boolean wardenMayTarget(Entity target) {
+    public static boolean wardenMayTarget(Warden warden, Entity target) {
         if (!(target instanceof Player player) || !wearsSculkRing(player)) {
             return true;
         }
-        Long angeredAt = ANGERED_WARDEN_AT.get(player.getUUID());
-        if (angeredAt != null && player.level().getGameTime() - angeredAt <= ANGER_MEMORY_TICKS) {
-            return true;
+        return isProvokedBy(player, warden);
+    }
+
+    /** True while this very warden is hunting the wearer (attacked and still in range). */
+    private static boolean isProvokedBy(Player player, Entity warden) {
+        Set<UUID> provoked = PROVOKED_WARDENS.get(player.getUUID());
+        if (provoked == null || !provoked.contains(warden.getUUID())) {
+            return false;
         }
-        return false;
+        if (!warden.isAlive() || warden.level() != player.level()
+                || warden.distanceToSqr(player) > Math.pow(wardenFollowRange(warden), 2.0)) {
+            provoked.remove(warden.getUUID());   // out of range (or gone): no more hatred
+            return false;
+        }
+        return true;
+    }
+
+    private static double wardenFollowRange(Entity warden) {
+        return warden instanceof LivingEntity living
+                ? living.getAttributeValue(Attributes.FOLLOW_RANGE)
+                : 35.0;
     }
 
     @SubscribeEvent
@@ -327,7 +372,8 @@ public final class SculkSoulAbility {
 
     private static void clear(UUID playerId) {
         SONIC_BOOM_READY_AT.remove(playerId);
-        ANGERED_WARDEN_AT.remove(playerId);
+        EFFECTS_CLEARED.remove(playerId);
+        PROVOKED_WARDENS.remove(playerId);
     }
 
     private SculkSoulAbility() {
