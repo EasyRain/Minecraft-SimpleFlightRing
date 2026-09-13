@@ -26,7 +26,12 @@ public final class RingAbilityKeyHandler {
             return;
         }
 
-        // TODO Active abilities go here as they are added: pick the ability for `slot`,
+        if (ring.getItem() instanceof FlightRingItem item && item.hasAbility(RingAbility.SCULK_SOUL)) {
+            SculkSoulAbility.tryFireSonicBoom(player);
+            return;
+        }
+
+        // TODO Other active abilities go here as they are added: pick the ability for `slot`,
         //      verify the ring is charged (RingEnergy) and let it fire. Until then:
         player.displayClientMessage(Component.translatable("message.simpleflightring.ability_passive",
                 ring.getHoverName()).withStyle(ChatFormatting.GRAY), true);

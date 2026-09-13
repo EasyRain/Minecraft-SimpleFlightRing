@@ -120,10 +120,18 @@ public class ModItems {
     private static Map<RelicRing, DeferredItem<FlightRingItem>> registerRelicRings() {
         EnumMap<RelicRing, DeferredItem<FlightRingItem>> rings = new EnumMap<>(RelicRing.class);
         for (RelicRing relic : RelicRing.values()) {
-            rings.put(relic, ITEMS.registerItem(relic.ringId(),
-                    properties -> new FlightRingItem(relic.durability(), relic.enchantmentValue(), properties)));
+            rings.put(relic, ITEMS.registerItem(relic.ringId(), properties -> new FlightRingItem(
+                    relic.durability(), relic.enchantmentValue(), null, relicAbilities(relic), 0.0F, properties)));
         }
         return Collections.unmodifiableMap(rings);
+    }
+
+    /**
+     * Special abilities of a relic ring. So far only the sculk ring has one
+     * ({@link RingAbility#SCULK_SOUL}); the rest are plain rings.
+     */
+    private static Set<RingAbility> relicAbilities(RelicRing relic) {
+        return relic == RelicRing.SCULK ? EnumSet.of(RingAbility.SCULK_SOUL) : Set.of();
     }
 
     private static Map<RelicRing, DeferredItem<DamagedRingItem>> registerDamagedRelicRings() {

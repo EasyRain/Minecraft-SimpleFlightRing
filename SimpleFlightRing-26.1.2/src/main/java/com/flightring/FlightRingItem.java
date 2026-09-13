@@ -3,6 +3,7 @@ package com.flightring;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
@@ -280,7 +281,8 @@ public class FlightRingItem extends Item {
     /**
      * The special abilities' blocks: title plus its description lines. Each description
      * line is its own component, because the vanilla tooltip does not break lines on
-     * {@code \n}.
+     * {@code \n}. The last line of {@link RingAbility#SCULK_SOUL} names the ability key,
+     * so it is filled with the key the player actually bound.
      */
     private List<Component> abilityHints() {
         List<Component> hints = new ArrayList<>();
@@ -289,8 +291,11 @@ public class FlightRingItem extends Item {
                     .withColor(ability.color()));
             for (int line = 1; line <= ability.descriptionLines(); line++) {
                 String suffix = line == 1 ? "_desc" : "_desc" + line;
-                hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + suffix)
-                        .withStyle(ChatFormatting.DARK_GRAY));
+                String key = "tooltip.simpleflightring." + ability.key() + suffix;
+                MutableComponent text = ability == RingAbility.SCULK_SOUL && line == ability.descriptionLines()
+                        ? Component.translatable(key, AbilityKeyHint.keyName())
+                        : Component.translatable(key);
+                hints.add(text.withStyle(ChatFormatting.DARK_GRAY));
             }
         }
         return hints;

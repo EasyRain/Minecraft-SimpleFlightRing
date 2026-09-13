@@ -1,7 +1,7 @@
 package com.flightring;
 
 /**
- * Special abilities of the linked (AllTheModium chain) rings.
+ * Special abilities of the relic rings and of the linked (AlltheModium chain) rings.
  * <p>
  * Upgrades inherit the previous tier's abilities: Vibranium also has whatever
  * Allthemodium grants, and Unobtainium has all of them (see {@code ModItems}).
@@ -10,7 +10,7 @@ package com.flightring;
  * <p>
  * Each ability keeps the colour of the ring it belongs to, so the tooltip shows the
  * whole inherited chain in its own tints (Allthemodium golden, Vibranium teal,
- * Unobtainium violet) - the same palettes the ring textures are drawn from.
+ * Unobtainium violet, Sculk cyan) - the same palettes the ring textures are drawn from.
  */
 public enum RingAbility {
 
@@ -21,7 +21,14 @@ public enum RingAbility {
     KINETIC_DEFLECTION("kinetic_deflection", 0xFF4BE3A8, 3),
 
     /** Unobtainium: survives a fatal hit with a block-safe explosion around the wearer. */
-    BURST_TOTEM("burst_totem", 0xFFC06BF5, 4);
+    BURST_TOTEM("burst_totem", 0xFFC06BF5, 4),
+
+    /**
+     * Sculk relic ring: darkness immunity, warden neutrality, silence in the deep dark and
+     * the V key sonic boom. Its last tooltip line names the ability key, so it is filled in
+     * with the player's actual binding by {@link FlightRingItem#abilityHints()}.
+     */
+    SCULK_SOUL("sculk_soul", 0xFF29DFEB, 5);
 
     private final String key;
     private final int color;

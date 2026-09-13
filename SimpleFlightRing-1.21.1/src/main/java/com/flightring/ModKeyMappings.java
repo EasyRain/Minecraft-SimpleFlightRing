@@ -38,6 +38,8 @@ public final class ModKeyMappings {
     /** Mod-bus registration, called from the mod constructor on the client only. */
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(ABILITY_KEY);
+        // Let ability tooltips print the key the player actually bound.
+        AbilityKeyHint.setKeyName(ABILITY_KEY::getTranslatedKeyMessage);
     }
 
     @SubscribeEvent
