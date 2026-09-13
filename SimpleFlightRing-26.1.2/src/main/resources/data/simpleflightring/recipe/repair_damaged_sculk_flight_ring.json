@@ -1,6 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "category": "equipment",
-  "ingredients": [ "simpleflightring:damaged_sculk_flight_ring", "minecraft:echo_shard" ],
-  "result": { "id": "simpleflightring:sculk_flight_ring", "count": 1 }
-}

@@ -13,41 +13,44 @@ import net.minecraft.world.item.Items;
  * turns inert (the tiered rings' behaviour) instead of breaking. They can be enchanted
  * and worn in the Curios slot like any other ring.
  * <p>
- * The enum also keeps the two ids in one place so the item registration, the loot tables,
- * the repair recipes and the language files can never drift apart:
+ * The enum also keeps everything the item registration, the loot tables, the recipes and
+ * the language files must agree on:
  * <ul>
  *   <li>{@code <id>_flight_ring} - the working ring ({@link #ringId()})</li>
  *   <li>{@code damaged_<id>_flight_ring} - the broken item found in loot ({@link #damagedId()})</li>
+ *   <li>{@link #color()} - the ring's theme colour, used for its tooltip lines</li>
  * </ul>
  */
 public enum RelicRing {
 
     /** Ancient City (deep dark). Balanced like the diamond ring: 7200 (120 minutes). */
-    SCULK("sculk", 7200, 10, Items.ECHO_SHARD),
+    SCULK("sculk", 7200, 10, 0xFF29DFEB, Items.ECHO_SHARD),
     /** Abandoned mineshaft chest minecarts. */
-    MINER("miner", 5400, 14, Items.IRON_BLOCK),
+    MINER("miner", 5400, 14, 0xFFC8CAD2, Items.IRON_BLOCK),
     /** Master librarian trade (the only relic that is not found in loot). */
-    EMERALD("emerald", 3600, 18, Items.EMERALD_BLOCK),
+    EMERALD("emerald", 3600, 18, 0xFF54E18E, Items.EMERALD_BLOCK),
     /** Shipwreck chests. */
-    OCEAN("ocean", 7200, 12, Items.HEART_OF_THE_SEA),
+    OCEAN("ocean", 7200, 12, 0xFF3F76E4, Items.HEART_OF_THE_SEA),
     /** Desert pyramid chests. */
-    DESERT("desert", 6000, 16, Items.GOLD_BLOCK),
+    DESERT("desert", 6000, 16, 0xFFF0CE8C, Items.GOLD_BLOCK),
     /** Pillager outpost and woodland mansion chests. */
-    RAID("raid", 8400, 14, Items.OMINOUS_BOTTLE),
+    RAID("raid", 8400, 14, 0xFFCC4E46, Items.OMINOUS_BOTTLE),
     /** Nether fortress chests. */
-    INFERNAL("infernal", 12000, 15, Items.BLAZE_ROD),
+    INFERNAL("infernal", 12000, 15, 0xFFFF8B34, Items.BLAZE_ROD),
     /** End city chests. */
-    ENDER("ender", 14400, 12, Items.SHULKER_SHELL);
+    ENDER("ender", 14400, 12, 0xFFB074F4, Items.SHULKER_SHELL);
 
     private final String id;
     private final int durability;
     private final int enchantmentValue;
+    private final int color;
     private final Item repairMaterial;
 
-    RelicRing(String id, int durability, int enchantmentValue, Item repairMaterial) {
+    RelicRing(String id, int durability, int enchantmentValue, int color, Item repairMaterial) {
         this.id = id;
         this.durability = durability;
         this.enchantmentValue = enchantmentValue;
+        this.color = color;
         this.repairMaterial = repairMaterial;
     }
 
@@ -77,6 +80,11 @@ public enum RelicRing {
     /** Enchantability of the working ring (the six tiers sit between 5 and 22). */
     public int enchantmentValue() {
         return enchantmentValue;
+    }
+
+    /** ARGB theme colour of the ring, used to tint its tooltip lines. */
+    public int color() {
+        return color;
     }
 
     /** The single item consumed together with the broken ring to repair it. */

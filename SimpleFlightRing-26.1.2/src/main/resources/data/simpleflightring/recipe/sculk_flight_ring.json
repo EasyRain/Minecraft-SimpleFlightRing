@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["EEE","ERE","EEE"],
+  "key": {
+    "E": "minecraft:echo_shard",
+    "R": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "simpleflightring:damaged_sculk_flight_ring",
+      "components": {
+        "simpleflightring:warden_soul": {}
+      }
+    }
+  },
+  "result": {
+    "id": "simpleflightring:sculk_flight_ring",
+    "count": 1
+  }
+}

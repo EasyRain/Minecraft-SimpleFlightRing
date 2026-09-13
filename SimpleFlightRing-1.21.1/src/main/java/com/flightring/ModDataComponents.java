@@ -40,6 +40,17 @@ public class ModDataComponents {
                     .persistent(Codec.FLOAT)
                     .networkSynchronized(ByteBufCodecs.FLOAT));
 
+    /**
+     * Sculk relic ring quest step: the damaged sculk ring has absorbed a Warden's soul,
+     * so it glints and can finally be forged into the working ring (see
+     * {@link SculkRingQuest} and the {@code sculk_flight_ring} recipe). Absent means the
+     * ring is still hungry, i.e. the first step of the quest.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> WARDEN_SOUL =
+            COMPONENTS.registerComponentType("warden_soul", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
     private ModDataComponents() {
     }
 }

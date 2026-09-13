@@ -131,7 +131,7 @@ Eight themed rings that **cannot be crafted**. The only way to get one is to fin
 
 | Ring | Found in (1% per chest) | Repair with | Flight time |
 |------|-------------------------|-------------|-------------|
-| Sculk Flight Ring | Ancient City chests | Echo Shard | 120 min |
+| Sculk Flight Ring | Ancient City chests | Echo Shard (see the quest below) | 120 min |
 | Miner's Flight Ring | Abandoned mineshaft chests / chest minecarts | Iron Block | 90 min |
 | Emerald Flight Ring | **Master librarian trade** (32 emeralds, 3 uses) | Emerald Block | 60 min |
 | Ocean Flight Ring | Shipwreck chests (treasure and supply) | Heart of the Sea | 120 min |
@@ -144,6 +144,14 @@ Eight themed rings that **cannot be crafted**. The only way to get one is to fin
 - Repairing is a **shapeless crafting-table recipe**: damaged ring + 1 theme material → the working ring, ready to fly and enchant like any other ring.
 - A damaged ring is stackable up to 1 and always stacks separately from the working ring.
 - Chances are per chest opened: 1% means roughly one ring per 100 of those chests, and the roll happens on top of the normal loot.
+
+### The sculk ring's quest
+
+The sculk ring does not use the plain "damaged + material" repair:
+
+1. The damaged sculk ring you find says **"The ring has lost its ancient power"** / **"The ring hungers for a Warden's soul"**.
+2. **Kill a Warden while carrying that ring** (inventory, offhand or Curios slot). One Warden feeds exactly **one** ring. The ring swallows the soul — it starts to glint and now reads **"The ring needs a new vessel"**.
+3. Forge it in the crafting table: **8 echo shards around the soul-fed ring** → the working Sculk Flight Ring.
 
 ## Ability key
 
