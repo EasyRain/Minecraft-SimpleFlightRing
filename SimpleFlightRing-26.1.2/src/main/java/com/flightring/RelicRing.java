@@ -22,8 +22,8 @@ import net.minecraft.world.item.Items;
  */
 public enum RelicRing {
 
-    /** Ancient City (deep dark). */
-    SCULK("sculk", 10800, 15, Items.ECHO_SHARD),
+    /** Ancient City (deep dark). Balanced like the diamond ring: 7200 (120 minutes). */
+    SCULK("sculk", 7200, 10, Items.ECHO_SHARD),
     /** Abandoned mineshaft chest minecarts. */
     MINER("miner", 5400, 14, Items.IRON_BLOCK),
     /** Master librarian trade (the only relic that is not found in loot). */
@@ -68,7 +68,7 @@ public enum RelicRing {
 
     /**
      * Durability of the working ring. One point is one second of flight, so this is
-     * also the ring's flight time in seconds (180 minutes for the sculk ring, ...).
+     * also the ring's flight time in seconds (120 minutes for the sculk ring, ...).
      */
     public int durability() {
         return durability;

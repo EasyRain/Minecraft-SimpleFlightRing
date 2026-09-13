@@ -131,7 +131,7 @@ Eight themed rings that **cannot be crafted**. The only way to get one is to fin
 
 | Ring | Found in (1% per chest) | Repair with | Flight time |
 |------|-------------------------|-------------|-------------|
-| Sculk Flight Ring | Ancient City chests | Echo Shard | 180 min |
+| Sculk Flight Ring | Ancient City chests | Echo Shard | 120 min |
 | Miner's Flight Ring | Abandoned mineshaft chests / chest minecarts | Iron Block | 90 min |
 | Emerald Flight Ring | **Master librarian trade** (32 emeralds, 3 uses) | Emerald Block | 60 min |
 | Ocean Flight Ring | Shipwreck chests (treasure and supply) | Heart of the Sea | 120 min |
