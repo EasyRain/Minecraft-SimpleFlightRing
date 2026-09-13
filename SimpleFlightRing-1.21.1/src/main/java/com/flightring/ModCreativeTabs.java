@@ -2,7 +2,6 @@ package com.flightring;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Unit;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -25,11 +24,8 @@ public class ModCreativeTabs {
                         for (var damaged : ModItems.DAMAGED_RELIC_RINGS.values()) {
                             output.accept(new ItemStack(damaged.get()));
                         }
-                        // The sculk quest's second step (already fed a Warden's soul), so the
-                        // 8 echo shard forge recipe can be tried without hunting a Warden.
-                        ItemStack fedSculkRing = new ItemStack(ModItems.DAMAGED_RELIC_RINGS.get(RelicRing.SCULK).get());
-                        fedSculkRing.set(ModDataComponents.WARDEN_SOUL.get(), Unit.INSTANCE);
-                        output.accept(fedSculkRing);
+                        // The soul-fed sculk ring is deliberately NOT listed here: it is a quest
+                        // step, so it only exists once a player has fed it a Warden's soul.
                         output.accept(new ItemStack(ModItems.INDESTRUCTIBLE_CORE.get()));
                     })
                     .build());
