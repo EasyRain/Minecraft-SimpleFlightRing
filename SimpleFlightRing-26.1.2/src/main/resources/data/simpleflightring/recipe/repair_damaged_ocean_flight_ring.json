@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [ "simpleflightring:damaged_ocean_flight_ring", "minecraft:heart_of_the_sea" ],
+  "result": { "id": "simpleflightring:ocean_flight_ring", "count": 1 }
+}

@@ -8,6 +8,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +107,39 @@ public class ModItems {
                 properties.component(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE)));
     }
 
-    /** All rings: the six tiered rings, the two special rings, then the AllTheModium chain when present. */
+    /**
+     * The eight relic rings (see {@link RelicRing}). They are never crafted: their broken
+     * form is found in structure loot (1% per matching chest) or bought from a master
+     * librarian, and is then repaired in the crafting table with the ring's theme material.
+     */
+    public static final Map<RelicRing, DeferredItem<FlightRingItem>> RELIC_RINGS = registerRelicRings();
+
+    /** The broken counterpart of every relic ring - what the loot tables and the trade give out. */
+    public static final Map<RelicRing, DeferredItem<DamagedRingItem>> DAMAGED_RELIC_RINGS = registerDamagedRelicRings();
+
+    /** The broken emerald ring, sold by master librarians (see {@code VillagerTradeHandler}). */
+    public static final DeferredItem<DamagedRingItem> DAMAGED_EMERALD_FLIGHT_RING =
+            DAMAGED_RELIC_RINGS.get(RelicRing.EMERALD);
+
+    private static Map<RelicRing, DeferredItem<FlightRingItem>> registerRelicRings() {
+        EnumMap<RelicRing, DeferredItem<FlightRingItem>> rings = new EnumMap<>(RelicRing.class);
+        for (RelicRing relic : RelicRing.values()) {
+            rings.put(relic, ITEMS.registerItem(relic.ringId(),
+                    properties -> new FlightRingItem(relic.durability(), relic.enchantmentValue(), properties)));
+        }
+        return Collections.unmodifiableMap(rings);
+    }
+
+    private static Map<RelicRing, DeferredItem<DamagedRingItem>> registerDamagedRelicRings() {
+        EnumMap<RelicRing, DeferredItem<DamagedRingItem>> rings = new EnumMap<>(RelicRing.class);
+        for (RelicRing relic : RelicRing.values()) {
+            rings.put(relic, ITEMS.registerItem(relic.damagedId(),
+                    properties -> new DamagedRingItem(relic, properties.stacksTo(1))));
+        }
+        return Collections.unmodifiableMap(rings);
+    }
+
+    /** All rings: the six tiered rings, the two special rings, the relics, then the AllTheModium chain. */
     public static final List<DeferredItem<FlightRingItem>> ALL = collectRings();
 
     private static List<DeferredItem<FlightRingItem>> collectRings() {
@@ -118,6 +152,7 @@ public class ModItems {
                 NETHERITE_FLIGHT_RING,
                 STABLE_FLIGHT_RING,
                 POWERED_FLIGHT_RING));
+        rings.addAll(RELIC_RINGS.values());
         if (AllthemodiumCompat.isLoaded()) {
             rings.add(ALLTHEMODIUM_FLIGHT_RING);
             rings.add(VIBRANIUM_FLIGHT_RING);

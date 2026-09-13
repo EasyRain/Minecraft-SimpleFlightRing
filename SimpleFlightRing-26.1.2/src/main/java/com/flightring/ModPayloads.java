@@ -18,6 +18,7 @@ public final class ModPayloads {
         registrar.playToClient(FlightTimePayload.TYPE, FlightTimePayload.STREAM_CODEC, ModPayloads::handleFlightTime);
         registrar.playToClient(RingEnergyPayload.TYPE, RingEnergyPayload.STREAM_CODEC, ModPayloads::handleRingEnergy);
         registrar.playToServer(RocketBoostPayload.TYPE, RocketBoostPayload.STREAM_CODEC, ModPayloads::handleRocketBoost);
+        registrar.playToServer(RingAbilityKeyPayload.TYPE, RingAbilityKeyPayload.STREAM_CODEC, ModPayloads::handleAbilityKey);
     }
 
     private static void handleFlightTime(FlightTimePayload payload, IPayloadContext context) {
@@ -35,6 +36,14 @@ public final class ModPayloads {
         context.enqueueWork(() -> {
             if (context.player() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                 FlightHandler.applyRocketBoost(serverPlayer);
+            }
+        });
+    }
+
+    private static void handleAbilityKey(RingAbilityKeyPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                RingAbilityKeyHandler.onAbilityKey(serverPlayer, payload.slot());
             }
         });
     }

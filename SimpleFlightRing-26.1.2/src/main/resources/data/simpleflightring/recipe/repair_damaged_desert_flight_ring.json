@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [ "simpleflightring:damaged_desert_flight_ring", "minecraft:gold_block" ],
+  "result": { "id": "simpleflightring:desert_flight_ring", "count": 1 }
+}

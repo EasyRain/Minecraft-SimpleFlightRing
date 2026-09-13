@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "entries": [
+        { "type": "minecraft:item", "name": "simpleflightring:damaged_miner_flight_ring" }
+      ]
+    }
+  ]
+}

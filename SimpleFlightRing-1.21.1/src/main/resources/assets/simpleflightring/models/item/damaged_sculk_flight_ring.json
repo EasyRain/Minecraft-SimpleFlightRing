@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "simpleflightring:item/damaged_sculk_flight_ring"
+  }
+}

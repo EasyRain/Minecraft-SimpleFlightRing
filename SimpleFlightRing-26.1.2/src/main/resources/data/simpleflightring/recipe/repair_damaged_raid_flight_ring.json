@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [ "simpleflightring:damaged_raid_flight_ring", "minecraft:ominous_bottle" ],
+  "result": { "id": "simpleflightring:raid_flight_ring", "count": 1 }
+}

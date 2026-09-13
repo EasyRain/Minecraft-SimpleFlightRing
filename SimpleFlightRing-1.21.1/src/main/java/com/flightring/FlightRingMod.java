@@ -8,6 +8,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class FlightRingMod {
         // Client-only: HUD flight timer layer (fires on the mod event bus).
         if (FMLLoader.getDist() == Dist.CLIENT) {
             modEventBus.addListener(RegisterGuiLayersEvent.class, FlightHud::onRegisterGuiLayers);
+            // Ring ability key (V by default); the ticking handler lives in ModKeyMappings.
+            modEventBus.addListener(RegisterKeyMappingsEvent.class, ModKeyMappings::onRegisterKeyMappings);
         }
 
         // Network payloads (server -> client flight time sync).

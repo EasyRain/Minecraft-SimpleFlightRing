@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [ "simpleflightring:damaged_infernal_flight_ring", "minecraft:blaze_rod" ],
+  "result": { "id": "simpleflightring:infernal_flight_ring", "count": 1 }
+}

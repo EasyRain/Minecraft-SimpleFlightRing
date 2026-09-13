@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [ "simpleflightring:damaged_miner_flight_ring", "minecraft:iron_block" ],
+  "result": { "id": "simpleflightring:miner_flight_ring", "count": 1 }
+}

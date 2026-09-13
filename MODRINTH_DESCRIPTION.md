@@ -29,6 +29,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
 - 🎒 **Sophisticated Backpacks support (optional)** — rings stored inside sophisticated backpacks also grant flight, including nested backpacks (up to 3 levels) and backpacks worn in the armor/offhand/Curios slots.
 - 🧿 **Curios API support (optional)** — adds an extra **"Flight Ring"** curio slot; rings can be right-click equipped. Without Curios, rings simply work from the inventory (and still do even with Curios installed).
 - 🌌 **Allthemodium integration (optional)** — with [Allthemodium](https://modrinth.com/mod/allthemodium) installed, three linked endgame rings (Allthemodium / Vibranium / Unobtainium) are added, each with an energy pool, inherited abilities (Magic Lining → Kinetic Deflection → Burst Totem) and the *Arcane Amplification* enchantment. Without Allthemodium **nothing** is registered — no items, no recipes, no errors. See [Allthemodium integration](#allthemodium-integration-optional).
+- 💎 **Eight relic rings, found broken** — they cannot be crafted: a **Damaged** ring turns up in a themed structure chest (1% chance) or is bought from a master librarian, and must be repaired in the crafting table before it can fly. See [Relic rings](#relic-rings-found-broken).
 
 ## Flight time per tier
 
@@ -123,6 +124,30 @@ Each linked ring has an energy pool (100 / 300 / 700) that its abilities draw on
 ### Arcane Amplification (enchantment)
 
 An enchanting-table enchantment for the three linked rings only, levels 1–9: **max energy = base energy × (level + 1)** — an Unobtainium ring at level 9 holds 7000 energy. It also appears in villager trades and loot as usual.
+
+## Relic rings (found broken)
+
+Eight themed rings that **cannot be crafted**. The only way to get one is to find its **Damaged** form — a **1% chance** in one specific kind of chest (or, for the emerald ring, to buy it from a **master librarian**) — and then repair it in the crafting table.
+
+| Ring | Found in (1% per chest) | Repair with | Flight time |
+|------|-------------------------|-------------|-------------|
+| Sculk Flight Ring | Ancient City chests | Echo Shard | 180 min |
+| Miner's Flight Ring | Abandoned mineshaft chests / chest minecarts | Iron Block | 90 min |
+| Emerald Flight Ring | **Master librarian trade** (32 emeralds, 3 uses) | Emerald Block | 60 min |
+| Ocean Flight Ring | Shipwreck chests (treasure and supply) | Heart of the Sea | 120 min |
+| Desert Flight Ring | Desert pyramid chests | Gold Block | 100 min |
+| Raid Flight Ring | Pillager outpost and woodland mansion chests | Ominous Bottle | 140 min |
+| Infernal Flight Ring | Nether fortress chests | Blaze Rod | 200 min |
+| Ender Flight Ring | End city chests | Shulker Shell | 240 min |
+
+- The broken ring is a separate item (`damaged_*_flight_ring`): it cannot fly, cannot be worn in the Curios slot and cannot be enchanted. Its tooltip says which material repairs it.
+- Repairing is a **shapeless crafting-table recipe**: damaged ring + 1 theme material → the working ring, ready to fly and enchant like any other ring.
+- A damaged ring is stackable up to 1 and always stacks separately from the working ring.
+- Chances are per chest opened: 1% means roughly one ring per 100 of those chests, and the roll happens on top of the normal loot.
+
+## Ability key
+
+The three linked Allthemodium rings have abilities; **V** (rebindable in Options → Controls → Misc) is the placeholder key that will trigger their **active** abilities. Right now every ability triggers on its own (they are passive), so pressing V simply reports which ring would fire.
 
 ## Installation
 

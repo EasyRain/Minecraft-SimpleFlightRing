@@ -20,6 +20,10 @@ public class ModCreativeTabs {
                         for (var ring : ModItems.ALL) {
                             output.accept(new ItemStack(ring.get()));
                         }
+                        // The broken relic rings, right after the working ones they repair into.
+                        for (var damaged : ModItems.DAMAGED_RELIC_RINGS.values()) {
+                            output.accept(new ItemStack(damaged.get()));
+                        }
                         output.accept(new ItemStack(ModItems.INDESTRUCTIBLE_CORE.get()));
                     })
                     .build());

@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "entries": [
+    "simpleflightring:sculk_ring_ancient_city",
+    "simpleflightring:miner_ring_abandoned_mineshaft",
+    "simpleflightring:ocean_ring_shipwreck_treasure",
+    "simpleflightring:ocean_ring_shipwreck_supply",
+    "simpleflightring:desert_ring_desert_pyramid",
+    "simpleflightring:raid_ring_pillager_outpost",
+    "simpleflightring:raid_ring_woodland_mansion",
+    "simpleflightring:infernal_ring_nether_bridge",
+    "simpleflightring:ender_ring_end_city_treasure"
+  ]
+}

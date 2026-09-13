@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "simpleflightring:item/damaged_infernal_flight_ring"
+  }
+}

@@ -8,6 +8,14 @@
     "simpleflightring:diamond_flight_ring",
     "simpleflightring:netherite_flight_ring",
     "simpleflightring:stable_flight_ring",
-    "simpleflightring:powered_flight_ring"
+    "simpleflightring:powered_flight_ring",
+    "simpleflightring:sculk_flight_ring",
+    "simpleflightring:miner_flight_ring",
+    "simpleflightring:emerald_flight_ring",
+    "simpleflightring:ocean_flight_ring",
+    "simpleflightring:desert_flight_ring",
+    "simpleflightring:raid_flight_ring",
+    "simpleflightring:infernal_flight_ring",
+    "simpleflightring:ender_flight_ring"
   ]
 }
