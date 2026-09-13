@@ -26,6 +26,7 @@ import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +83,23 @@ public final class SculkSoulAbility {
         var effect = event.getEffectInstance().getEffect();
         if (effect.is(MobEffects.BLINDNESS) || effect.is(MobEffects.DARKNESS)) {
             event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+        }
+    }
+
+    /**
+     * Blindness and Darkness that were already on the player when the ring was equipped
+     * must go as well: the event above only stops new ones.
+     */
+    @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || !wearsSculkRing(player)) {
+            return;
+        }
+        if (player.hasEffect(MobEffects.BLINDNESS)) {
+            player.removeEffect(MobEffects.BLINDNESS);
+        }
+        if (player.hasEffect(MobEffects.DARKNESS)) {
+            player.removeEffect(MobEffects.DARKNESS);
         }
     }
 
@@ -267,6 +285,32 @@ public final class SculkSoulAbility {
     private static boolean isInDeepDark(Player player) {
         BlockPos pos = player.blockPosition();
         return player.level().getBiome(pos).is(Biomes.DEEP_DARK);
+    }
+
+    /**
+     * Called from the mixins - the two places vanilla does NOT go through an event:
+     * {@code SculkShriekerBlockEntity#tryShriek} (standing on a shrieker calls it directly)
+     * and {@code Warden#canTargetEntity} (the warden picks its target through brain memory).
+     */
+
+    /** True when the wearer must be silent: ring worn and standing in the deep dark. */
+    public static boolean isSilenced(Player player) {
+        return wearsSculkRing(player) && isInDeepDark(player);
+    }
+
+    /**
+     * False for a ring wearer the warden must not notice at all. Attacking a warden is
+     * remembered for {@link #ANGER_MEMORY_TICKS}, so it still gets to fight back.
+     */
+    public static boolean wardenMayTarget(Entity target) {
+        if (!(target instanceof Player player) || !wearsSculkRing(player)) {
+            return true;
+        }
+        Long angeredAt = ANGERED_WARDEN_AT.get(player.getUUID());
+        if (angeredAt != null && player.level().getGameTime() - angeredAt <= ANGER_MEMORY_TICKS) {
+            return true;
+        }
+        return false;
     }
 
     @SubscribeEvent

@@ -27,7 +27,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.
   - Position and visibility configurable in `config/simpleflightring-client.toml`.
 - 🎛️ **Cloth Config support (optional)** — in-game configuration screen from the mod list (toggle + position sliders).
 - 🎒 **Sophisticated Backpacks support (optional)** — rings stored inside sophisticated backpacks also grant flight, including nested backpacks (up to 3 levels) and backpacks worn in the armor/offhand/Curios slots.
-- 🧿 **Curios API support (optional)** — adds an extra **"Flight Ring"** curio slot; rings can be right-click equipped. Without Curios, rings simply work from the inventory (and still do even with Curios installed).
+- 🧿 **Curios API support (required)** — the mod adds a dedicated **"Flight Ring"** curio slot; rings are right-click equipped and every special ability works from that slot. Curios is a hard dependency since 1.2.x.
 - 🌌 **Allthemodium integration (optional)** — with [Allthemodium](https://modrinth.com/mod/allthemodium) installed, three linked endgame rings (Allthemodium / Vibranium / Unobtainium) are added, each with an energy pool, inherited abilities (Magic Lining → Kinetic Deflection → Burst Totem) and the *Arcane Amplification* enchantment. Without Allthemodium **nothing** is registered — no items, no recipes, no errors. See [Allthemodium integration](#allthemodium-integration-optional).
 - 💎 **Eight relic rings, found broken** — they cannot be crafted: a **Damaged** ring turns up in a themed structure chest (1% chance) or is bought from a master librarian, and must be repaired in the crafting table before it can fly. See [Relic rings](#relic-rings-found-broken).
 
@@ -153,6 +153,15 @@ The sculk ring does not use the plain "damaged + material" repair:
 2. **Kill a Warden while carrying that ring** (inventory, offhand or Curios slot). One Warden feeds exactly **one** ring. The ring swallows the soul — it starts to glint and now reads **"The ring needs a new vessel"**.
 3. Forge it in the crafting table: **8 echo shards around the soul-fed ring** → the working Sculk Flight Ring.
 
+### Sculk Soul (the sculk ring's ability)
+
+Worn in the Curios slot, the Sculk Flight Ring grants:
+
+- **Darkness immunity** — Blindness and Darkness can never be applied again, and any already on you when you put the ring on are removed.
+- **Wardens see you as one of their own** — a warden ignores the wearer completely (it never picks them as a target) unless the wearer attacks it first, in which case it fights back normally.
+- **Silence in the deep dark** — while the wearer stands in the Deep Dark biome, their sounds *and* their vibrations are cancelled: no footstep or block sounds, sculk sensors do not hear them, shriekers do not trigger (walking on one does nothing) and no warden is summoned by them.
+- **Sonic boom** — press the ability key (V by default, rebindable) to fire a warden-style beam: 10 damage plus vanilla knockback along the line you are looking at, with a 3 second cooldown.
+
 ## Ability key
 
 The three linked Allthemodium rings have abilities; **V** (rebindable in Options → Controls → Misc) is the placeholder key that will trigger their **active** abilities. Right now every ability triggers on its own (they are passive), so pressing V simply reports which ring would fire.
@@ -161,7 +170,7 @@ The three linked Allthemodium rings have abilities; **V** (rebindable in Options
 
 1. Install the matching [NeoForge](https://neoforged.net/) version.
 2. Drop the `simpleflightring` jar into the `mods` folder.
-3. *(Optional)* Install [Curios API](https://modrinth.com/mod/curios) for the flight ring slot, [Cloth Config](https://modrinth.com/mod/cloth-config) for the in-game config screen, and/or [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks) for backpack support.
+3. *(Optional)* Install [Cloth Config](https://modrinth.com/mod/cloth-config) for the in-game config screen and/or [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks) for backpack support. [Curios API](https://modrinth.com/mod/curios) is **required**.
 
 ## Configuration
 

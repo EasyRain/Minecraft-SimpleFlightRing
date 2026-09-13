@@ -42,7 +42,7 @@ side="BOTH"
 
 [[dependencies.simpleflightring]]
 modId="curios"
-type="optional"
+type="required"
 versionRange="[9.5.1,10)"
 ordering="AFTER"
 side="BOTH"

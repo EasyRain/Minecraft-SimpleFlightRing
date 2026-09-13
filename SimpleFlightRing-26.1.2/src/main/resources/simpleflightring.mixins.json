@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "EnchantmentHelperMixin",
-    "PlayerMixin"
+    "PlayerMixin",
+    "SculkShriekerBlockEntityMixin",
+    "WardenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

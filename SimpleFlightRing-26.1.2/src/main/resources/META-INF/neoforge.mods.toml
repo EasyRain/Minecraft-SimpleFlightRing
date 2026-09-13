@@ -37,7 +37,7 @@ versionRange="[26.1.2,26.2)"
 
 [[dependencies.${mod_id}]]
 modId="curios"
-type="optional"
+type="required"
 versionRange="[15,16)"
 ordering="AFTER"
 side="BOTH"

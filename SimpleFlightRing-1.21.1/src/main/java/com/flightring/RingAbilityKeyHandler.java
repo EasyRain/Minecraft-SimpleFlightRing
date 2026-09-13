@@ -39,21 +39,14 @@ public final class RingAbilityKeyHandler {
                 player.getName().getString(), ring.getHoverName().getString(), slot);
     }
 
-    /** The worn ring that actually has special abilities, or an empty stack. */
+    /**
+     * The ring worn in the Curios flight ring slot when it has special abilities, or an
+     * empty stack. Abilities never work from the inventory (same rule as the linked rings'
+     * attributes), so the ability key does not look there either.
+     */
     private static ItemStack wornAbilityRing(ServerPlayer player) {
-        if (CuriosCompat.isLoaded()) {
-            ItemStack ring = CuriosCompat.findRingInSlot(player);
-            if (hasAbilities(ring)) {
-                return ring;
-            }
-        }
-        for (ItemStack stack : player.getInventory().items) {
-            if (hasAbilities(stack)) {
-                return stack;
-            }
-        }
-        ItemStack offhand = player.getInventory().offhand.get(0);
-        return hasAbilities(offhand) ? offhand : ItemStack.EMPTY;
+        ItemStack ring = CuriosCompat.findRingInSlot(player);
+        return hasAbilities(ring) ? ring : ItemStack.EMPTY;
     }
 
     private static boolean hasAbilities(ItemStack stack) {
