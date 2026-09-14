@@ -141,6 +141,28 @@ public class FlightRingItem extends Item {
         this.maxEnergy = maxEnergy;
     }
 
+    /**
+     * Relic ring with built-in (intrinsic) enchantments and special abilities - the miner
+     * ring comes with Unbreaking I, for example. Unlike the special rings it is NOT destroyed
+     * once drained; it goes inert like every tiered ring.
+     */
+    public FlightRingItem(int maxDurability, int enchantmentValue,
+                          Map<ResourceKey<Enchantment>, Integer> intrinsicBase,
+                          Set<RingAbility> abilities, Properties properties) {
+        super(properties
+                .durability(maxDurability)
+                .enchantable(enchantmentValue));
+        this.tier = null;
+        this.breaksWhenDepleted = false;
+        this.intrinsicBase = Map.copyOf(intrinsicBase);
+        this.breakSound = null;
+        this.bonuses = null;
+        this.abilities = abilities.isEmpty()
+                ? EnumSet.noneOf(RingAbility.class)
+                : EnumSet.copyOf(abilities);
+        this.maxEnergy = 0.0F;
+    }
+
     /** Whether this ring has the given special ability (see {@link RingAbility}). */
     public boolean hasAbility(RingAbility ability) {
         return abilities.contains(ability);

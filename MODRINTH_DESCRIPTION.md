@@ -132,7 +132,7 @@ Eight themed rings that **cannot be crafted**. The only way to get one is to fin
 | Ring | Found in (1% per chest) | Repair with | Flight time |
 |------|-------------------------|-------------|-------------|
 | Sculk Flight Ring | Ancient City chests | Echo Shard (see the quest below) | 120 min |
-| Miner's Flight Ring | Abandoned mineshaft chests / chest minecarts | Iron Block | 90 min |
+| Miner's Flight Ring | Abandoned mineshaft chests / chest minecarts | Iron Ingot (see the quest below) | 30 min + Unbreaking I |
 | Emerald Flight Ring | **Master librarian trade** (32 emeralds, 3 uses) | Emerald Block | 60 min |
 | Ocean Flight Ring | Shipwreck chests (treasure and supply) | Heart of the Sea | 120 min |
 | Desert Flight Ring | Desert pyramid chests | Gold Block | 100 min |
@@ -141,7 +141,7 @@ Eight themed rings that **cannot be crafted**. The only way to get one is to fin
 | Ender Flight Ring | End city chests | Shulker Shell | 240 min |
 
 - The broken ring is a separate item (`damaged_*_flight_ring`): it cannot fly, cannot be worn in the Curios slot and cannot be enchanted. Its tooltip says which material repairs it.
-- Repairing is a **shapeless crafting-table recipe**: damaged ring + 1 theme material → the working ring, ready to fly and enchant like any other ring.
+- Repairing is usually a **shapeless crafting-table recipe** (damaged ring + 1 theme material); the sculk and miner rings have their own quest lines instead, see below.
 - A damaged ring is stackable up to 1 and always stacks separately from the working ring.
 - Chances are per chest opened: 1% means roughly one ring per 100 of those chests, and the roll happens on top of the normal loot.
 
@@ -161,6 +161,18 @@ Worn in the Curios slot, the Sculk Flight Ring grants:
 - **Wardens see you as one of their own** — a warden ignores the wearer completely (it never picks them as a target) unless the wearer attacks it first, in which case it fights back normally.
 - **Silence in the deep dark** — while the wearer stands in the Deep Dark biome, their sounds *and* their vibrations are cancelled: no footstep or block sounds, sculk sensors do not hear them, shriekers do not trigger (walking on one does nothing) and no warden is summoned by them.
 - **Sonic boom** — press the ability key (V by default, rebindable) to fire a warden-style beam: 10 damage plus vanilla knockback along the line you are looking at, with a 3 second cooldown.
+
+### Miner's Veteran (the miner ring's ability)
+
+- **Night Vision** permanently, plus **Haste by depth**: level I below sea level, II below y = 0, III below y = -32 (always I outside the overworld, nothing above sea level). The HUD icons stay visible and are cleared again the moment the ring comes off or runs dry.
+- **Immune to every explosion** — damage *and* knockback, whether it came from TNT, a creeper, a respawn anchor, a bed or another mod.
+- **Mining blast** on the ability key: a block-breaking TNT explosion centred on the wearer (the wearer is safe from it), 3 second cooldown. The **Energy Burst** enchantment (levels 1–9, enchanting table, only for the rings that have an active ability) adds +25% damage *and* +25% blast radius per level.
+
+### The miner ring's quest
+
+1. The damaged miner ring reads *"Nobody knows which miner left this ring behind"* / *"Its mottled metal says it broke a long time ago"* / *"It has to be reshaped by the power of a blast"*.
+2. **Drop it on the ground and let an explosion wash over it** (TNT, a creeper, another mod's blast — anything). The ring survives, starts to glint and its third line becomes *"Only the missing material has to be added now"*.
+3. Forge it in the crafting table: **8 iron ingots around the blast-forged ring** → the working Miner's Flight Ring. It is balanced like the iron ring (30 minutes) but ships with **Unbreaking I** built in.
 
 ## Ability key
 

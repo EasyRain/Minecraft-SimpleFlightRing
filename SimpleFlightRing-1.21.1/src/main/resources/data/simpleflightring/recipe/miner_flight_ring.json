@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "III",
+    "IRI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "type": "neoforge:components",
+      "items": "simpleflightring:damaged_miner_flight_ring",
+      "components": {
+        "simpleflightring:blast_forged": {}
+      }
+    }
+  },
+  "result": {
+    "id": "simpleflightring:miner_flight_ring",
+    "count": 1
+  }
+}

@@ -25,8 +25,8 @@ public enum RelicRing {
 
     /** Ancient City (deep dark). Balanced like the diamond ring: 7200 (120 minutes). */
     SCULK("sculk", 7200, 10, 0xFF29DFEB, Items.ECHO_SHARD),
-    /** Abandoned mineshaft chest minecarts. */
-    MINER("miner", 5400, 14, 0xFFC8CAD2, Items.IRON_BLOCK),
+    /** Abandoned mineshaft chest minecarts. Balanced like the iron ring, but ships with Unbreaking I. */
+    MINER("miner", 1800, 14, 0xFFC8CAD2, Items.IRON_BLOCK),
     /** Master librarian trade (the only relic that is not found in loot). */
     EMERALD("emerald", 3600, 18, 0xFF54E18E, Items.EMERALD_BLOCK),
     /** Shipwreck chests. */

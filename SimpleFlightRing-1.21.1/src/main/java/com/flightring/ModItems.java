@@ -1,8 +1,10 @@
 package com.flightring;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -125,7 +127,8 @@ public class ModItems {
         EnumMap<RelicRing, DeferredItem<FlightRingItem>> rings = new EnumMap<>(RelicRing.class);
         for (RelicRing relic : RelicRing.values()) {
             rings.put(relic, ITEMS.registerItem(relic.ringId(), properties -> new FlightRingItem(
-                    relic.durability(), relic.enchantmentValue(), null, relicAbilities(relic), 0.0F, properties)));
+                    relic.durability(), relic.enchantmentValue(), relicIntrinsicEnchantments(relic),
+                    relicAbilities(relic), properties)));
         }
         return Collections.unmodifiableMap(rings);
     }
@@ -140,6 +143,15 @@ public class ModItems {
             case MINER -> EnumSet.of(RingAbility.MINER_VETERAN);
             default -> Set.of();
         };
+    }
+
+    /**
+     * Built-in (intrinsic) enchantments of a relic ring: the miner ring is balanced against
+     * the iron ring but ships with Unbreaking I, so every point of its durability lasts two
+     * seconds of flight.
+     */
+    private static Map<ResourceKey<Enchantment>, Integer> relicIntrinsicEnchantments(RelicRing relic) {
+        return relic == RelicRing.MINER ? Map.of(Enchantments.UNBREAKING, 1) : Map.of();
     }
 
     private static Map<RelicRing, DeferredItem<DamagedRingItem>> registerDamagedRelicRings() {

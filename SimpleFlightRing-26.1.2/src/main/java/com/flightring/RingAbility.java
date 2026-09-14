@@ -34,7 +34,7 @@ public enum RingAbility {
      * Miner relic ring: permanent Night Vision, depth scaled Haste, TNT immunity and a
      * block-breaking TNT blast on the ability key.
      */
-    MINER_VETERAN("miner_veteran", 0xFFC0C0C0, 4, 4);
+    MINER_VETERAN("miner_veteran", 0xFFC0C0C0, 5, 5);
 
     private final String key;
     private final int color;

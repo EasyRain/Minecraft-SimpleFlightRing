@@ -13,13 +13,17 @@ import java.util.List;
  * structure loot tables hand out and what a master librarian sells.
  * <p>
  * It is deliberately NOT a {@link FlightRingItem}: it cannot fly, cannot be worn in the
- * Curios slot and has no durability bar. Repairing it in the crafting table together with
- * the ring's theme material yields the working ring (see the {@code repair_damaged_*}
- * recipes).
- * <p>
- * The sculk ring is special: it has its own two-step quest instead of the plain repair
- * recipe - see {@link SculkRingQuest} - so its tooltip shows the quest state and it glints
- * once the Warden's soul is inside it.
+ * Curios slot and has no durability bar. Repairing it yields the working ring, but the way
+ * there differs per relic:
+ * <ul>
+ *   <li><b>Sculk</b>: kill a Warden while carrying it, then forge it with 8 echo shards
+ *       (see {@link SculkRingQuest}).</li>
+ *   <li><b>Miner</b>: throw it into a blast, then add 8 iron ingots
+ *       (see {@link MinerRingQuest}).</li>
+ *   <li><b>Everything else</b>: the plain shapeless repair recipe with the theme material.</li>
+ * </ul>
+ * While a relic has its own quest its tooltip shows the quest text (and it glints once the
+ * ring is ready for the final recipe) instead of the generic "damaged" lines.
  */
 public class DamagedRingItem extends Item {
 
@@ -40,10 +44,15 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.WARDEN_SOUL.get());
     }
 
-    /** The broken sculk ring glints while the Warden's soul is inside it. */
+    /** True once the miner ring has been reforged by a blast (see {@link MinerRingQuest}). */
+    public static boolean isBlastForged(ItemStack stack) {
+        return stack.has(ModDataComponents.BLAST_FORGED.get());
+    }
+
+    /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
-        return hasWardenSoul(stack) || super.isFoil(stack);
+        return hasWardenSoul(stack) || isBlastForged(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -56,6 +65,18 @@ public class DamagedRingItem extends Item {
                             ? "tooltip.simpleflightring.sculk_needs_vessel"
                             : "tooltip.simpleflightring.sculk_hungers")
                     .withColor(relic.color()));
+            return;
+        }
+        if (relic == RelicRing.MINER) {
+            // The miner ring's quest text: two grey flavour lines, then what to do next.
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.miner_damaged_origin")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.miner_damaged_shape")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable(isBlastForged(stack)
+                            ? "tooltip.simpleflightring.miner_damaged_ready"
+                            : "tooltip.simpleflightring.miner_damaged_reforge")
+                    .withStyle(ChatFormatting.WHITE));
             return;
         }
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));

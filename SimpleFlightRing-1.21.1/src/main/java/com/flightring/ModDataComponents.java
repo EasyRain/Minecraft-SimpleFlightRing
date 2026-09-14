@@ -51,6 +51,17 @@ public class ModDataComponents {
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
+    /**
+     * Miner relic ring quest step: the damaged miner ring was thrown into a blast and got
+     * reforged by it (see {@link MinerRingQuest}), so only the missing material has to be
+     * added now (8 iron ingots, the {@code miner_flight_ring} recipe). Absent means the ring
+     * is still waiting for its explosion.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> BLAST_FORGED =
+            COMPONENTS.registerComponentType("blast_forged", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
     private ModDataComponents() {
     }
 }
