@@ -1,5 +1,8 @@
 package com.flightring;
 
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
@@ -64,16 +67,31 @@ public final class CuriosCompat {
                  * {@code getAttributeModifiers(SlotContext, Identifier, ItemStack)} does
                  * nothing here: both the per-tick attribute application and the tooltip use
                  * the static path, so the bonuses must come from this method.
+                 * <p>
+                 * The ocean ring adds the submerged mining speed on top: vanilla multiplies the
+                 * mining speed by {@code SUBMERGED_MINING_SPEED} (0.2 by default) whenever the
+                 * eyes are in water, so +0.8 brings it back to 1.0 - no slowdown underwater.
+                 * Like every ability it needs the ring to still have durability left.
                  */
                 @Override
                 public CurioAttributeModifiers getDefaultCurioAttributeModifiers(ItemStack stack) {
                     RingBonuses bonuses = ring.get().getBonuses();
-                    if (bonuses == null) {
+                    boolean underwaterMining = stack.getItem() instanceof FlightRingItem item
+                            && item.hasAbility(RingAbility.OCEAN_FAVORED)
+                            && item.isUsable(stack);
+                    if (bonuses == null && !underwaterMining) {
                         return CurioAttributeModifiers.EMPTY;
                     }
                     CurioAttributeModifiers.Builder builder = CurioAttributeModifiers.builder();
-                    bonuses.attributeModifiers()
-                            .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
+                    if (bonuses != null) {
+                        bonuses.attributeModifiers()
+                                .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
+                    }
+                    if (underwaterMining) {
+                        builder.addModifier(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
+                                Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
+                                OceanFavoredAbility.submergedMiningBonus(), AttributeModifier.Operation.ADD_VALUE), SLOT_ID);
+                    }
                     return builder.build().withTooltip(true);
                 }
             });

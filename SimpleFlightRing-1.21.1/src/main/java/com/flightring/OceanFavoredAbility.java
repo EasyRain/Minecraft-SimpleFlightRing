@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -22,10 +23,12 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -74,6 +77,20 @@ public final class OceanFavoredAbility {
     private static final int WHIRLPOOL_OCEAN_AMPLIFIER = 2;
     /** Damage taken in an ocean biome is halved. */
     private static final float OCEAN_DAMAGE_MULTIPLIER = 0.5F;
+    /**
+     * The submerged mining speed multiplier the ring aims for: 1.0 means "no slow-down at all".
+     * The Curios modifier adds the difference to vanilla's 0.2 base (see {@code CuriosCompat}),
+     * and {@link #onBreakSpeed} clamps the total back to this value so other mods cannot stack
+     * on the same attribute.
+     */
+    static final double SUBMERGED_MINING_SPEED_CLAMP = 1.0;
+    /** Vanilla's base value of {@code SUBMERGED_MINING_SPEED} (see {@code Player#getDigSpeed}). */
+    private static final double SUBMERGED_MINING_SPEED_BASE = 0.2;
+
+    /** What the Curios attribute modifier has to add to reach {@link #SUBMERGED_MINING_SPEED_CLAMP}. */
+    static double submergedMiningBonus() {
+        return SUBMERGED_MINING_SPEED_CLAMP - SUBMERGED_MINING_SPEED_BASE;
+    }
 
     /**
      * The aquatic monsters that treat the wearer as one of their own. A data driven entity type
@@ -198,6 +215,33 @@ public final class OceanFavoredAbility {
     }
 
     // ------------------------------------------------------------------
+    // No underwater mining slow-down (and no stacking on that attribute)
+    // ------------------------------------------------------------------
+
+    /**
+     * Vanilla multiplies the mining speed by {@code SUBMERGED_MINING_SPEED} (0.2 by default)
+     * whenever the eyes are in water. The ocean ring raises that attribute to 1.0 through a
+     * Curios modifier (see {@code CuriosCompat}), which on its own already cancels the penalty.
+     * <p>
+     * Another mod adding its own modifier to the same attribute would stack on top of that and
+     * let the wearer mine faster than on land, so this runs LAST (LOWEST priority) and divides
+     * any excess back out: the effective multiplier is clamped to exactly 1.0. It is the same
+     * "no stacking with other mods" guard {@code FlightHandler#onBreakSpeed} uses for the Flight
+     * Stability enchantment, only exact here because our target value is known.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        Player player = event.getEntity();
+        if (wornRing(player).isEmpty() || !player.isEyeInFluid(FluidTags.WATER)) {
+            return;
+        }
+        double submerged = player.getAttributeValue(Attributes.SUBMERGED_MINING_SPEED);
+        if (submerged > SUBMERGED_MINING_SPEED_CLAMP + 1.0E-4) {
+            event.setNewSpeed((float) (event.getNewSpeed() / submerged * SUBMERGED_MINING_SPEED_CLAMP));
+        }
+    }
+
+    // ------------------------------------------------------------------
     // The sea's children are neutral (but still hit back)
     // ------------------------------------------------------------------
 
@@ -233,6 +277,28 @@ public final class OceanFavoredAbility {
         // and is deprecated in 1.21.1, builtInRegistryHolder() is deprecated in both.
         return entity instanceof Enemy
                 && BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(entity.getType()).is(AQUATIC_HOSTILES);
+    }
+
+    /**
+     * The Elder Guardian's curse is not an attack: vanilla hands Mining Fatigue III (and the
+     * curse sound) to every player within 50 blocks of it, no matter what the guardian is
+     * targeting ({@code MobEffectUtil.addEffectToPlayersAround}). A wearer counts as one of the
+     * sea's own, so a curse coming from an aquatic monster is refused. The event carries the
+     * source entity, so potions, commands and other mods stay untouched.
+     */
+    @SubscribeEvent
+    public static void onEffectApplicable(MobEffectEvent.Applicable event) {
+        if (!(event.getEntity() instanceof Player player) || wornRing(player).isEmpty()) {
+            return;
+        }
+        if (!event.getEffectInstance().getEffect().is(MobEffects.DIG_SLOWDOWN)) {
+            return;
+        }
+        Entity source = event.getEffectSource();
+        if (source == null || !isAquaticHostile(source)) {
+            return;
+        }
+        event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
     }
 
     /** True while this very monster is hunting the wearer (attacked and still in range). */
