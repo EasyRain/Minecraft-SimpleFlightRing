@@ -134,13 +134,14 @@ public class ModItems {
     }
 
     /**
-     * Special abilities of a relic ring: the sculk ring and the miner ring each have one,
+     * Special abilities of a relic ring: the sculk, miner and emerald rings each have one,
      * the rest are plain rings.
      */
     private static Set<RingAbility> relicAbilities(RelicRing relic) {
         return switch (relic) {
             case SCULK -> EnumSet.of(RingAbility.SCULK_SOUL);
             case MINER -> EnumSet.of(RingAbility.MINER_VETERAN);
+            case EMERALD -> EnumSet.of(RingAbility.EMERALD_HERO);
             default -> Set.of();
         };
     }

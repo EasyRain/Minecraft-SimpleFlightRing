@@ -34,7 +34,14 @@ public enum RingAbility {
      * Miner relic ring: permanent Night Vision, depth scaled Haste, TNT immunity and a
      * block-breaking TNT blast on the ability key.
      */
-    MINER_VETERAN("miner_veteran", 0xFFC0C0C0, 5, 5);
+    MINER_VETERAN("miner_veteran", 0xFFC0C0C0, 5, 5),
+
+    /**
+     * Emerald relic ring: the village hero's blessing is permanent, illagers take double
+     * damage from the wearer, drop twice the loot and every hostile mob has a small chance
+     * to leave an emerald behind. Passive only - the emerald ring has no ability key.
+     */
+    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4);
 
     private final String key;
     private final int color;

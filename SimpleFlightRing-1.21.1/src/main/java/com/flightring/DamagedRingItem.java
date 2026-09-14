@@ -79,6 +79,14 @@ public class DamagedRingItem extends Item {
                     .withStyle(ChatFormatting.WHITE));
             return;
         }
+        if (relic == RelicRing.EMERALD) {
+            // The only relic that cannot be looted: a master librarian may sell it.
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_source")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged_repair",
+                    new ItemStack(relic.repairMaterial()).getHoverName()).withStyle(ChatFormatting.GRAY));
+            return;
+        }
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged_repair",
                 new ItemStack(relic.repairMaterial()).getHoverName()).withStyle(ChatFormatting.GRAY));
