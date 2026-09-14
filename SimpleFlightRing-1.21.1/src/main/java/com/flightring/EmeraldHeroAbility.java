@@ -76,7 +76,8 @@ public final class EmeraldHeroAbility {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (wornRing(player).isEmpty()) {
+        ItemStack ring = wornRing(player);
+        if (ring.isEmpty()) {
             // Ring taken off (or drained): drop the buff once instead of waiting it out.
             if (BUFFED.remove(player.getUUID())) {
                 player.removeEffect(MobEffects.HERO_OF_THE_VILLAGE);
@@ -86,10 +87,26 @@ public final class EmeraldHeroAbility {
         if (player.level().getGameTime() % BUFF_REFRESH_TICKS != 0) {
             return;                          // once per second is plenty for a 30 s buff
         }
+        // The blessing is exactly as strong as the raid the ring was carried through, so a
+        // ring charged in a level III raid gives Hero of the Village III (amplifier 2).
+        applyBuff(player, HeroLevel.of(ring) - 1);
+        BUFFED.add(player.getUUID());
+    }
+
+    /**
+     * Keeps the blessing at the wanted level (the ring's raid level). A stronger instance
+     * that is already on the player is removed first, otherwise swapping to a ring with a
+     * lower level would keep the old strength until it expires - the same guard the miner
+     * ring uses for its depth scaled Haste.
+     */
+    private static void applyBuff(ServerPlayer player, int amplifier) {
+        MobEffectInstance current = player.getEffect(MobEffects.HERO_OF_THE_VILLAGE);
+        if (current != null && current.getAmplifier() > amplifier) {
+            player.removeEffect(MobEffects.HERO_OF_THE_VILLAGE);
+        }
         // ambient (no particles), showIcon: the player should see the blessing is on.
         player.addEffect(new MobEffectInstance(
-                MobEffects.HERO_OF_THE_VILLAGE, BUFF_DURATION_TICKS, 0, true, false, true));
-        BUFFED.add(player.getUUID());
+                MobEffects.HERO_OF_THE_VILLAGE, BUFF_DURATION_TICKS, amplifier, true, false, true));
     }
 
     // ------------------------------------------------------------------

@@ -306,7 +306,7 @@ public class FlightRingItem extends Item {
      * with the ring it belongs to, in chain order), then the enchantment effect hints.
      */
     public List<Component> effectHints(ItemStack stack, TooltipContext context) {
-        List<Component> hints = new ArrayList<>(abilityHints());
+        List<Component> hints = new ArrayList<>(abilityHints(stack));
         hints.addAll(enchantmentHints(stack, context));
         return hints;
     }
@@ -314,10 +314,11 @@ public class FlightRingItem extends Item {
     /**
      * The special abilities' blocks: title plus its description lines. Each description
      * line is its own component, because the vanilla tooltip does not break lines on
-     * {@code \n}. The last line of {@link RingAbility#SCULK_SOUL} names the ability key,
-     * so it is filled with the key the player actually bound.
+     * {@code \n}. The line named by {@link RingAbility#keyLine()} gets the ability key the
+     * player actually bound, the one named by {@link RingAbility#levelLine()} the ring's
+     * own strength (the emerald ring's raid level).
      */
-    private List<Component> abilityHints() {
+    private List<Component> abilityHints(ItemStack stack) {
         List<Component> hints = new ArrayList<>();
         for (RingAbility ability : abilities) {
             hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + "_title")
@@ -327,6 +328,8 @@ public class FlightRingItem extends Item {
                 String key = "tooltip.simpleflightring." + ability.key() + suffix;
                 MutableComponent text = line == ability.keyLine()
                         ? Component.translatable(key, AbilityKeyHint.keyName())
+                        : line == ability.levelLine()
+                        ? Component.translatable(key, HeroLevel.roman(HeroLevel.of(stack)))
                         : Component.translatable(key);
                 hints.add(text.withStyle(ChatFormatting.DARK_GRAY));
             }

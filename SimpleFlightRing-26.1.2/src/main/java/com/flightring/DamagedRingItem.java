@@ -101,8 +101,9 @@ public class DamagedRingItem extends Item {
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.emerald_damaged_deeds")
                     .withStyle(ChatFormatting.GRAY));
             if (isHeroCharged(stack)) {
-                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.emerald_damaged_charged")
-                        .withStyle(ChatFormatting.WHITE));
+                // The light it remembers is the level of the raid it was carried through.
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.emerald_damaged_charged",
+                        HeroLevel.roman(HeroLevel.of(stack))).withStyle(ChatFormatting.WHITE));
                 tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.emerald_damaged_vessel")
                         .withStyle(ChatFormatting.WHITE));
             } else {

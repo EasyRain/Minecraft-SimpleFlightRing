@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Unit;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
@@ -20,9 +21,10 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
- * The first step of the emerald relic ring's quest.
+ * The emerald relic ring's quest and its strength.
  * <p>
  * The broken emerald ring is only sold by master librarians. While it is still asleep (no
  * {@code hero_charged} component) winning a raid with it CARRYING it - anywhere in the
@@ -34,10 +36,16 @@ import java.util.UUID;
  * The raid is detected the vanilla way: {@code ServerLevel#getRaidAt} returns the active
  * raid within 96 blocks of the player (exactly the range vanilla uses for the raid itself),
  * and a raid whose status is VICTORY keeps celebrating for 30 seconds before it stops - so
- * one poll per second is more than enough to catch it. One won raid wakes exactly ONE ring:
- * the raid that already charged a ring is remembered per player (by its centre) for as long
- * as that victory lasts, so a player carrying several sleeping rings has to win one raid per
+ * one poll per second is more than enough to catch it. One won raid pays out exactly ONE
+ * ring: the raid that already did is remembered per player (by its centre) for as long as
+ * that victory lasts, so a player carrying several sleeping rings has to win one raid per
  * ring instead of having the whole inventory charged within the 30 second celebration.
+ * <p>
+ * The raid's ominous level becomes the ring's strength ({@link HeroLevel}): a ring woken in a
+ * level III raid grants Hero of the Village III. A ring that is already awake - damaged but
+ * charged, or already forged - is strengthened instead when the raid was stronger than it is,
+ * and the level follows the ring through the crafting table (see {@link #onItemCrafted}).
+ * A sleeping ring is always woken first: quest before upgrades.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class EmeraldRingQuest {
@@ -46,6 +54,8 @@ public final class EmeraldRingQuest {
     private static final int CHECK_INTERVAL_TICKS = 20;
     /** Feedback when the ring wakes up. */
     private static final String HERO_AWAKENED = "message.simpleflightring.emerald_hero_awakened";
+    /** Feedback when an already awake ring grows to the level of the raid that was just won. */
+    private static final String HERO_STRENGTHENED = "message.simpleflightring.emerald_hero_strengthened";
 
     /**
      * Which won raid already woke a ring for a player, by the raid's centre. The celebration
@@ -71,28 +81,40 @@ public final class EmeraldRingQuest {
             return;
         }
         if (raid.getCenter().equals(RAID_WOKE.get(player.getUUID()))) {
-            return;                          // this very victory already woke one ring
+            return;                          // this very victory already did its one ring
         }
+        // The raid's ominous level (1..5) is what the ring takes away from the victory.
+        int level = HeroLevel.clamp(raid.getRaidOmenLevel());
         ItemStack ring = findSleepingRing(player);
-        if (ring.isEmpty()) {
-            return;
+        boolean awaken = !ring.isEmpty();
+        if (!awaken) {
+            // Nothing left to wake: a ring that is already awake (damaged or forged) still
+            // grows when the raid was stronger than the light it carries.
+            ring = findWeakerRing(player, level);
+            if (ring.isEmpty()) {
+                return;
+            }
         }
 
-        ring.set(ModDataComponents.HERO_CHARGED.get(), Unit.INSTANCE);
+        if (awaken) {
+            ring.set(ModDataComponents.HERO_CHARGED.get(), Unit.INSTANCE);
+        }
+        HeroLevel.set(ring, level);
         RAID_WOKE.put(player.getUUID(), raid.getCenter());
 
-        ServerLevel level = player.level();
+        ServerLevel serverLevel = player.level();
         // The village hero's own particles and the advancement jingle: this is a celebration.
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+        serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
                 player.getX(), player.getY() + 1.0, player.getZ(),
                 24, 0.5, 0.6, 0.5, 0.05);
-        level.playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
+        serverLevel.playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
                 SoundSource.PLAYERS, 0.8F, 1.0F);
-        player.sendOverlayMessage(
-                Component.translatable(HERO_AWAKENED).withStyle(ChatFormatting.GRAY));
+        player.sendOverlayMessage(Component.translatable(
+                awaken ? HERO_AWAKENED : HERO_STRENGTHENED, HeroLevel.roman(level))
+                .withStyle(ChatFormatting.GRAY));
 
-        FlightRingMod.LOGGER.debug("[FlightRing] {} woke the emerald ring up with a raid victory",
-                player.getName().getString());
+        FlightRingMod.LOGGER.debug("[FlightRing] {} {} the emerald ring (level {}) with a raid victory",
+                player.getName().getString(), awaken ? "woke" : "strengthened", level);
     }
 
     @SubscribeEvent
@@ -106,27 +128,79 @@ public final class EmeraldRingQuest {
     }
 
     /**
+     * Carries the charged ring's level over to the ring that is forged out of it: a plain
+     * vanilla shaped recipe does not copy components from its ingredients, so the finished
+     * ring would always start at level I without this. The grid still holds its ingredients
+     * while the event fires - vanilla only empties it afterwards (see {@code ResultSlot}).
+     */
+    @SubscribeEvent
+    public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
+        ItemStack crafted = event.getCrafting();
+        if (!(crafted.getItem() instanceof FlightRingItem ring)
+                || !ring.hasAbility(RingAbility.EMERALD_HERO)) {
+            return;
+        }
+        Container grid = event.getInventory();
+        for (int slot = 0; slot < grid.getContainerSize(); slot++) {
+            ItemStack ingredient = grid.getItem(slot);
+            if (ingredient.getItem() instanceof DamagedRingItem damaged
+                    && damaged.relic() == RelicRing.EMERALD
+                    && DamagedRingItem.isHeroCharged(ingredient)) {
+                HeroLevel.set(crafted, HeroLevel.of(ingredient));
+                return;
+            }
+        }
+    }
+
+    /**
      * The carried broken emerald ring that is still asleep, or an empty stack. Only this one
      * stack is charged: one won raid = one ring, even when the player carries several of them.
      */
     private static ItemStack findSleepingRing(ServerPlayer player) {
+        return findRing(player, stack -> stack.getItem() instanceof DamagedRingItem damaged
+                && damaged.relic() == RelicRing.EMERALD
+                && !DamagedRingItem.isHeroCharged(stack));
+    }
+
+    /**
+     * The carried emerald ring - damaged but already awake, or forged and worn - whose light
+     * is still weaker than the raid that was just won, or an empty stack.
+     * <p>
+     * A ring that already sits at the raid's level is skipped and the victory is passed on to
+     * the next candidate, so a level V ring - the strongest a raid can ever give - never
+     * absorbs a victory: the raid strengthens another ring instead, and when there is none the
+     * victory simply does nothing (and stays unused for a ring the player picks up while the
+     * raid is still celebrating). Quest first: a sleeping ring is woken before any ring is
+     * strengthened (see the caller).
+     */
+    private static ItemStack findWeakerRing(ServerPlayer player, int level) {
+        return findRing(player, stack -> isEmeraldRing(stack) && HeroLevel.of(stack) < level);
+    }
+
+    /** True for both forms of the emerald ring: the awakened broken one and the working one. */
+    private static boolean isEmeraldRing(ItemStack stack) {
+        if (stack.getItem() instanceof DamagedRingItem damaged) {
+            return damaged.relic() == RelicRing.EMERALD && DamagedRingItem.isHeroCharged(stack);
+        }
+        return stack.getItem() instanceof FlightRingItem ring && ring.hasAbility(RingAbility.EMERALD_HERO);
+    }
+
+    /**
+     * The first carried stack matching {@code match}, looking at the Curios slot, the
+     * inventory and the offhand - the same order {@link SculkRingQuest} uses.
+     */
+    private static ItemStack findRing(ServerPlayer player, Predicate<ItemStack> match) {
         ItemStack worn = CuriosCompat.isLoaded() ? CuriosCompat.findRingInSlot(player) : ItemStack.EMPTY;
-        if (isSleeping(worn)) {
+        if (match.test(worn)) {
             return worn;
         }
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-            if (isSleeping(stack)) {
+            if (match.test(stack)) {
                 return stack;
             }
         }
         ItemStack offhand = player.getItemBySlot(EquipmentSlot.OFFHAND);
-        return isSleeping(offhand) ? offhand : ItemStack.EMPTY;
-    }
-
-    private static boolean isSleeping(ItemStack stack) {
-        return stack.getItem() instanceof DamagedRingItem damaged
-                && damaged.relic() == RelicRing.EMERALD
-                && !DamagedRingItem.isHeroCharged(stack);
+        return match.test(offhand) ? offhand : ItemStack.EMPTY;
     }
 
     private EmeraldRingQuest() {

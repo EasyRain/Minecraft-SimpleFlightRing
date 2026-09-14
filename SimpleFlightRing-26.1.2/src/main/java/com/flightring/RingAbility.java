@@ -37,26 +37,34 @@ public enum RingAbility {
     MINER_VETERAN("miner_veteran", 0xFFC0C0C0, 5, 5),
 
     /**
-     * Emerald relic ring: the village hero's blessing is permanent, illagers take double
-     * damage from the wearer, drop twice the loot and every hostile mob has a small chance
-     * to leave an emerald behind. Passive only - the emerald ring has no ability key.
+     * Emerald relic ring: the village hero's blessing is permanent and its strength is the
+     * level of the raid the ring was carried through (see {@link HeroLevel}), illagers take
+     * double damage from the wearer, drop twice the loot and every hostile mob has a small
+     * chance to leave an emerald behind. Passive only - the emerald ring has no ability key,
+     * and the emerald chance keeps no tooltip line of its own.
      */
-    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4);
+    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4, 0, 1);
 
     private final String key;
     private final int color;
     private final int descriptionLines;
     private final int keyLine;
+    private final int levelLine;
 
     RingAbility(String key, int color, int descriptionLines) {
-        this(key, color, descriptionLines, 0);
+        this(key, color, descriptionLines, 0, 0);
     }
 
     RingAbility(String key, int color, int descriptionLines, int keyLine) {
+        this(key, color, descriptionLines, keyLine, 0);
+    }
+
+    RingAbility(String key, int color, int descriptionLines, int keyLine, int levelLine) {
         this.key = key;
         this.color = color;
         this.descriptionLines = descriptionLines;
         this.keyLine = keyLine;
+        this.levelLine = levelLine;
     }
 
     /** Suffix of this ability's translation keys ({@code tooltip.simpleflightring.<key>_title/_desc}). */
@@ -80,6 +88,15 @@ public enum RingAbility {
      */
     public int keyLine() {
         return keyLine;
+    }
+
+    /**
+     * 1-based number of the description line that shows the ring's strength (0 = none), so
+     * {@link FlightRingItem#abilityHints()} can fill in the level the ring was charged at
+     * (see {@link HeroLevel}). Only the emerald ring uses it so far.
+     */
+    public int levelLine() {
+        return levelLine;
     }
 
     /**

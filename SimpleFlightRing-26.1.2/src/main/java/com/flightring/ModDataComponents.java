@@ -73,6 +73,17 @@ public class ModDataComponents {
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
+    /**
+     * Hero of the Village strength of an emerald ring: 1..5, exactly the level of the raid the
+     * ring was carried through (the same 1..5 an ominous bottle / bad omen gives). It lives on
+     * the damaged ring while it waits for its vessel and on the working ring afterwards, where
+     * {@link EmeraldHeroAbility} turns it into the buff's amplifier. Absent means level 1.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> HERO_LEVEL =
+            COMPONENTS.registerComponentType("hero_level", builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT));
+
     private ModDataComponents() {
     }
 }
