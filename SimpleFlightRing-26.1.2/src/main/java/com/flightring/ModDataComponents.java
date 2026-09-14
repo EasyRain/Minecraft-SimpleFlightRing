@@ -90,8 +90,8 @@ public class ModDataComponents {
      * vessel is missing (a heart of the sea, prismarine shards and a nautilus shell - see the
      * {@code ocean_flight_ring} recipe). Absent means the ring is still waiting for the deep.
      */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> TIDE_BLESSED =
-            COMPONENTS.registerComponentType("tide_blessed", builder -> builder
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> GUARDIAN_ACKNOWLEDGED =
+            COMPONENTS.registerComponentType("guardian_acknowledged", builder -> builder
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 

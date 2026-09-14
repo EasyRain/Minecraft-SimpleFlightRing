@@ -20,7 +20,7 @@
       "type": "neoforge:components",
       "items": "simpleflightring:damaged_ocean_flight_ring",
       "components": {
-        "simpleflightring:tide_blessed": {}
+        "simpleflightring:guardian_acknowledged": {}
       }
     }
   },

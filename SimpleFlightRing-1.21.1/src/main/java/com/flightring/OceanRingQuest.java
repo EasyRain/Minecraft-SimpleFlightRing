@@ -18,10 +18,9 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
  * The first step of the ocean relic ring's quest.
  * <p>
  * The broken ocean ring is found in shipwrecks. While it is still waiting (no
- * {@code tide_blessed} component - the internal name stayed, the text speaks of the sleeping
- * guardian) killing an ELDER GUARDIAN while CARRYING it - anywhere in the
- * inventory, the offhand or the Curios slot - earns its acknowledgement: the stack
- * gains the component, starts to glint and its tooltip switches to the blessed lines
+ * {@code guardian_acknowledged} component) killing an ELDER GUARDIAN while CARRYING it -
+ * anywhere in the inventory, the offhand or the Curios slot - earns its acknowledgement: the
+ * stack gains the component, starts to glint and its tooltip switches to the blessed lines
  * ("the sleeping guardian has accepted you" / "use the ocean's greatest treasure"). That is the
  * recipe gate for forging the working ring out of a heart of the sea, two prismarine shards and
  * a nautilus shell (see {@code ocean_flight_ring.json}).
@@ -33,7 +32,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 public final class OceanRingQuest {
 
     /** Feedback when the ring earns the blessing. */
-    private static final String TIDE_BLESSED = "message.simpleflightring.ocean_tide_blessed";
+    private static final String GUARDIAN_ACKNOWLEDGED = "message.simpleflightring.ocean_guardian_acknowledged";
 
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent event) {
@@ -48,7 +47,7 @@ public final class OceanRingQuest {
             return;
         }
 
-        ring.set(ModDataComponents.TIDE_BLESSED.get(), Unit.INSTANCE);
+        ring.set(ModDataComponents.GUARDIAN_ACKNOWLEDGED.get(), Unit.INSTANCE);
 
         ServerLevel level = player.serverLevel();
         // The conduit's own particles and activation sound: the tide acknowledges the ring.
@@ -58,7 +57,7 @@ public final class OceanRingQuest {
         level.playSound(null, player.blockPosition(), SoundEvents.CONDUIT_ACTIVATE,
                 SoundSource.PLAYERS, 1.0F, 1.2F);
         player.displayClientMessage(
-                Component.translatable(TIDE_BLESSED).withStyle(ChatFormatting.GRAY), true);
+                Component.translatable(GUARDIAN_ACKNOWLEDGED).withStyle(ChatFormatting.GRAY), true);
 
         FlightRingMod.LOGGER.debug("[FlightRing] {} earned the sleeping guardian's acknowledgement for the ocean ring",
                 player.getName().getString());
@@ -85,7 +84,7 @@ public final class OceanRingQuest {
     private static boolean isWaiting(ItemStack stack) {
         return stack.getItem() instanceof DamagedRingItem damaged
                 && damaged.relic() == RelicRing.OCEAN
-                && !DamagedRingItem.isTideBlessed(stack);
+                && !DamagedRingItem.isGuardianAcknowledged(stack);
     }
 
     private OceanRingQuest() {

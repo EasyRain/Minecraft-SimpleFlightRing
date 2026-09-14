@@ -63,15 +63,15 @@ public class DamagedRingItem extends Item {
     }
 
     /** True once the sleeping guardian acknowledged the ocean ring (see {@link OceanRingQuest}). */
-    public static boolean isTideBlessed(ItemStack stack) {
-        return stack.has(ModDataComponents.TIDE_BLESSED.get());
+    public static boolean isGuardianAcknowledged(ItemStack stack) {
+        return stack.has(ModDataComponents.GUARDIAN_ACKNOWLEDGED.get());
     }
 
     /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
         return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack)
-                || isTideBlessed(stack) || super.isFoil(stack);
+                || isGuardianAcknowledged(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -125,11 +125,11 @@ public class DamagedRingItem extends Item {
             // and third line carry the tide's own colour and change once the ring is blessed.
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_eroded")
                     .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.accept(Component.translatable(isTideBlessed(stack)
+            tooltipComponents.accept(Component.translatable(isGuardianAcknowledged(stack)
                             ? "tooltip.simpleflightring.ocean_damaged_acknowledged"
                             : "tooltip.simpleflightring.ocean_damaged_waiting")
                     .withColor(RingAbility.OCEAN_FAVORED.color()));
-            tooltipComponents.accept(Component.translatable(isTideBlessed(stack)
+            tooltipComponents.accept(Component.translatable(isGuardianAcknowledged(stack)
                             ? "tooltip.simpleflightring.ocean_damaged_restore"
                             : "tooltip.simpleflightring.ocean_damaged_prove")
                     .withColor(RingAbility.OCEAN_FAVORED.color()));
