@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [" H ","PRP"," N "],
+  "key": {
+    "H": "minecraft:heart_of_the_sea",
+    "P": "minecraft:prismarine_shard",
+    "N": "minecraft:nautilus_shell",
+    "R": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "simpleflightring:damaged_ocean_flight_ring",
+      "components": {
+        "simpleflightring:tide_blessed": {}
+      }
+    }
+  },
+  "result": {
+    "id": "simpleflightring:ocean_flight_ring",
+    "count": 1
+  }
+}

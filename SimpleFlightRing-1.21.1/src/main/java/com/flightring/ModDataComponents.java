@@ -84,6 +84,17 @@ public class ModDataComponents {
                     .persistent(Codec.INT)
                     .networkSynchronized(ByteBufCodecs.VAR_INT));
 
+    /**
+     * Ocean relic ring quest step: the damaged ocean ring was carried while an Elder Guardian
+     * was slain (see {@link OceanRingQuest}), so it earned the tide's blessing and only the new
+     * vessel is missing (a heart of the sea, prismarine shards and a nautilus shell - see the
+     * {@code ocean_flight_ring} recipe). Absent means the ring is still waiting for the deep.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> TIDE_BLESSED =
+            COMPONENTS.registerComponentType("tide_blessed", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
     private ModDataComponents() {
     }
 }

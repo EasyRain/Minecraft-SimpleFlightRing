@@ -23,6 +23,8 @@ import java.util.function.Consumer;
  *       (see {@link MinerRingQuest}).</li>
  *   <li><b>Emerald</b>: win a raid while carrying it, then add 8 emeralds
  *       (see {@link EmeraldRingQuest}).</li>
+ *   <li><b>Ocean</b>: slay an Elder Guardian while carrying it, then forge the vessel out of a
+ *       heart of the sea, prismarine shards and a nautilus shell (see {@link OceanRingQuest}).</li>
  *   <li><b>Everything else</b>: the plain shapeless repair recipe with the theme material.</li>
  * </ul>
  * While a relic has its own quest its tooltip shows the quest text (and it glints once the
@@ -60,10 +62,16 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.HERO_CHARGED.get());
     }
 
+    /** True once the ocean ring earned the tide's blessing (see {@link OceanRingQuest}). */
+    public static boolean isTideBlessed(ItemStack stack) {
+        return stack.has(ModDataComponents.TIDE_BLESSED.get());
+    }
+
     /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
-        return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack) || super.isFoil(stack);
+        return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack)
+                || isTideBlessed(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -108,6 +116,26 @@ public class DamagedRingItem extends Item {
                         .withStyle(ChatFormatting.WHITE));
             } else {
                 tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.emerald_damaged_wake")
+                        .withStyle(ChatFormatting.WHITE));
+            }
+            return;
+        }
+        if (relic == RelicRing.OCEAN) {
+            // The ocean ring's quest text: three grey flavour lines, then what to do next.
+            // Blessed rings swap that last line for the state and the missing vessel.
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_lost")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_salt")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_listen")
+                    .withStyle(ChatFormatting.GRAY));
+            if (isTideBlessed(stack)) {
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_blessed")
+                        .withStyle(ChatFormatting.WHITE));
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_vessel")
+                        .withStyle(ChatFormatting.WHITE));
+            } else {
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_wake")
                         .withStyle(ChatFormatting.WHITE));
             }
             return;
