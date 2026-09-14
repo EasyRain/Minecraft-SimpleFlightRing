@@ -13,9 +13,8 @@ import net.minecraft.world.item.ItemStack;
  * from the ring the player is really wearing, so the key cannot be spoofed into
  * triggering a ring the player does not have.
  * <p>
- * Every ability implemented so far (Magic Lining, Kinetic Deflection, Burst Totem)
- * triggers on its own, so pressing the key currently just reports the ring it would
- * fire. ACTIVE abilities hook in at the marked spot below.
+ * The ring must actually work: a drained ring (durability used up) fires nothing, just
+ * like it stops granting flight. Rings whose abilities are all passive only report that.
  */
 public final class RingAbilityKeyHandler {
 
@@ -28,7 +27,7 @@ public final class RingAbilityKeyHandler {
         }
 
         if (ring.getItem() instanceof FlightRingItem item && item.hasAbility(RingAbility.SCULK_SOUL)) {
-            SculkSoulAbility.tryFireSonicBoom(player);
+            SculkSoulAbility.tryFireSonicBoom(player, ring);
             return;
         }
 
@@ -41,9 +40,9 @@ public final class RingAbilityKeyHandler {
     }
 
     /**
-     * The ring worn in the Curios flight ring slot when it has special abilities, or an
-     * empty stack. Abilities never work from the inventory (same rule as the linked rings'
-     * attributes), so the ability key does not look there either.
+     * The ring worn in the Curios flight ring slot when it has special abilities and still
+     * has durability left, or an empty stack. Abilities never work from the inventory (the
+     * same rule as the linked rings' attributes), so the ability key does not look there.
      */
     private static ItemStack wornAbilityRing(ServerPlayer player) {
         ItemStack ring = CuriosCompat.findRingInSlot(player);
@@ -51,7 +50,9 @@ public final class RingAbilityKeyHandler {
     }
 
     private static boolean hasAbilities(ItemStack stack) {
-        return stack.getItem() instanceof FlightRingItem ring && !ring.getAbilities().isEmpty();
+        return stack.getItem() instanceof FlightRingItem ring
+                && !ring.getAbilities().isEmpty()
+                && ring.isUsable(stack);
     }
 
     private RingAbilityKeyHandler() {

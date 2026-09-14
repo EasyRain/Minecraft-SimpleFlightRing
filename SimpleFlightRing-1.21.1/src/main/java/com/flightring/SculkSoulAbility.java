@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.phys.BlockHitResult;
@@ -215,7 +216,7 @@ public final class SculkSoulAbility {
      * Fires the warden-style sonic boom for the worn sculk ring, if it is off cooldown.
      * Called by {@link RingAbilityKeyHandler} when the ability key is pressed.
      */
-    static void tryFireSonicBoom(ServerPlayer player) {
+    static void tryFireSonicBoom(ServerPlayer player, ItemStack ring) {
         long now = player.serverLevel().getGameTime();
         Long readyAt = SONIC_BOOM_READY_AT.get(player.getUUID());
         if (readyAt != null && now < readyAt) {
@@ -225,10 +226,10 @@ public final class SculkSoulAbility {
             return;
         }
         SONIC_BOOM_READY_AT.put(player.getUUID(), now + SONIC_BOOM_COOLDOWN_TICKS);
-        fireSonicBoom(player);
+        fireSonicBoom(player, ring);
     }
 
-    private static void fireSonicBoom(ServerPlayer player) {
+    private static void fireSonicBoom(ServerPlayer player, ItemStack ring) {
         ServerLevel level = player.serverLevel();
         Vec3 from = player.getEyePosition();
         Vec3 direction = player.getLookAngle().normalize();
@@ -264,7 +265,8 @@ public final class SculkSoulAbility {
         if (target == null) {
             return;
         }
-        if (target.hurt(level.damageSources().sonicBoom(player), SONIC_BOOM_DAMAGE)) {
+        if (target.hurt(level.damageSources().sonicBoom(player),
+                SONIC_BOOM_DAMAGE * RingAbilities.abilityDamageMultiplier(ring))) {
             double resistance = 1.0 - target.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
             target.push(step.x * SONIC_BOOM_KNOCKBACK_HORIZONTAL * resistance,
                     step.y * SONIC_BOOM_KNOCKBACK_VERTICAL * resistance,
@@ -302,13 +304,26 @@ public final class SculkSoulAbility {
     // Helpers
     // ------------------------------------------------------------------
 
-    /** True while the player wears a ring with the sculk soul in the Curios slot. */
+    /** True while the player wears a usable ring with the sculk soul in the Curios slot. */
     private static boolean wearsSculkRing(Player player) {
+        return !wornSculkRing(player).isEmpty();
+    }
+
+    /**
+     * The worn sculk ring, or an empty stack. The ring must still be usable: a drained ring
+     * (durability used up) grants none of the four effects, exactly like it stops flying.
+     */
+    private static ItemStack wornSculkRing(Player player) {
         if (!CuriosCompat.isLoaded()) {
-            return false;
+            return ItemStack.EMPTY;
         }
-        var ring = CuriosCompat.findRingInSlot(player);
-        return ring.getItem() instanceof FlightRingItem item && item.hasAbility(RingAbility.SCULK_SOUL);
+        ItemStack ring = CuriosCompat.findRingInSlot(player);
+        if (ring.getItem() instanceof FlightRingItem item
+                && item.hasAbility(RingAbility.SCULK_SOUL)
+                && item.isUsable(ring)) {
+            return ring;
+        }
+        return ItemStack.EMPTY;
     }
 
     private static boolean isInDeepDark(Player player) {

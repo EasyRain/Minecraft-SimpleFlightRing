@@ -38,4 +38,13 @@ final class RingAbilities {
         ItemStack ring = CuriosCompat.findRingInSlot(player);
         return RingEnergy.max(ring) > 0.0F ? ring : ItemStack.EMPTY;
     }
+
+    /**
+     * Damage multiplier the ring's 力量 (Power) enchantment grants to its special ability:
+     * +25% per level, so level 5 hits for 2.25 times the base damage. A ring without the
+     * enchantment returns 1.0.
+     */
+    static float abilityDamageMultiplier(ItemStack ring) {
+        return 1.0F + 0.25F * RingEnergy.enchantLevel(ring, ModEnchantments.POWER);
+    }
 }

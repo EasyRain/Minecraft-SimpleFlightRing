@@ -151,6 +151,17 @@ public class FlightRingItem extends Item {
         return Collections.unmodifiableSet(abilities);
     }
 
+    /**
+     * True while the ring can still be used: a ring forged with the Indestructible Core has
+     * infinite durability, every other ring simply goes inert once its durability is used
+     * up (see {@link FlightHandler}). Special abilities check this as well, so a drained
+     * ring grants neither flight nor its ability.
+     */
+    public boolean isUsable(ItemStack stack) {
+        return stack.has(ModDataComponents.INDESTRUCTIBLE.get())
+                || stack.getDamageValue() < stack.getMaxDamage();
+    }
+
     /** Size of the ring's energy pool, or 0 when it has none (see {@link RingEnergy}). */
     public float getMaxEnergy() {
         return maxEnergy;
@@ -327,6 +338,11 @@ public class FlightRingItem extends Item {
         }
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack) > 0) {
             addHint(hints, "rocket_boost");
+        }
+        int power = RingEnergy.enchantLevel(stack, ModEnchantments.POWER);
+        if (power > 0) {
+            // 力量 (Power): +25% special ability damage per level.
+            addHint(hints, "power", power * 25);
         }
         return hints;
     }
