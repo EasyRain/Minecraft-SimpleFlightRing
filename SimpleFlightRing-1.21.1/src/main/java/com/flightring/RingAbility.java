@@ -43,7 +43,16 @@ public enum RingAbility {
      * chance to leave an emerald behind. Passive only - the emerald ring has no ability key,
      * and the emerald chance keeps no tooltip line of its own.
      */
-    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4, 0, 1);
+    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4, 0, 1),
+
+    /**
+     * Ocean relic ring: the sea's own blessing. Water breathing and dolphin's grace forever,
+     * night vision and clear water while submerged, aquatic monsters treat the wearer as one of
+     * their own (but still hit back), half damage while standing in an ocean biome, a whirlpool
+     * that slows every nearby enemy and flames that go out on their own. Passive only - the
+     * ocean ring has no ability key.
+     */
+    OCEAN_FAVORED("ocean_favored", 0xFF2BB8D8, 5);
 
     private final String key;
     private final int color;

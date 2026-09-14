@@ -119,23 +119,18 @@ public class DamagedRingItem extends Item {
             return;
         }
         if (relic == RelicRing.OCEAN) {
-            // The ocean ring's quest text: three grey flavour lines, then what to do next.
-            // Blessed rings swap that last line for the state and the missing vessel.
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_lost")
+            // The ocean ring's quest text: what the sea took, then what to do next. The second
+            // and third line carry the tide's own colour and change once the ring is blessed.
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_eroded")
                     .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_salt")
-                    .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_listen")
-                    .withStyle(ChatFormatting.GRAY));
-            if (isTideBlessed(stack)) {
-                tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_blessed")
-                        .withStyle(ChatFormatting.WHITE));
-                tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_vessel")
-                        .withStyle(ChatFormatting.WHITE));
-            } else {
-                tooltipComponents.add(Component.translatable("tooltip.simpleflightring.ocean_damaged_wake")
-                        .withStyle(ChatFormatting.WHITE));
-            }
+            tooltipComponents.add(Component.translatable(isTideBlessed(stack)
+                            ? "tooltip.simpleflightring.ocean_damaged_acknowledged"
+                            : "tooltip.simpleflightring.ocean_damaged_waiting")
+                    .withColor(RingAbility.OCEAN_FAVORED.color()));
+            tooltipComponents.add(Component.translatable(isTideBlessed(stack)
+                            ? "tooltip.simpleflightring.ocean_damaged_restore"
+                            : "tooltip.simpleflightring.ocean_damaged_prove")
+                    .withColor(RingAbility.OCEAN_FAVORED.color()));
             return;
         }
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));
