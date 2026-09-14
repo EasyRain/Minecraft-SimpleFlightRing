@@ -47,7 +47,7 @@
   "tooltip.simpleflightring.unbreaking_desc": "每点耐久能够提供%s秒飞行时间",
   "tooltip.simpleflightring.efficiency_title": "效率附魔：",
   "tooltip.simpleflightring.efficiency_desc": "增加%s%%疾跑飞行速度",
-  "tooltip.simpleflightring.arcane_amplification_title": "魔能增幅：",
+  "tooltip.simpleflightring.arcane_amplification_title": "魔能增幅附魔：",
   "tooltip.simpleflightring.arcane_amplification_desc": "能量上限提升为戒指基础能量的 %s 倍",
   "tooltip.simpleflightring.energy_burst_title": "能量迸发附魔：",
   "tooltip.simpleflightring.energy_burst_desc": "主动特殊能力伤害增加%s%%",
