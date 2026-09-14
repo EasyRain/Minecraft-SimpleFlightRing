@@ -5,6 +5,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -16,14 +18,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.ExplosionKnockbackEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -31,13 +37,15 @@ import java.util.UUID;
  * ability it only works while the ring is worn (in the Curios slot) and still has
  * durability left.
  * <ol>
- *   <li><b>Night Vision</b> forever: re-applied every second with a 3 second duration, so
- *       it never runs out but also disappears within 3 s of taking the ring off.</li>
- *   <li><b>Haste by depth</b> (same 3 s / every second refresh): level 1 below sea level
- *       (y &lt; 63), level 2 below y = 0, level 3 below y = -32, nothing above sea level.
- *       Outside the overworld height is ignored and it is always level 1.</li>
- *   <li><b>Immune to TNT blasts</b> - only TNT (and TNT minecarts); creepers, beds and
- *       every other explosion still hurt normally.</li>
+ *   <li><b>Night Vision</b> forever: re-applied every second. The buff lasts 30 s so the
+ *       HUD icon is visible without ever getting into the "last 10 seconds" blinking
+ *       state; taking the ring off (or draining it) removes it right away.</li>
+ *   <li><b>Haste by depth</b> (same refresh): level 1 below sea level (y &lt; 63), level 2
+ *       below y = 0, level 3 below y = -32, none above sea level. Outside the overworld
+ *       height is ignored and it is always level 1.</li>
+ *   <li><b>Immune to TNT blasts</b> - the damage AND the knockback of TNT (and TNT
+ *       minecarts) only; creepers, respawn anchors, beds and every other explosion still
+ *       hurt and push normally.</li>
  *   <li><b>TNT blast on the ability key</b>: a vanilla TNT explosion (radius 4, breaks
  *       blocks) centred on the wearer, 3 s cooldown. The wearer survives it thanks to the
  *       immunity above, and the 力量 (Power) enchantment scales the damage it deals.</li>
@@ -46,8 +54,12 @@ import java.util.UUID;
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class MinerVeteranAbility {
 
-    /** Passive: both buffs last 3 s and are re-applied once per second. */
-    private static final int BUFF_DURATION_TICKS = 60;
+    /**
+     * Passive: the buffs last 30 s and are re-applied every second. 30 s is well past the
+     * 10 s mark where vanilla starts blinking the HUD icon, so the icon reads as "always on"
+     * instead of flickering, while still fading within half a minute of losing the ring.
+     */
+    private static final int BUFF_DURATION_TICKS = 600;
     private static final int BUFF_REFRESH_TICKS = 20;
     /** Passive: sea level and the two deeper steps of Haste. */
     private static final int SEA_LEVEL = 63;
@@ -59,6 +71,8 @@ public final class MinerVeteranAbility {
     private static final int DETONATE_COOLDOWN_TICKS = 60;
 
     private static final Map<UUID, Long> DETONATE_READY_AT = new HashMap<>();
+    /** Players currently carrying the miner buffs, so losing the ring clears them once. */
+    private static final Set<UUID> BUFFED = new HashSet<>();
 
     // ------------------------------------------------------------------
     // Passive: Night Vision + depth scaled Haste
@@ -69,25 +83,41 @@ public final class MinerVeteranAbility {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (player.level().getGameTime() % BUFF_REFRESH_TICKS != 0) {
-            return;                          // once per second is enough for a 3 s buff
-        }
         if (wornRing(player).isEmpty()) {
+            // Ring taken off (or drained): drop both buffs once instead of waiting them out.
+            if (BUFFED.remove(player.getUUID())) {
+                player.removeEffect(MobEffects.NIGHT_VISION);
+                player.removeEffect(MobEffects.HASTE);
+            }
             return;
         }
-        player.addEffect(hiddenBuff(MobEffects.NIGHT_VISION, 0));
-        int haste = hasteAmplifier(player);
-        if (haste >= 0) {
-            player.addEffect(hiddenBuff(MobEffects.HASTE, haste));
+        if (player.level().getGameTime() % BUFF_REFRESH_TICKS != 0) {
+            return;                          // once per second is plenty for a 30 s buff
         }
+        applyBuff(player, MobEffects.NIGHT_VISION, 0);
+        applyBuff(player, MobEffects.HASTE, hasteAmplifier(player));
+        BUFFED.add(player.getUUID());
     }
 
     /**
-     * A buff with no particles and no HUD icon: it is re-applied every second forever while
-     * the ring is worn, so an icon would only flicker.
+     * Keeps one buff at the wanted level: {@code amplifier < 0} means "no buff at all"
+     * (above sea level for Haste). A stronger buff that is already on the player is removed
+     * first, otherwise vanilla would keep the higher level until it expires - the player
+     * would stay at Haste III after climbing back up.
      */
-    private static MobEffectInstance hiddenBuff(Holder<MobEffect> effect, int amplifier) {
-        return new MobEffectInstance(effect, BUFF_DURATION_TICKS, amplifier, true, false, false);
+    private static void applyBuff(ServerPlayer player, Holder<MobEffect> effect, int amplifier) {
+        if (amplifier < 0) {
+            if (player.hasEffect(effect)) {
+                player.removeEffect(effect);
+            }
+            return;
+        }
+        MobEffectInstance current = player.getEffect(effect);
+        if (current != null && current.getAmplifier() > amplifier) {
+            player.removeEffect(effect);
+        }
+        // ambient (no particles), showIcon: the player should be able to see that it is on.
+        player.addEffect(new MobEffectInstance(effect, BUFF_DURATION_TICKS, amplifier, true, false, true));
     }
 
     /**
@@ -110,7 +140,7 @@ public final class MinerVeteranAbility {
     }
 
     // ------------------------------------------------------------------
-    // Passive: TNT immunity
+    // Passive: TNT immunity (damage and knockback)
     // ------------------------------------------------------------------
 
     @SubscribeEvent
@@ -118,10 +148,44 @@ public final class MinerVeteranAbility {
         if (!(event.getEntity() instanceof Player player) || wornRing(player).isEmpty()) {
             return;
         }
-        Entity direct = event.getSource().getDirectEntity();
-        if (direct != null && (direct.getType() == EntityType.TNT || direct.getType() == EntityType.TNT_MINECART)) {
+        if (isTntBlast(event.getSource())) {
             event.setCanceled(true);
         }
+    }
+
+    /**
+     * Cancels the shove of a TNT blast as well: vanilla applies the knockback outside the
+     * damage call, so cancelling the damage alone still threw the wearer around.
+     */
+    @SubscribeEvent
+    public static void onExplosionKnockback(ExplosionKnockbackEvent event) {
+        if (!(event.getAffectedEntity() instanceof Player player) || wornRing(player).isEmpty()) {
+            return;
+        }
+        if (isTntBlast(event.getExplosion())) {
+            event.setKnockbackVelocity(Vec3.ZERO);
+        }
+    }
+
+    /**
+     * True only for an explosion that came from a TNT (or a TNT minecart): the damage must
+     * be tagged as an explosion AND its direct source entity must be that TNT. Anything else -
+     * creepers, respawn anchors, beds, end crystals - is left completely alone.
+     */
+    private static boolean isTntBlast(DamageSource source) {
+        if (!source.is(DamageTypeTags.IS_EXPLOSION)) {
+            return false;
+        }
+        return isTnt(source.getDirectEntity());
+    }
+
+    private static boolean isTntBlast(Explosion explosion) {
+        return isTnt(explosion.getDirectSourceEntity());
+    }
+
+    private static boolean isTnt(Entity entity) {
+        return entity != null
+                && (entity.getType() == EntityType.TNT || entity.getType() == EntityType.TNT_MINECART);
     }
 
     // ------------------------------------------------------------------
@@ -178,12 +242,17 @@ public final class MinerVeteranAbility {
 
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        DETONATE_READY_AT.remove(event.getEntity().getUUID());
+        clear(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        DETONATE_READY_AT.remove(event.getOriginal().getUUID());
+        clear(event.getOriginal().getUUID());
+    }
+
+    private static void clear(UUID playerId) {
+        DETONATE_READY_AT.remove(playerId);
+        BUFFED.remove(playerId);
     }
 
     private MinerVeteranAbility() {
