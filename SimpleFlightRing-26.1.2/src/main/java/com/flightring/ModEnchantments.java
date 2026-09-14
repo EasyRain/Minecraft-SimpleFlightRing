@@ -40,16 +40,6 @@ public class ModEnchantments {
             ResourceKey.create(Registries.ENCHANTMENT,
                     Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "arcane_amplification"));
 
-    /**
-     * "Power" (Chinese: 力量) - an enchanting-table enchantment for the rings that have an
-     * ACTIVE ability only (currently the sculk ring, see the
-     * {@code #simpleflightring:active_ability_rings} tag): every level adds 25% to the
-     * damage of that ring's special ability (see {@link RingAbilities#abilityDamageMultiplier}).
-     */
-    public static final ResourceKey<Enchantment> POWER =
-            ResourceKey.create(Registries.ENCHANTMENT,
-                    Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "power"));
-
     private ModEnchantments() {
     }
 }

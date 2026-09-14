@@ -2,6 +2,7 @@ package com.flightring;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 /**
  * Shared helpers for the special abilities of the linked rings: they all work only while
@@ -41,10 +42,12 @@ final class RingAbilities {
 
     /**
      * Damage multiplier the ring's 力量 (Power) enchantment grants to its special ability:
-     * +25% per level, so level 5 hits for 2.25 times the base damage. A ring without the
-     * enchantment returns 1.0.
+     * +25% per level, so level V hits for 2.25 times the base damage. Uses the VANILLA
+     * {@code minecraft:power} enchantment (the rings that have an active ability are added
+     * to {@code #minecraft:enchantable/bow}, which is what makes the table offer it);
+     * a ring without it returns 1.0.
      */
     static float abilityDamageMultiplier(ItemStack ring) {
-        return 1.0F + 0.25F * RingEnergy.enchantLevel(ring, ModEnchantments.POWER);
+        return 1.0F + 0.25F * RingEnergy.enchantLevel(ring, Enchantments.POWER);
     }
 }

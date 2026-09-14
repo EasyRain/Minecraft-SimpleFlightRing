@@ -6,13 +6,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
@@ -43,12 +40,12 @@ import java.util.UUID;
  *   <li><b>Haste by depth</b> (same refresh): level 1 below sea level (y &lt; 63), level 2
  *       below y = 0, level 3 below y = -32, none above sea level. Outside the overworld
  *       height is ignored and it is always level 1.</li>
- *   <li><b>Immune to TNT blasts</b> - the damage AND the knockback of TNT (and TNT
- *       minecarts) only; creepers, respawn anchors, beds and every other explosion still
- *       hurt and push normally.</li>
- *   <li><b>TNT blast on the ability key</b>: a vanilla TNT explosion (radius 4, breaks
- *       blocks) centred on the wearer, 3 s cooldown. The wearer survives it thanks to the
- *       immunity above, and the 力量 (Power) enchantment scales the damage it deals.</li>
+ *   <li><b>Immune to every explosion</b> - damage and knockback alike, whether it came from
+ *       a block, a TNT, a creeper or another mod.</li>
+ *   <li><b>TNT blast on the ability key</b>: a vanilla TNT explosion (breaks blocks) centred
+ *       on the wearer, 3 s cooldown. The wearer survives it thanks to the immunity above, and
+ *       the vanilla 力量 (Power) enchantment scales both the damage and the radius
+ *       (+25% each per level, so level V is 2.25 times the damage and a 9 block radius).</li>
  * </ol>
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
@@ -140,7 +137,7 @@ public final class MinerVeteranAbility {
     }
 
     // ------------------------------------------------------------------
-    // Passive: TNT immunity (damage and knockback)
+    // Passive: explosion immunity (damage and knockback, from anything)
     // ------------------------------------------------------------------
 
     @SubscribeEvent
@@ -148,13 +145,13 @@ public final class MinerVeteranAbility {
         if (!(event.getEntity() instanceof Player player) || wornRing(player).isEmpty()) {
             return;
         }
-        if (isTntBlast(event.getSource())) {
+        if (event.getSource().is(DamageTypeTags.IS_EXPLOSION)) {
             event.setCanceled(true);
         }
     }
 
     /**
-     * Cancels the shove of a TNT blast as well: vanilla applies the knockback outside the
+     * Cancels the shove of an explosion as well: vanilla applies the knockback outside the
      * damage call, so cancelling the damage alone still threw the wearer around.
      */
     @SubscribeEvent
@@ -162,30 +159,7 @@ public final class MinerVeteranAbility {
         if (!(event.getAffectedEntity() instanceof Player player) || wornRing(player).isEmpty()) {
             return;
         }
-        if (isTntBlast(event.getExplosion())) {
-            event.setKnockbackVelocity(Vec3.ZERO);
-        }
-    }
-
-    /**
-     * True only for an explosion that came from a TNT (or a TNT minecart): the damage must
-     * be tagged as an explosion AND its direct source entity must be that TNT. Anything else -
-     * creepers, respawn anchors, beds, end crystals - is left completely alone.
-     */
-    private static boolean isTntBlast(DamageSource source) {
-        if (!source.is(DamageTypeTags.IS_EXPLOSION)) {
-            return false;
-        }
-        return isTnt(source.getDirectEntity());
-    }
-
-    private static boolean isTntBlast(Explosion explosion) {
-        return isTnt(explosion.getDirectSourceEntity());
-    }
-
-    private static boolean isTnt(Entity entity) {
-        return entity != null
-                && (entity.getType() == EntityType.TNT || entity.getType() == EntityType.TNT_MINECART);
+        event.setKnockbackVelocity(Vec3.ZERO);
     }
 
     // ------------------------------------------------------------------
@@ -204,22 +178,22 @@ public final class MinerVeteranAbility {
         DETONATE_READY_AT.put(player.getUUID(), now + DETONATE_COOLDOWN_TICKS);
 
         ServerLevel level = player.level();
-        // A TNT entity that is never added to the world: it only gives the explosion the TNT
-        // damage source (so this ring's wearer stays immune to their own blast) while the
-        // custom calculator scales the damage with the 力量 (Power) enchantment.
-        PrimedTnt source = new PrimedTnt(level, player.getX(), player.getY(), player.getZ(), player);
+        // 力量 (Power) grows the blast both ways: damage per entity AND the radius, so a
+        // stronger ring really clears more rock. The wearer is safe from every explosion
+        // (see the immunity above), so standing in the middle is fine.
         float multiplier = RingAbilities.abilityDamageMultiplier(ring);
-        level.explode(source, level.damageSources().explosion(source, player),
+        level.explode(player, level.damageSources().explosion(player, player),
                 new ExplosionDamageCalculator() {
                     @Override
                     public float getEntityDamageAmount(Explosion explosion, Entity entity, float base) {
                         return super.getEntityDamageAmount(explosion, entity, base) * multiplier;
                     }
                 },
-                player.getX(), player.getY(), player.getZ(), BLAST_RADIUS, false, Level.ExplosionInteraction.TNT);
+                player.getX(), player.getY(), player.getZ(), BLAST_RADIUS * multiplier, false,
+                Level.ExplosionInteraction.TNT);
 
-        FlightRingMod.LOGGER.debug("[FlightRing] {} detonated the miner blast (x{})",
-                player.getName().getString(), multiplier);
+        FlightRingMod.LOGGER.debug("[FlightRing] {} detonated the miner blast (x{}, radius {})",
+                player.getName().getString(), multiplier, BLAST_RADIUS * multiplier);
     }
 
     // ------------------------------------------------------------------
