@@ -339,6 +339,17 @@ public final class OceanFavoredAbility {
         return ItemStack.EMPTY;
     }
 
+    /**
+     * True while this player wears a usable ocean ring, {@code false} for a null player.
+     * <p>
+     * Used by the client side {@code ElderGuardianCurseMixin} to decline the guardian's curse
+     * packet: the Curios slot is readable on both sides for the local player, so the client can
+     * decide this on its own without a network round trip.
+     */
+    public static boolean isCurseProtected(Player player) {
+        return player != null && !wornRing(player).isEmpty();
+    }
+
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         clear(event.getEntity().getUUID());

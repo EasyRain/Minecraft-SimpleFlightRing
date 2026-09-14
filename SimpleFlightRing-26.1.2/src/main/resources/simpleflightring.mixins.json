@@ -9,6 +9,9 @@
     "SculkShriekerBlockEntityMixin",
     "WardenMixin"
   ],
+  "client": [
+    "ElderGuardianCurseMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
