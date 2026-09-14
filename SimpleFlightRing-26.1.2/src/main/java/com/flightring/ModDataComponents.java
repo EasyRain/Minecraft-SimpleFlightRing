@@ -62,6 +62,17 @@ public class ModDataComponents {
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
+    /**
+     * Emerald relic ring quest step: the damaged emerald ring was carried through a won raid
+     * (see {@link EmeraldRingQuest}), so it remembers the old hero's light and only the new
+     * vessel is missing (8 emeralds around it, the {@code emerald_flight_ring} recipe).
+     * Absent means the ring is still asleep.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> HERO_CHARGED =
+            COMPONENTS.registerComponentType("hero_charged", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
     private ModDataComponents() {
     }
 }

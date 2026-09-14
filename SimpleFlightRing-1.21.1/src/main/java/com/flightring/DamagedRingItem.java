@@ -20,6 +20,8 @@ import java.util.List;
  *       (see {@link SculkRingQuest}).</li>
  *   <li><b>Miner</b>: throw it into a blast, then add 8 iron ingots
  *       (see {@link MinerRingQuest}).</li>
+ *   <li><b>Emerald</b>: win a raid while carrying it, then add 8 emeralds
+ *       (see {@link EmeraldRingQuest}).</li>
  *   <li><b>Everything else</b>: the plain shapeless repair recipe with the theme material.</li>
  * </ul>
  * While a relic has its own quest its tooltip shows the quest text (and it glints once the
@@ -49,10 +51,18 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.BLAST_FORGED.get());
     }
 
+    /**
+     * True once the emerald ring has been carried through a won raid
+     * (see {@link EmeraldRingQuest}).
+     */
+    public static boolean isHeroCharged(ItemStack stack) {
+        return stack.has(ModDataComponents.HERO_CHARGED.get());
+    }
+
     /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
-        return hasWardenSoul(stack) || isBlastForged(stack) || super.isFoil(stack);
+        return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -80,11 +90,23 @@ public class DamagedRingItem extends Item {
             return;
         }
         if (relic == RelicRing.EMERALD) {
-            // The only relic that cannot be looted: a master librarian may sell it.
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_source")
+            // The emerald ring's quest text: three grey flavour lines, then what to do next.
+            // Charged rings swap that last line for the state and the missing vessel.
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_gone")
                     .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged_repair",
-                    new ItemStack(relic.repairMaterial()).getHoverName()).withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_name")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_deeds")
+                    .withStyle(ChatFormatting.GRAY));
+            if (isHeroCharged(stack)) {
+                tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_charged")
+                        .withStyle(ChatFormatting.WHITE));
+                tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_vessel")
+                        .withStyle(ChatFormatting.WHITE));
+            } else {
+                tooltipComponents.add(Component.translatable("tooltip.simpleflightring.emerald_damaged_wake")
+                        .withStyle(ChatFormatting.WHITE));
+            }
             return;
         }
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));

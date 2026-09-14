@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": ["EEE","ERE","EEE"],
+  "key": {
+    "E": "minecraft:emerald",
+    "R": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "simpleflightring:damaged_emerald_flight_ring",
+      "components": {
+        "simpleflightring:hero_charged": {}
+      }
+    }
+  },
+  "result": {
+    "id": "simpleflightring:emerald_flight_ring",
+    "count": 1
+  }
+}

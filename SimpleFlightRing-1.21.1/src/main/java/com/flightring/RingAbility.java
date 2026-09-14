@@ -41,7 +41,7 @@ public enum RingAbility {
      * damage from the wearer, drop twice the loot and every hostile mob has a small chance
      * to leave an emerald behind. Passive only - the emerald ring has no ability key.
      */
-    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4);
+    EMERALD_HERO("emerald_hero", 0xFF54E18E, 5);
 
     private final String key;
     private final int color;

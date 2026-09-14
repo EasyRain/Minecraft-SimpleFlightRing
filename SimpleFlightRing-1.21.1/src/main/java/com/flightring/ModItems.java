@@ -147,12 +147,18 @@ public class ModItems {
     }
 
     /**
-     * Built-in (intrinsic) enchantments of a relic ring: the miner ring is balanced against
-     * the iron ring but ships with Unbreaking I, so every point of its durability lasts two
-     * seconds of flight.
+     * Built-in (intrinsic) enchantments of a relic ring, both are kept outside the vanilla
+     * enchantments component so nothing can strip them: the miner ring is balanced against
+     * the iron ring but ships with Unbreaking I (every point of its durability lasts two
+     * seconds of flight), the emerald ring is balanced against the gold ring and ships with
+     * Efficiency I (10% faster sprint flight).
      */
     private static Map<ResourceKey<Enchantment>, Integer> relicIntrinsicEnchantments(RelicRing relic) {
-        return relic == RelicRing.MINER ? Map.of(Enchantments.UNBREAKING, 1) : Map.of();
+        return switch (relic) {
+            case MINER -> Map.of(Enchantments.UNBREAKING, 1);
+            case EMERALD -> Map.of(Enchantments.EFFICIENCY, 1);
+            default -> Map.of();
+        };
     }
 
     private static Map<RelicRing, DeferredItem<DamagedRingItem>> registerDamagedRelicRings() {

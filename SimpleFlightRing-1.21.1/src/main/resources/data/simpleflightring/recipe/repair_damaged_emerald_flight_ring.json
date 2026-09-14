@@ -1,6 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "category": "equipment",
-  "ingredients": [ { "item": "simpleflightring:damaged_emerald_flight_ring" }, { "item": "minecraft:emerald_block" } ],
-  "result": { "id": "simpleflightring:emerald_flight_ring", "count": 1 }
-}
