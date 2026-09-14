@@ -3,6 +3,7 @@
   "values": [
     "simpleflightring:flight_stability",
     "simpleflightring:rocket_boost",
+    "simpleflightring:energy_burst",
     { "id": "simpleflightring:arcane_amplification", "required": false }
   ]
 }

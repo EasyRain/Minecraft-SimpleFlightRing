@@ -40,6 +40,17 @@ public class ModEnchantments {
             ResourceKey.create(Registries.ENCHANTMENT,
                     ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "arcane_amplification"));
 
+    /**
+     * "Energy Burst" (Chinese: 能量迸发) - an enchanting-table enchantment for the rings that
+     * have an ACTIVE ability only (see the {@code #simpleflightring:active_ability_rings}
+     * tag, currently the sculk and miner rings): every level adds 25% to the damage of that
+     * ring's special ability and widens its blast by the same factor
+     * (see {@link RingAbilities#abilityDamageMultiplier}).
+     */
+    public static final ResourceKey<Enchantment> ENERGY_BURST =
+            ResourceKey.create(Registries.ENCHANTMENT,
+                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "energy_burst"));
+
     private ModEnchantments() {
     }
 }

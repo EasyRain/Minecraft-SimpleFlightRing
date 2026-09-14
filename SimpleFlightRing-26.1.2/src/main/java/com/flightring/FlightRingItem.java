@@ -339,11 +339,10 @@ public class FlightRingItem extends Item {
         if (EnchantmentHelper.getItemEnchantmentLevel(context.registries().holderOrThrow(ModEnchantments.ROCKET_BOOST), stack) > 0) {
             addHint(hints, "rocket_boost");
         }
-        int power = EnchantmentHelper.getItemEnchantmentLevel(
-                context.registries().holderOrThrow(Enchantments.POWER), stack);
-        if (power > 0) {
-            // 力量 (Power): +25% special ability damage per level (and a wider blast).
-            addHint(hints, "power", power * 25);
+        int burst = RingEnergy.enchantLevel(stack, ModEnchantments.ENERGY_BURST);
+        if (burst > 0) {
+            // 能量迸发: +25% special ability damage per level (and a wider blast).
+            addHint(hints, "energy_burst", burst * 25);
         }
         return hints;
     }
