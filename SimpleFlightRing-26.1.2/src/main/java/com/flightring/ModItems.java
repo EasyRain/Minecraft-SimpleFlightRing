@@ -124,9 +124,23 @@ public class ModItems {
         for (RelicRing relic : RelicRing.values()) {
             rings.put(relic, ITEMS.registerItem(relic.ringId(), properties -> new FlightRingItem(
                     relic.durability(), relic.enchantmentValue(), relicIntrinsicEnchantments(relic),
-                    relicAbilities(relic), properties)));
+                    relicAbilities(relic), relicDefaultComponents(relic, properties))));
         }
         return Collections.unmodifiableMap(rings);
+    }
+
+    /**
+     * Default components of a relic ring. Only the emerald ring has one: its strength
+     * ({@code hero_level}) defaults to the maximum, so the ring in the creative menu and one
+     * spawned with {@code /give} really are level V rings. A ring forged at the crafting table
+     * overwrites it with the level of the damaged ring it was made from
+     * (see {@link EmeraldForgeRecipe}), so the default only ever shows up on rings that were
+     * never charged.
+     */
+    private static Item.Properties relicDefaultComponents(RelicRing relic, Item.Properties properties) {
+        return relic == RelicRing.EMERALD
+                ? properties.component(ModDataComponents.HERO_LEVEL.get(), HeroLevel.MAX)
+                : properties;
     }
 
     /**

@@ -31,6 +31,16 @@ public class ModRecipeSerializers {
             SERIALIZERS.register("ring_enchant_upgrade", RingEnchantUpgradeRecipe.Serializer::new);
 
     /**
+     * Shaped: 8 emeralds around an awakened damaged emerald ring -> the working emerald ring,
+     * keeping the strength ({@code hero_level}) the damaged ring was charged with. A plain
+     * vanilla shaped recipe cannot do that - it never copies a component from an ingredient -
+     * and since the crafting preview is built by {@code assemble}, this also makes the preview
+     * in the result slot show the ring at its real level instead of level I.
+     */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EmeraldForgeRecipe>> EMERALD_FORGE =
+            SERIALIZERS.register("emerald_forge", EmeraldForgeRecipe.Serializer::new);
+
+    /**
      * Note: the AllTheModium chain (indestructible ring + that mod's upgrade template + the
      * matching metal ingot) needs no serializer of its own - it is a plain vanilla
      * {@code minecraft:smithing_transform} recipe exactly like AllTheModium's own gear

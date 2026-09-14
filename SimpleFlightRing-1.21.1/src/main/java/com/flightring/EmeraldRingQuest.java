@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Unit;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -43,7 +42,7 @@ import java.util.function.Predicate;
  * The raid's ominous level becomes the ring's strength ({@link HeroLevel}): a ring woken in a
  * level III raid grants Hero of the Village III. A ring that is already awake - damaged but
  * charged, or already forged - is strengthened instead when the raid was stronger than it is,
- * and the level follows the ring through the crafting table (see {@link #onItemCrafted}).
+ * and the level follows the ring into the working one through {@link EmeraldForgeRecipe}.
  * A sleeping ring is always woken first: quest before upgrades.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
@@ -124,31 +123,6 @@ public final class EmeraldRingQuest {
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
         RAID_WOKE.remove(event.getOriginal().getUUID());
-    }
-
-    /**
-     * Carries the charged ring's level over to the ring that is forged out of it: a plain
-     * vanilla shaped recipe does not copy components from its ingredients, so the finished
-     * ring would always start at level I without this. The grid still holds its ingredients
-     * while the event fires - vanilla only empties it afterwards (see {@code ResultSlot}).
-     */
-    @SubscribeEvent
-    public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
-        ItemStack crafted = event.getCrafting();
-        if (!(crafted.getItem() instanceof FlightRingItem ring)
-                || !ring.hasAbility(RingAbility.EMERALD_HERO)) {
-            return;
-        }
-        Container grid = event.getInventory();
-        for (int slot = 0; slot < grid.getContainerSize(); slot++) {
-            ItemStack ingredient = grid.getItem(slot);
-            if (ingredient.getItem() instanceof DamagedRingItem damaged
-                    && damaged.relic() == RelicRing.EMERALD
-                    && DamagedRingItem.isHeroCharged(ingredient)) {
-                HeroLevel.set(crafted, HeroLevel.of(ingredient));
-                return;
-            }
-        }
     }
 
     /**

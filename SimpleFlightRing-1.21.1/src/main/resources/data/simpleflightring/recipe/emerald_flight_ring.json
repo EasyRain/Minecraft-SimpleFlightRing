@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "simpleflightring:emerald_forge",
   "category": "equipment",
   "pattern": [
     "EEE",
