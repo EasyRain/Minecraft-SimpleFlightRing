@@ -51,7 +51,7 @@ public final class OceanRingQuest {
         ring.set(ModDataComponents.GUARDIAN_ACKNOWLEDGED.get(), Unit.INSTANCE);
 
         ServerLevel level = player.level();
-        // The conduit's own particles and activation sound: the tide acknowledges the ring.
+        // The conduit's own particles and activation sound: the guardian acknowledges the ring.
         level.sendParticles(ParticleTypes.NAUTILUS,
                 player.getX(), player.getY() + 0.8, player.getZ(),
                 24, 0.5, 0.7, 0.5, 0.05);

@@ -122,7 +122,7 @@ public class DamagedRingItem extends Item {
         }
         if (relic == RelicRing.OCEAN) {
             // The ocean ring's quest text: what the sea took, then what to do next. The second
-            // and third line carry the tide's own colour and change once the ring is blessed.
+            // and third line carry the ability's own colour and change once the guardian acknowledges it.
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ocean_damaged_eroded")
                     .withStyle(ChatFormatting.GRAY));
             tooltipComponents.accept(Component.translatable(isGuardianAcknowledged(stack)
