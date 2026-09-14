@@ -62,7 +62,7 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.HERO_CHARGED.get());
     }
 
-    /** True once the ocean ring earned the tide's blessing (see {@link OceanRingQuest}). */
+    /** True once the sleeping guardian acknowledged the ocean ring (see {@link OceanRingQuest}). */
     public static boolean isTideBlessed(ItemStack stack) {
         return stack.has(ModDataComponents.TIDE_BLESSED.get());
     }

@@ -86,7 +86,7 @@ public class ModDataComponents {
 
     /**
      * Ocean relic ring quest step: the damaged ocean ring was carried while an Elder Guardian
-     * was slain (see {@link OceanRingQuest}), so it earned the tide's blessing and only the new
+     * was slain (see {@link OceanRingQuest}), so the sleeping guardian acknowledged it and only the new
      * vessel is missing (a heart of the sea, prismarine shards and a nautilus shell - see the
      * {@code ocean_flight_ring} recipe). Absent means the ring is still waiting for the deep.
      */

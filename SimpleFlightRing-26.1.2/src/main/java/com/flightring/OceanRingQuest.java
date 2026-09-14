@@ -19,14 +19,15 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
  * The first step of the ocean relic ring's quest.
  * <p>
  * The broken ocean ring is found in shipwrecks. While it is still waiting (no
- * {@code tide_blessed} component) killing an ELDER GUARDIAN while CARRYING it - anywhere in the
- * inventory, the offhand or the Curios slot - earns the ring the tide's blessing: the stack
- * gains the component, starts to glint and its tooltip swaps the last line ("take back the
- * heart the guardians keep") for the state line plus the missing vessel. That is the recipe
- * gate for forging the working ring out of a heart of the sea, two prismarine shards and a
- * nautilus shell (see {@code ocean_flight_ring.json}).
+ * {@code tide_blessed} component - the internal name stayed, the text speaks of the sleeping
+ * guardian) killing an ELDER GUARDIAN while CARRYING it - anywhere in the
+ * inventory, the offhand or the Curios slot - earns its acknowledgement: the stack
+ * gains the component, starts to glint and its tooltip switches to the blessed lines
+ * ("the sleeping guardian has accepted you" / "use the ocean's greatest treasure"). That is the
+ * recipe gate for forging the working ring out of a heart of the sea, two prismarine shards and
+ * a nautilus shell (see {@code ocean_flight_ring.json}).
  * <p>
- * One Elder Guardian blesses exactly ONE ring: if the player carries several waiting rings,
+ * One Elder Guardian acknowledges exactly ONE ring: if the player carries several waiting rings,
  * only the first one found is blessed, and the rest keep waiting for their own guardian.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
@@ -60,7 +61,7 @@ public final class OceanRingQuest {
         player.sendOverlayMessage(
                 Component.translatable(TIDE_BLESSED).withStyle(ChatFormatting.GRAY));
 
-        FlightRingMod.LOGGER.debug("[FlightRing] {} earned the tide's blessing for the ocean ring",
+        FlightRingMod.LOGGER.debug("[FlightRing] {} earned the sleeping guardian's acknowledgement for the ocean ring",
                 player.getName().getString());
     }
 
