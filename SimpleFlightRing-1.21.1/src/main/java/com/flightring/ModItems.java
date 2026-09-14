@@ -131,11 +131,15 @@ public class ModItems {
     }
 
     /**
-     * Special abilities of a relic ring. So far only the sculk ring has one
-     * ({@link RingAbility#SCULK_SOUL}); the rest are plain rings.
+     * Special abilities of a relic ring: the sculk ring and the miner ring each have one,
+     * the rest are plain rings.
      */
     private static Set<RingAbility> relicAbilities(RelicRing relic) {
-        return relic == RelicRing.SCULK ? EnumSet.of(RingAbility.SCULK_SOUL) : Set.of();
+        return switch (relic) {
+            case SCULK -> EnumSet.of(RingAbility.SCULK_SOUL);
+            case MINER -> EnumSet.of(RingAbility.MINER_VETERAN);
+            default -> Set.of();
+        };
     }
 
     private static Map<RelicRing, DeferredItem<DamagedRingItem>> registerDamagedRelicRings() {

@@ -302,7 +302,7 @@ public class FlightRingItem extends Item {
             for (int line = 1; line <= ability.descriptionLines(); line++) {
                 String suffix = line == 1 ? "_desc" : "_desc" + line;
                 String key = "tooltip.simpleflightring." + ability.key() + suffix;
-                MutableComponent text = ability == RingAbility.SCULK_SOUL && line == ability.descriptionLines()
+                MutableComponent text = line == ability.keyLine()
                         ? Component.translatable(key, AbilityKeyHint.keyName())
                         : Component.translatable(key);
                 hints.add(text.withStyle(ChatFormatting.DARK_GRAY));

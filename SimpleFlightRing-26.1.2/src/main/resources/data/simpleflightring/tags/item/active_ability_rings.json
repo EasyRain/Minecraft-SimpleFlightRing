@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "simpleflightring:sculk_flight_ring"
+    "simpleflightring:sculk_flight_ring",
+    "simpleflightring:miner_flight_ring"
   ]
 }

@@ -28,16 +28,28 @@ public enum RingAbility {
      * the V key sonic boom. Its last tooltip line names the ability key, so it is filled in
      * with the player's actual binding by {@link FlightRingItem#abilityHints()}.
      */
-    SCULK_SOUL("sculk_soul", 0xFF29DFEB, 5);
+    SCULK_SOUL("sculk_soul", 0xFF29DFEB, 5, 5),
+
+    /**
+     * Miner relic ring: permanent Night Vision, depth scaled Haste, TNT immunity and a
+     * block-breaking TNT blast on the ability key.
+     */
+    MINER_VETERAN("miner_veteran", 0xFFC0C0C0, 4, 4);
 
     private final String key;
     private final int color;
     private final int descriptionLines;
+    private final int keyLine;
 
     RingAbility(String key, int color, int descriptionLines) {
+        this(key, color, descriptionLines, 0);
+    }
+
+    RingAbility(String key, int color, int descriptionLines, int keyLine) {
         this.key = key;
         this.color = color;
         this.descriptionLines = descriptionLines;
+        this.keyLine = keyLine;
     }
 
     /** Suffix of this ability's translation keys ({@code tooltip.simpleflightring.<key>_title/_desc}). */
@@ -53,6 +65,14 @@ public enum RingAbility {
      */
     public int descriptionLines() {
         return descriptionLines;
+    }
+
+    /**
+     * 1-based number of the description line that names the ability key (0 = none), so
+     * {@link FlightRingItem#abilityHints()} can fill in the key the player actually bound.
+     */
+    public int keyLine() {
+        return keyLine;
     }
 
     /**
