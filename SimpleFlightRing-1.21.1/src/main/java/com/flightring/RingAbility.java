@@ -39,9 +39,10 @@ public enum RingAbility {
     /**
      * Emerald relic ring: the village hero's blessing is permanent, illagers take double
      * damage from the wearer, drop twice the loot and every hostile mob has a small chance
-     * to leave an emerald behind. Passive only - the emerald ring has no ability key.
+     * to leave an emerald behind. Passive only - the emerald ring has no ability key, and the
+     * emerald chance keeps no tooltip line of its own.
      */
-    EMERALD_HERO("emerald_hero", 0xFF54E18E, 5);
+    EMERALD_HERO("emerald_hero", 0xFF54E18E, 4);
 
     private final String key;
     private final int color;

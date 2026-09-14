@@ -1,0 +1,8 @@
+Follow-up on the emerald ring tooltip and the ability-key message
+
+- Drop tooltip.simpleflightring.emerald_hero_desc5 again: the Rising Hero block is back to
+  the four lines that were specified, the emerald chance from hostile mobs keeps working but
+  gets no tooltip line of its own.
+- message.simpleflightring.ability_passive now reads "没有主动能力" instead of "暂无主动能力"
+  (en: "has no active ability"), because the sonic boom and the mining blast stay the only
+  two active abilities - nothing else is going to be added.
