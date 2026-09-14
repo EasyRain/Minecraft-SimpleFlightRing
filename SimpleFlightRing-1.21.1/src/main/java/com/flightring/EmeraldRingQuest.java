@@ -1,6 +1,7 @@
 package com.flightring;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -12,7 +13,12 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * The first step of the emerald relic ring's quest.
@@ -28,7 +34,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  * raid within 96 blocks of the player (exactly the range vanilla uses for the raid itself),
  * and a raid whose status is VICTORY keeps celebrating for 30 seconds before it stops - so
  * one poll per second is more than enough to catch it. One won raid wakes exactly ONE ring:
- * if the player carries several sleeping rings, only the first one found is charged.
+ * the raid that already charged a ring is remembered per player (by its centre) for as long
+ * as that victory lasts, so a player carrying several sleeping rings has to win one raid per
+ * ring instead of having the whole inventory charged within the 30 second celebration.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class EmeraldRingQuest {
@@ -37,6 +45,14 @@ public final class EmeraldRingQuest {
     private static final int CHECK_INTERVAL_TICKS = 20;
     /** Feedback when the ring wakes up. */
     private static final String HERO_AWAKENED = "message.simpleflightring.emerald_hero_awakened";
+
+    /**
+     * Which won raid already woke a ring for a player, by the raid's centre. The celebration
+     * lasts 30 s and this code polls once a second, so without this the whole inventory would
+     * be charged one ring per second - and the tick after the celebration ends the entry is
+     * dropped again, so the next raid counts as a new one.
+     */
+    private static final Map<UUID, BlockPos> RAID_WOKE = new HashMap<>();
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -49,7 +65,12 @@ public final class EmeraldRingQuest {
         // Cheap test first: there usually is no raid at all, and the raid map is empty then.
         Raid raid = player.serverLevel().getRaidAt(player.blockPosition());
         if (raid == null || !raid.isVictory()) {
+            // No victory in progress (anymore): forget the last one, so the next raid counts.
+            RAID_WOKE.remove(player.getUUID());
             return;
+        }
+        if (raid.getCenter().equals(RAID_WOKE.get(player.getUUID()))) {
+            return;                          // this very victory already woke one ring
         }
         ItemStack ring = findSleepingRing(player);
         if (ring.isEmpty()) {
@@ -57,6 +78,7 @@ public final class EmeraldRingQuest {
         }
 
         ring.set(ModDataComponents.HERO_CHARGED.get(), Unit.INSTANCE);
+        RAID_WOKE.put(player.getUUID(), raid.getCenter());
 
         ServerLevel level = player.serverLevel();
         // The village hero's own particles and the advancement jingle: this is a celebration.
@@ -70,6 +92,16 @@ public final class EmeraldRingQuest {
 
         FlightRingMod.LOGGER.debug("[FlightRing] {} woke the emerald ring up with a raid victory",
                 player.getName().getString());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        RAID_WOKE.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        RAID_WOKE.remove(event.getOriginal().getUUID());
     }
 
     /**
