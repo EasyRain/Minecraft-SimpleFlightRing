@@ -1,205 +1,27 @@
 # Simple Flight Ring
 
-**A small Minecraft mod that adds six tiers of flight rings: Wood, Stone, Iron, Gold, Diamond and Netherite** — plus an optional, fully gated Allthemodium endgame chain of three linked rings with their own abilities and enchantment.
+A small Minecraft mod that adds **flight rings**: wear one and you fly like in Creative mode — no elytra, no rockets. Double-tap Space to take off, hold Space to go up, Shift to go down.
 
-Fly like in Creative mode by simply wearing (or carrying) a ring — no elytra, no rockets, just **traditional Creative flight**: double-tap Space to take off and land, hold Space to ascend, hold Shift to descend.
-
-Supported versions: **Minecraft 1.21.1 (NeoForge 21.1.x)** and **Minecraft 26.1.2 (NeoForge 26.1.2.x)**.
-
----
+Supported versions: **Minecraft 1.21.1 (NeoForge)** and **Minecraft 26.1.2 (NeoForge)**.
 
 ## Features
 
-- ⚡ **Traditional Creative flight** — the ring grants `mayfly` while it has durability left. Double-tap Space to toggle flying, exactly like Creative mode.
-- ⏱️ **Durability only drains while flying** — 1 durability point per second of flight. Standing still or on the ground costs nothing.
-- 🔨 **Unbreaking extends flight time** — each Unbreaking level makes every durability point last one extra second (Unbreaking III = 1 point per 4 seconds).
-- 💚 **Mending compatible** — rings repair naturally from XP orbs.
-- 💍 **Six tiers, nested upgrade crafting** — craft the Wooden ring first, then upgrade it through Stone → Iron → Gold → Diamond in a 3×3 crafting grid (8 material items around the lower-tier ring).
-  - Upgrades **keep enchantments, custom names and lore**.
-  - The input ring may have **any remaining durability** (even zero).
-  - The upgraded ring starts at **full durability**.
-- ⚒️ **Netherite ring via smithing** — Netherite Upgrade Smithing Template + Diamond Flight Ring + Netherite Ingot in the smithing table.
-- 💜 **Indestructible Core** — craft 1 Netherite Ingot + 1 Nether Star (shapeless) into the dark *Indestructible Core*, then combine it with **any** flight ring in the smithing table: the ring becomes **indestructible** — durability never drains, flight is infinite, the tooltip shows *Infinite* flight time and the HUD countdown disappears (no longer needed).
-- 🔧 **Crafting-table repair** — combine a ring with its tier material (shapeless): each craft consumes 1 material unit and restores 25% durability, and a single Netherite Ingot fully repairs the Netherite ring. Enchantments, names and lore are preserved.
-- 🖥️ **HUD flight time countdown** — shows the remaining flight time in the bottom-left corner by default.
-  - Multiple rings are **summed up** (Curios slot + inventory + offhand + backpacks).
-  - Automatically hidden while the chat is open (configurable).
-  - Position and visibility configurable in `config/simpleflightring-client.toml`.
-- 🎛️ **Cloth Config support (optional)** — in-game configuration screen from the mod list (toggle + position sliders).
-- 🎒 **Sophisticated Backpacks support (optional)** — rings stored inside sophisticated backpacks also grant flight, including nested backpacks (up to 3 levels) and backpacks worn in the armor/offhand/Curios slots.
-- 🧿 **Curios API support (required)** — the mod adds a dedicated **"Flight Ring"** curio slot; rings are right-click equipped and every special ability works from that slot. Curios is a hard dependency since 1.2.x.
-- 🌌 **Allthemodium integration (optional)** — with [Allthemodium](https://modrinth.com/mod/allthemodium) installed, three linked endgame rings (Allthemodium / Vibranium / Unobtainium) are added, each with an energy pool, inherited abilities (Magic Lining → Kinetic Deflection → Burst Totem) and the *Arcane Amplification* enchantment. Without Allthemodium **nothing** is registered — no items, no recipes, no errors. See [Allthemodium integration](#allthemodium-integration-optional).
-- 💎 **Eight relic rings, found broken** — they cannot be crafted: a **Damaged** ring turns up in a themed structure chest (1% chance) or is bought from a master librarian, and must be repaired in the crafting table before it can fly. See [Relic rings](#relic-rings-found-broken).
+- 💍 **Six tiers of rings** — Wood, Stone, Iron, Gold, Diamond and Netherite, each with its own flight time. Durability only drains while you actually fly, and upgrading a ring keeps its enchantments, name and lore.
+- 💜 **Indestructible Core** — forge any ring with it and that ring never runs out of flight again.
+- ⚡ **Two special rings** — Stable and Powered, each with enchantments of its own built in.
+- 🗝️ **Eight relic rings** — they have no recipe at all: only their **damaged** form can be found (deep in structures, or bought from a librarian). Getting one back into shape is a little adventure of its own, and each finished ring carries a unique ability.
+- 🌀 **Special abilities** — a warden's sonic boom, a miner's blast, and more to come. The rings with an active ability fire it with the ability key (**V** by default, rebindable).
+- 🟣 **Enchantments** — Flight Stability, Rocket Boost, Arcane Amplification and Energy Burst.
+- 🖥️ **HUD** — flight time countdown and an energy bar, both positionable in `config/simpleflightring-client.toml` (Cloth Config gives you an in-game screen).
+- 🎒 **Optional integrations** — Sophisticated Backpacks (rings stored inside backpacks count) and Allthemodium (three linked endgame rings, only registered when Allthemodium is installed).
 
-## Flight time per tier
-
-| Ring | Total flight time | Durability |
-|------|-------------------|------------|
-| Wooden | 5 minutes | 300 |
-| Stone | 15 minutes | 900 |
-| Iron | 30 minutes | 1800 |
-| Golden | 60 minutes | 3600 |
-| Diamond | 120 minutes | 7200 |
-| Netherite | 240 minutes | 14400 |
-
-> Durability = minutes × 60 (1 point per second of flight). With Unbreaking III the actual flight time is about 4× the table above, and Mending makes the ring effectively infinite.
-
-## Crafting
-
-### Wooden Flight Ring
-```
-Planks        Planks        Planks
-Planks         Feather      Planks
-Planks        Planks        Planks
-```
-> Any planks work (`#minecraft:planks` tag) — all vanilla wood types and planks from other mods are accepted.
-
-### Upgrades (Stone / Iron / Gold / Diamond)
-8 material items around the lower-tier ring (any durability):
-
-| Upgrade to | 8× material | Center |
-|-----------|-------------|--------|
-| Stone Flight Ring | Cobblestone* | Wooden Flight Ring |
-| Iron Flight Ring | Iron Ingot | Stone Flight Ring |
-| Golden Flight Ring | Gold Ingot | Iron Flight Ring |
-| Diamond Flight Ring | Diamond | Golden Flight Ring |
-
-> \* Any cobblestone works (`#c:cobblestones` tag) — regular cobblestone, deepslate cobblestone and cobblestone from other mods are all accepted.
-
-### Repairing (Shapeless)
-Combine a flight ring with its tier material in any arrangement to restore durability:
-
-| Ring | Material | Restored per craft |
-|------|----------|--------------------|
-| Wooden Flight Ring | any planks | 25% |
-| Stone Flight Ring | any cobblestone | 25% |
-| Iron Flight Ring | Iron Ingot | 25% |
-| Golden Flight Ring | Gold Ingot | 25% |
-| Diamond Flight Ring | Diamond | 25% |
-| Netherite Flight Ring | Netherite Ingot | **100%** (1 ingot = full repair) |
-
-- Each craft consumes exactly **1 material unit** (standard vanilla consumption) — repeat the craft to fully repair a ring. This works identically in every crafting system: crafting table, recipe book and modded terminals such as AE2's crafting terminal.
-- Enchantments, custom names and lore are **kept** during repair.
-- A fully-durable ring cannot be used in the repair recipe (no waste).
-
-### Netherite Flight Ring (Smithing Table)
-1. Netherite Upgrade Smithing Template
-2. Diamond Flight Ring (any durability)
-3. Netherite Ingot
-
-## Allthemodium integration (optional)
-
-When [Allthemodium](https://modrinth.com/mod/allthemodium) is installed, three linked endgame rings are added on top of the six classic tiers.
-
-| Ring | Energy pool | Abilities |
-|------|-------------|-----------|
-| Allthemodium Flight Ring | 100 | Magic Lining |
-| Vibranium Flight Ring | 300 | Magic Lining + Kinetic Deflection |
-| Unobtainium Flight Ring | 700 | Magic Lining + Kinetic Deflection + Burst Totem |
-
-- All three are **indestructible the moment they are crafted** — no Indestructible Core is needed for them (the Netherite ring must be made indestructible *first*, see below).
-- Their attributes (armour, toughness, attack damage, reach) and abilities **only apply while the ring is worn in the Curios slot** — one carried in the inventory still grants flight only.
-- Abilities are **inherited up the chain**: Allthemodium ⊂ Vibranium ⊂ Unobtainium.
-
-### Crafting the linked rings (Smithing Table)
-
-The Netherite Flight Ring must be **indestructible first** — combine it with the **Indestructible Core** (1 Netherite Ingot + 1 Nether Star, shapeless) in the smithing table. Then upgrade it along the chain with Allthemodium's own smithing templates:
-
-| Result | Template | Base | Addition |
-|--------|----------|------|----------|
-| Allthemodium Flight Ring | Allthemodium Upgrade Smithing Template | Indestructible Netherite Flight Ring | Allthemodium Ingot |
-| Vibranium Flight Ring | Vibranium Upgrade Smithing Template | Indestructible Allthemodium Flight Ring | Vibranium Ingot |
-| Unobtainium Flight Ring | Unobtainium Upgrade Smithing Template | Indestructible Vibranium Flight Ring | Unobtainium Ingot |
-
-### Energy
-
-Each linked ring has an energy pool (100 / 300 / 700) that its abilities draw on. Energy starts refilling **10 seconds after the last use**, fills the pool in 3 seconds regardless of its size, and taking another hit interrupts the refill. The HUD shows the pool as a bar that hides itself 3 seconds after it has been sitting full (any change brings it back).
-
-### Abilities
-
-- 🟡 **Magic Lining** (Allthemodium) — incoming damage is absorbed by the ring's energy 1:1; when the pool can cover the whole hit, the hit is cancelled outright (no knockback, no damage flash, no invulnerability window).
-- 🟢 **Kinetic Deflection** (Vibranium) — incoming projectiles bounce off a sphere-shaped barrier around the wearer in a random direction. Free of charge while the pool is above half; below half it stops working and Magic Lining takes over.
-- 🟣 **Burst Totem** (Unobtainium) — a lethal hit is cancelled: the wearer survives (health restored, harmful effects cleared, Regeneration II / Absorption II / Fire Resistance) while a TNT-style, block-safe explosion (8 blocks, 20 damage) damages and knocks back everything around. The pool then waits 60 seconds **and** must refill completely before the totem can fire again.
-
-### Arcane Amplification (enchantment)
-
-An enchanting-table enchantment for the three linked rings only, levels 1–9: **max energy = base energy × (level + 1)** — an Unobtainium ring at level 9 holds 7000 energy. It also appears in villager trades and loot as usual.
-
-## Relic rings (found broken)
-
-Eight themed rings that **cannot be crafted**. The only way to get one is to find its **Damaged** form — a **1% chance** in one specific kind of chest (or, for the emerald ring, to buy it from a **master librarian**) — and then repair it in the crafting table.
-
-| Ring | Found in (1% per chest) | Repair with | Flight time |
-|------|-------------------------|-------------|-------------|
-| Sculk Flight Ring | Ancient City chests | Echo Shard (see the quest below) | 120 min |
-| Miner's Flight Ring | Abandoned mineshaft chests / chest minecarts | Iron Ingot (see the quest below) | 30 min + Unbreaking I |
-| Emerald Flight Ring | **Master librarian trade** (32 emeralds, 3 uses) | Emerald Block | 60 min |
-| Ocean Flight Ring | Shipwreck chests (treasure and supply) | Heart of the Sea | 120 min |
-| Desert Flight Ring | Desert pyramid chests | Gold Block | 100 min |
-| Raid Flight Ring | Pillager outpost and woodland mansion chests | Ominous Bottle | 140 min |
-| Infernal Flight Ring | Nether fortress chests | Blaze Rod | 200 min |
-| Ender Flight Ring | End city chests | Shulker Shell | 240 min |
-
-- The broken ring is a separate item (`damaged_*_flight_ring`): it cannot fly, cannot be worn in the Curios slot and cannot be enchanted. Its tooltip says which material repairs it.
-- Repairing is usually a **shapeless crafting-table recipe** (damaged ring + 1 theme material); the sculk and miner rings have their own quest lines instead, see below.
-- A damaged ring is stackable up to 1 and always stacks separately from the working ring.
-- Chances are per chest opened: 1% means roughly one ring per 100 of those chests, and the roll happens on top of the normal loot.
-
-### The sculk ring's quest
-
-The sculk ring does not use the plain "damaged + material" repair:
-
-1. The damaged sculk ring you find says **"The ring has lost its ancient power"** / **"The ring hungers for a Warden's soul"**.
-2. **Kill a Warden while carrying that ring** (inventory, offhand or Curios slot). One Warden feeds exactly **one** ring. The ring swallows the soul — it starts to glint and now reads **"The ring needs a new vessel"**.
-3. Forge it in the crafting table: **8 echo shards around the soul-fed ring** → the working Sculk Flight Ring.
-
-### Sculk Soul (the sculk ring's ability)
-
-Worn in the Curios slot, the Sculk Flight Ring grants:
-
-- **Darkness immunity** — Blindness and Darkness can never be applied again, and any already on you when you put the ring on are removed.
-- **Wardens see you as one of their own** — a warden ignores the wearer completely (it never picks them as a target) unless the wearer attacks it first, in which case it fights back normally.
-- **Silence in the deep dark** — while the wearer stands in the Deep Dark biome, their sounds *and* their vibrations are cancelled: no footstep or block sounds, sculk sensors do not hear them, shriekers do not trigger (walking on one does nothing) and no warden is summoned by them.
-- **Sonic boom** — press the ability key (V by default, rebindable) to fire a warden-style beam: 10 damage plus vanilla knockback along the line you are looking at, with a 3 second cooldown.
-
-### Miner's Veteran (the miner ring's ability)
-
-- **Night Vision** permanently, plus **Haste by depth**: level I below sea level, II below y = 0, III below y = -32 (always I outside the overworld, nothing above sea level). The HUD icons stay visible and are cleared again the moment the ring comes off or runs dry.
-- **Immune to every explosion** — damage *and* knockback, whether it came from TNT, a creeper, a respawn anchor, a bed or another mod.
-- **Mining blast** on the ability key: a block-breaking TNT explosion centred on the wearer (the wearer is safe from it), 3 second cooldown. The **Energy Burst** enchantment (levels 1–9, enchanting table, only for the rings that have an active ability) adds +25% damage *and* +25% blast radius per level.
-
-### The miner ring's quest
-
-1. The damaged miner ring reads *"Nobody knows which miner left this ring behind"* / *"Its mottled metal says it broke a long time ago"* / *"It has to be reshaped by the power of a blast"*.
-2. **Drop it on the ground and let an explosion wash over it** (TNT, a creeper, another mod's blast — anything). The ring survives, starts to glint and its third line becomes *"Only the missing material has to be added now"*.
-3. Forge it in the crafting table: **8 iron ingots around the blast-forged ring** → the working Miner's Flight Ring. It is balanced like the iron ring (30 minutes) but ships with **Unbreaking I** built in.
-
-## Ability key
-
-The three linked Allthemodium rings have abilities; **V** (rebindable in Options → Controls → Misc) is the placeholder key that will trigger their **active** abilities. Right now every ability triggers on its own (they are passive), so pressing V simply reports which ring would fire.
+> **Curios API is required** — the mod uses its own "Flight Ring" curio slot.
 
 ## Installation
 
 1. Install the matching [NeoForge](https://neoforged.net/) version.
-2. Drop the `simpleflightring` jar into the `mods` folder.
-3. *(Optional)* Install [Cloth Config](https://modrinth.com/mod/cloth-config) for the in-game config screen and/or [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks) for backpack support. [Curios API](https://modrinth.com/mod/curios) is **required**.
-
-## Configuration
-
-`config/simpleflightring-client.toml` (client-side):
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `showFlightTimer` | `true` | Show the HUD flight time countdown |
-| `hideWhileChatOpen` | `true` | Hide the countdown while the chat is open |
-| `hudX` | `4` | Horizontal position (pixels from the left edge) |
-| `hudY` | `4` | Vertical position (pixels from the bottom edge) |
-
-## Notes
-
-- Creative/Spectator players are not affected (vanilla flight, no durability cost).
-- A fully consumed ring does not break — it becomes inert, and can still be used in upgrade recipes or repaired with the repair recipe / Mending / anvil.
-- The mod id is `simpleflightring`; all features are server-safe and work in multiplayer.
+2. Drop the `simpleflightring` jar and [Curios API](https://modrinth.com/mod/curios) into the `mods` folder.
+3. *(Optional)* [Cloth Config](https://modrinth.com/mod/cloth-config) for the in-game config screen, [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks) for backpack support, [Allthemodium](https://modrinth.com/mod/allthemodium) for the linked rings.
 
 ## License
 
