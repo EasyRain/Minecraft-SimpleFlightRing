@@ -121,6 +121,7 @@
   "message.simpleflightring.raid_no_emeralds": "Not enough emeralds (needs %s)",
   "message.simpleflightring.raid_evoker_refuses": "This evoker will not trade with you again",
   "message.simpleflightring.raid_fang_cooldown": "The fangs need another %s s",
+  "message.simpleflightring.raid_fang_no_ground": "Too far above the ground - the fangs cannot break through",
   "tooltip.simpleflightring.desert_damaged_history": "Drifting sand has watched over this land's whole history",
   "tooltip.simpleflightring.desert_damaged_rusted": "And the passing of time has rusted and broken it",
   "tooltip.simpleflightring.desert_damaged_polish": "It only takes some simple polishing and mending",

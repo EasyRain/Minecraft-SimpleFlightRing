@@ -121,6 +121,7 @@
   "message.simpleflightring.raid_no_emeralds": "绿宝石不够（需要 %s 个）",
   "message.simpleflightring.raid_evoker_refuses": "这只唤魔者不会再与你交易",
   "message.simpleflightring.raid_fang_cooldown": "尖牙还需 %s 秒",
+  "message.simpleflightring.raid_fang_no_ground": "离地面太远，尖牙没能破土而出",
   "tooltip.simpleflightring.desert_damaged_history": "漫天黄沙见证了这片大地的历史",
   "tooltip.simpleflightring.desert_damaged_rusted": "它也在时间的流逝下锈蚀损坏",
   "tooltip.simpleflightring.desert_damaged_polish": "只需一些简单的打磨和修缮",
