@@ -1,5 +1,7 @@
 package com.flightring;
 
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -7,6 +9,11 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * "Desert Guide" - the ability of the desert relic ring, the ring of getting the most out of
@@ -38,18 +45,52 @@ public final class DesertRingAbility {
      */
     public static final float FOOD_BONUS = 0.5F;
 
+    /** Wearers whose already active Hunger and Poison have been cured this wearing session. */
+    private static final Set<UUID> EFFECTS_CLEARED = new HashSet<>();
+
     /**
      * Hunger and Poison are simply refused. Unlike the ocean ring's elder guardian curse this is
      * not scoped to a source: the desert ring makes the wearer immune to both, whoever tries.
+     * <p>
+     * The effect has to be compared through its {@link Holder}: {@code MobEffects.HUNGER} and
+     * {@code MobEffects.POISON} are holders, so comparing them against
+     * {@code getEffect().value()} compiles (a subclass could implement {@code Holder}) but is
+     * false for every effect in the game.
      */
     @SubscribeEvent
     public static void onEffectApplicable(MobEffectEvent.Applicable event) {
         if (!(event.getEntity() instanceof Player player) || wornRing(player).isEmpty()) {
             return;
         }
-        MobEffect effect = event.getEffectInstance().getEffect().value();
-        if (effect == MobEffects.HUNGER || effect == MobEffects.POISON) {
+        Holder<MobEffect> effect = event.getEffectInstance().getEffect();
+        if (effect.is(MobEffects.HUNGER) || effect.is(MobEffects.POISON)) {
             event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+        }
+    }
+
+    /**
+     * Hunger or Poison that was already on the player when the ring was equipped is cured as
+     * well. Edge triggered like the sculk ring's Darkness: only the tick that notices the ring
+     * being worn does the work, and taking the ring off arms it again.
+     */
+    @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        UUID id = player.getUUID();
+        if (!isDesertWalker(player)) {
+            EFFECTS_CLEARED.remove(id);     // next time the ring goes on, cure again
+            return;
+        }
+        if (!EFFECTS_CLEARED.add(id)) {
+            return;                          // already handled for this wearing session
+        }
+        if (player.hasEffect(MobEffects.HUNGER)) {
+            player.removeEffect(MobEffects.HUNGER);
+        }
+        if (player.hasEffect(MobEffects.POISON)) {
+            player.removeEffect(MobEffects.POISON);
         }
     }
 
