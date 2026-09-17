@@ -20,11 +20,12 @@ import java.util.Set;
  * collects the living creatures within {@link #SENSE_RADIUS} blocks of the local player and hands
  * them to {@link DesertSense}, which {@code EntityGlowMixin} turns into outlines.
  * <p>
- * Everything happens on the wearer's own client, so <b>only they</b> see the outlines - no
- * glowing effect is ever applied to the creatures and no packet is involved. The creatures are
- * all within the server's entity tracking range for this player, so the client already knows
- * them. Weapons, dropped items and other non living entities are skipped (see
- * {@link DesertSense#isSenseable}).
+ * The scanning happens on the wearer's own client, so <b>only they</b> see the outlines - no
+ * glowing effect is ever applied to the creatures. The creatures are all within the server's
+ * entity tracking range for this player, so the client already knows them. Weapons, dropped items
+ * and other non living entities are skipped (see {@link DesertSense#isSenseable}); the one thing
+ * the client cannot work out by itself, a neutral creature that turned on the wearer, arrives
+ * separately (see {@link DesertHostileSync}).
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID, value = Dist.CLIENT)
 public final class DesertSenseHandler {
