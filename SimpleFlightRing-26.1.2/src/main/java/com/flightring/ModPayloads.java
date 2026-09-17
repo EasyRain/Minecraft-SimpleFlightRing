@@ -17,6 +17,8 @@ public final class ModPayloads {
         PayloadRegistrar registrar = event.registrar(FlightRingMod.MODID).versioned("1");
         registrar.playToClient(FlightTimePayload.TYPE, FlightTimePayload.STREAM_CODEC, ModPayloads::handleFlightTime);
         registrar.playToClient(RingEnergyPayload.TYPE, RingEnergyPayload.STREAM_CODEC, ModPayloads::handleRingEnergy);
+        registrar.playToClient(DesertHostilesPayload.TYPE, DesertHostilesPayload.STREAM_CODEC,
+                ModPayloads::handleDesertHostiles);
         registrar.playToServer(RocketBoostPayload.TYPE, RocketBoostPayload.STREAM_CODEC, ModPayloads::handleRocketBoost);
         registrar.playToServer(RingAbilityKeyPayload.TYPE, RingAbilityKeyPayload.STREAM_CODEC, ModPayloads::handleAbilityKey);
     }
@@ -30,6 +32,11 @@ public final class ModPayloads {
 
     private static void handleRingEnergy(RingEnergyPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> ClientRingEnergy.update(payload.energy(), payload.maxEnergy()));
+    }
+
+    /** The creatures hunting this wearer; {@link DesertSense} outlines them red. */
+    private static void handleDesertHostiles(DesertHostilesPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> DesertSense.setHostile(payload.entityIds()));
     }
 
     private static void handleRocketBoost(RocketBoostPayload payload, IPayloadContext context) {

@@ -11,9 +11,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * The desert ring's danger sense, client side: every {@link #RESCAN_INTERVAL_TICKS} ticks it
@@ -49,9 +49,9 @@ public final class DesertSenseHandler {
 
         AABB box = player.getBoundingBox().inflate(SENSE_RADIUS);
         List<Entity> nearby = level.getEntities(player, box, DesertSense::isSenseable);
-        Map<Integer, Integer> sensed = new HashMap<>(nearby.size());
+        Set<Integer> sensed = new HashSet<>(nearby.size());
         for (Entity entity : nearby) {
-            sensed.put(entity.getId(), DesertSense.colorFor(entity));
+            sensed.add(entity.getId());
         }
         DesertSense.replace(sensed);
     }
