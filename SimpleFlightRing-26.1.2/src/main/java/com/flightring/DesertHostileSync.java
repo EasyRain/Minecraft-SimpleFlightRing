@@ -24,13 +24,13 @@ import java.util.UUID;
  * Tells a desert ring wearer which creatures are hunting them, so {@link DesertSense} can outline
  * those red.
  * <p>
- * Vanilla already answers "is this creature hostile?" by its class ({@link
- * net.minecraft.world.entity.monster.Enemy}), which the client can see on its own. What it cannot
- * see is a <b>neutral</b> creature that turned on the wearer: a mob's attack target and its
- * persistent anger (both of which {@link NeutralMob} keeps) live on the server only. So every
- * {@link #INTERVAL_TICKS} ticks the server collects, for each wearer, the creatures within
- * {@link #TRACK_RADIUS} blocks that either target the wearer or are angry at them, and sends the
- * list to that wearer alone - and only when it actually changed.
+ * Whether a creature is hostile is judged by what it is doing, not by its class: vanilla and
+ * modded monsters alike stay white while they are neutral (a zombified piglin nobody attacked, a
+ * piglin facing a player in gold, a spider in the light, an enderman nobody looked at). What the
+ * client cannot see is the creature's intent at all - a mob's attack target and its persistent
+ * anger live on the server only - so every {@link #INTERVAL_TICKS} ticks the server collects, for
+ * each wearer, the creatures within {@link #TRACK_RADIUS} blocks that either target the wearer or
+ * are angry at them, and sends that list to that wearer alone, only when it changed.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class DesertHostileSync {
@@ -78,9 +78,12 @@ public final class DesertHostileSync {
 
     /**
      * True while this creature is hostile to this very player: either it is actively hunting them
-     * (which also covers the mobs vanilla keeps no anger for, like iron golems and polar bears),
-     * or it remembers them as an enemy (the neutral mobs' persistent anger, e.g. a zombified
-     * piglin or a wolf). Both are per player, so a wolf that hates someone else stays white.
+     * (which also covers the mobs vanilla keeps no anger for, like iron golems and polar bears,
+     * and the brain driven ones like piglins, hoglins and wardens, whose {@code getTarget} reads
+     * their brain), or it remembers them as an enemy (the neutral mobs' persistent anger, e.g. a
+     * zombified piglin or a wolf). Both are per player, so a wolf that hates someone else stays
+     * white, and both are behavioural, so a monster from another mod that is neutral by its own
+     * rules is judged the same way as long as it uses the ordinary target or anger machinery.
      */
     private static boolean isHostileTo(Mob mob, ServerPlayer player, ServerLevel level) {
         if (mob.getTarget() == player) {

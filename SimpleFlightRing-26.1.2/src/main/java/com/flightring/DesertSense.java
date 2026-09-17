@@ -3,7 +3,6 @@ package com.flightring;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.monster.Enemy;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,13 +15,15 @@ import java.util.Set;
  * ticks, the {@code desert_hostiles} payload ({@link DesertHostileSync}) fills the grudges - and
  * the mixin only asks about entities while {@code level().isClientSide()} is true.
  * <p>
- * A sensed creature is outlined for the wearer alone: <b>red</b> for the hostile ones and
- * <b>white</b> for the friendly and neutral ones. Hostile means either vanilla's own hostile
- * classes ({@link Enemy}) or a creature the server reported as hunting the wearer - a neutral mob
- * that was attacked turns red the moment the server says so. Only living creatures are ever put
- * in here - dropped items, experience orbs, boats, minecarts and the like are not creatures, and
- * decorative armour stands are left out as well even though they technically are
- * {@link LivingEntity}.
+ * A sensed creature is outlined for the wearer alone: <b>red</b> while it is hostile to the
+ * wearer, <b>white</b> for all the rest. Hostility is decided on <b>behaviour</b>, not on the
+ * creature's class - a creature is red while it hunts the wearer or holds a grudge against them.
+ * That is what makes neutral mobs come out right: a zombified piglin, an enderman or a spider is
+ * white until it is provoked, and so is a monster from another mod that is neutral by its own
+ * rules, while a zombie that has locked onto the wearer is red the moment it does. Only living
+ * creatures are ever put in here - dropped items, experience orbs, boats, minecarts and the like
+ * are not creatures, and decorative armour stands are left out as well even though they
+ * technically are {@link LivingEntity}.
  */
 public final class DesertSense {
 
@@ -56,9 +57,9 @@ public final class DesertSense {
                 && !entity.isSpectator();
     }
 
-    /** The colour of a sensed creature: red for the hostile ones, white for the rest. */
+    /** The colour of a sensed creature: red while it is hostile to the wearer, white otherwise. */
     public static int colorFor(Entity entity) {
-        return entity instanceof Enemy || HOSTILE.contains(entity.getId()) ? HOSTILE_COLOR : FRIENDLY_COLOR;
+        return HOSTILE.contains(entity.getId()) ? HOSTILE_COLOR : FRIENDLY_COLOR;
     }
 
     /** Replaces the sensed set (client only, called from the client tick). */
