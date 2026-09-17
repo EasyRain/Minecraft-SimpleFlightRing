@@ -50,10 +50,15 @@ public final class CuriosCompat {
                  * every tick and also lists them in the tooltip; a ring carried in the
                  * inventory is never consulted here, so it only gives flight time.
                  * <p>
-                 * The ocean ring adds the submerged mining speed: vanilla multiplies the mining
-                 * speed by {@code SUBMERGED_MINING_SPEED} (0.2 by default) whenever the eyes are
-                 * in water, so +0.8 brings it back to 1.0 - no slowdown underwater. Like every
-                 * ability it needs the ring to still have durability left.
+                 * Two relic rings add an attribute of their own, both only while the ring still
+                 * has durability left:
+                 * <ul>
+                 *   <li>ocean: {@code SUBMERGED_MINING_SPEED} - vanilla multiplies the mining
+                 *       speed by 0.2 whenever the eyes are in water, so +0.8 brings it back to
+                 *       1.0, i.e. no slowdown underwater;</li>
+                 *   <li>desert: a point of {@code LUCK}, the same attribute a Luck potion
+                 *       raises, so the effect stacks on top of it.</li>
+                 * </ul>
                  */
                 @Override
                 public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext,
@@ -63,12 +68,17 @@ public final class CuriosCompat {
                     Multimap<Holder<Attribute>, AttributeModifier> modifiers = bonuses == null
                             ? LinkedHashMultimap.create()
                             : bonuses.attributeModifiers();
-                    if (stack.getItem() instanceof FlightRingItem item
-                            && item.hasAbility(RingAbility.OCEAN_FAVORED)
-                            && item.isUsable(stack)) {
-                        modifiers.put(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
-                                ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
-                                OceanFavoredAbility.submergedMiningBonus(), AttributeModifier.Operation.ADD_VALUE));
+                    if (stack.getItem() instanceof FlightRingItem item && item.isUsable(stack)) {
+                        if (item.hasAbility(RingAbility.OCEAN_FAVORED)) {
+                            modifiers.put(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
+                                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
+                                    OceanFavoredAbility.submergedMiningBonus(), AttributeModifier.Operation.ADD_VALUE));
+                        }
+                        if (item.hasAbility(RingAbility.DESERT_GUIDE)) {
+                            modifiers.put(Attributes.LUCK, new AttributeModifier(
+                                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "desert_luck"),
+                                    DesertRingAbility.LUCK_BONUS, AttributeModifier.Operation.ADD_VALUE));
+                        }
                     }
                     return modifiers;
                 }

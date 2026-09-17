@@ -52,7 +52,16 @@ public enum RingAbility {
      * that slows every nearby enemy and flames that go out on their own. Passive only - the
      * ocean ring has no ability key.
      */
-    OCEAN_FAVORED("ocean_favored", 0xFF2BB8D8, 5);
+    OCEAN_FAVORED("ocean_favored", 0xFF2BB8D8, 5),
+
+    /**
+     * Desert relic ring: the desert wastes nothing - a permanent point of Luck (a real attribute
+     * bonus, so a Luck potion stacks on top of it), immunity to Hunger and Poison, half again as
+     * much food value out of everything eaten, and a sixth sense that outlines every living
+     * creature within 32 blocks for the wearer alone (white for friendly and neutral, red for
+     * hostile). Passive only - the desert ring has no ability key.
+     */
+    DESERT_GUIDE("desert_guide", 0xFFF0CE8C, 4);
 
     private final String key;
     private final int color;
