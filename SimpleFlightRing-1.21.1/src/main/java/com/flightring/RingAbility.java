@@ -58,10 +58,10 @@ public enum RingAbility {
      * Desert relic ring: the desert wastes nothing - a permanent point of Luck (a real attribute
      * bonus, so a Luck potion stacks on top of it), immunity to Hunger and Poison, half again as
      * much food value out of everything eaten, and a sixth sense that outlines every living
-     * creature within 32 blocks for the wearer alone (white for friendly and neutral, red for
-     * hostile). Passive only - the desert ring has no ability key.
+     * creature within 32 blocks for the wearer alone, white until it turns on the wearer and red
+     * while it is hunting them. Passive only - the desert ring has no ability key.
      */
-    DESERT_GUIDE("desert_guide", 0xFFF0CE8C, 4);
+    DESERT_GUIDE("desert_guide", 0xFFF0CE8C, 5);
 
     private final String key;
     private final int color;

@@ -31,8 +31,8 @@ public enum RelicRing {
     EMERALD("emerald", 3600, 18, 0xFF54E18E, Items.EMERALD_BLOCK),
     /** Shipwreck chests. */
     OCEAN("ocean", 7200, 12, 0xFF3F76E4, Items.HEART_OF_THE_SEA),
-    /** Desert pyramid chests. */
-    DESERT("desert", 6000, 16, 0xFFF0CE8C, Items.GOLD_BLOCK),
+    /** Desert pyramid chests. Its gift is the modest one, so it is balanced like the iron ring. */
+    DESERT("desert", 1800, 16, 0xFFF0CE8C, Items.GOLD_INGOT),
     /** Pillager outpost and woodland mansion chests. */
     RAID("raid", 8400, 14, 0xFFCC4E46, Items.OMINOUS_BOTTLE),
     /** Nether fortress chests. */

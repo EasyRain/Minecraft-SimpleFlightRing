@@ -1,6 +1,14 @@
 {
-  "type": "minecraft:crafting_shapeless",
+  "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "ingredients": [ "simpleflightring:damaged_desert_flight_ring", "minecraft:gold_block" ],
-  "result": { "id": "simpleflightring:desert_flight_ring", "count": 1 }
+  "pattern": ["GLG","LRL","GLG"],
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "L": "minecraft:lapis_lazuli",
+    "R": "simpleflightring:damaged_desert_flight_ring"
+  },
+  "result": {
+    "id": "simpleflightring:desert_flight_ring",
+    "count": 1
+  }
 }

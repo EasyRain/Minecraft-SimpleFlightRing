@@ -25,6 +25,9 @@ import java.util.function.Consumer;
  *       (see {@link EmeraldRingQuest}).</li>
  *   <li><b>Ocean</b>: slay an Elder Guardian while carrying it, then forge the vessel out of a
  *       heart of the sea, prismarine shards and a nautilus shell (see {@link OceanRingQuest}).</li>
+ *   <li><b>Desert</b>: no quest at all - the ring is only weathered, so a plain polish of gold
+ *       ingots and lapis lazuli around it is enough (the {@code repair_damaged_desert_flight_ring}
+ *       recipe).</li>
  *   <li><b>Everything else</b>: the plain shapeless repair recipe with the theme material.</li>
  * </ul>
  * While a relic has its own quest its tooltip shows the quest text (and it glints once the
@@ -133,6 +136,17 @@ public class DamagedRingItem extends Item {
                             ? "tooltip.simpleflightring.ocean_damaged_restore"
                             : "tooltip.simpleflightring.ocean_damaged_prove")
                     .withColor(RingAbility.OCEAN_FAVORED.color()));
+            return;
+        }
+        if (relic == RelicRing.DESERT) {
+            // The desert ring is the one relic with no quest at all: it is merely weathered, so
+            // its three lines never change and a plain polish of gold and lapis lazuli is enough.
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.desert_damaged_history")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.desert_damaged_rusted")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.desert_damaged_polish")
+                    .withColor(RingAbility.DESERT_GUIDE.color()));
             return;
         }
         tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));

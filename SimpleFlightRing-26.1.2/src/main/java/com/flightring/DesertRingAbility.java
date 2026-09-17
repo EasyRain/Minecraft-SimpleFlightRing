@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * "Desert Guide" - the ability of the desert relic ring, the ring of getting the most out of
+ * "Survivalist" - the ability of the desert relic ring, the ring of getting the most out of
  * very little. Passive, and like every other relic ability it only works while the ring is worn
  * in the Curios slot with durability left.
  * <ol>
