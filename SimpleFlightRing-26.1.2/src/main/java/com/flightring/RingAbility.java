@@ -61,28 +61,45 @@ public enum RingAbility {
      * creature within 32 blocks for the wearer alone, white until it turns on the wearer and red
      * while it is hunting them. Passive only - the desert ring has no ability key.
      */
-    DESERT_GUIDE("desert_guide", 0xFFF0CE8C, 5);
+    DESERT_GUIDE("desert_guide", 0xFFF0CE8C, 5),
+
+    /**
+     * Raid relic ring: the illager's own blessing, "Great Plunder!". The wearer counts as one of
+     * the illagers - raiders leave them alone (but hit back), villagers refuse to trade and flee,
+     * iron golems turn on them - and lives off the village instead: emeralds buy ominous bottles
+     * from raid captains and totems from evokers, slaying a villager yields emeralds and that
+     * villager's trade goods, Bad Omen cannot touch the wearer, and the ring itself holds totem
+     * charges (see {@link RaidCharges}) which save their life the way a totem of undying would.
+     * Its last line names the ability key, which summons the evoker's fangs.
+     */
+    RAID_PLUNDER("raid_plunder", 0xFFCC4E46, 7, 7, 0, 6);
 
     private final String key;
     private final int color;
     private final int descriptionLines;
     private final int keyLine;
     private final int levelLine;
+    private final int chargeLine;
 
     RingAbility(String key, int color, int descriptionLines) {
-        this(key, color, descriptionLines, 0, 0);
+        this(key, color, descriptionLines, 0, 0, 0);
     }
 
     RingAbility(String key, int color, int descriptionLines, int keyLine) {
-        this(key, color, descriptionLines, keyLine, 0);
+        this(key, color, descriptionLines, keyLine, 0, 0);
     }
 
     RingAbility(String key, int color, int descriptionLines, int keyLine, int levelLine) {
+        this(key, color, descriptionLines, keyLine, levelLine, 0);
+    }
+
+    RingAbility(String key, int color, int descriptionLines, int keyLine, int levelLine, int chargeLine) {
         this.key = key;
         this.color = color;
         this.descriptionLines = descriptionLines;
         this.keyLine = keyLine;
         this.levelLine = levelLine;
+        this.chargeLine = chargeLine;
     }
 
     /** Suffix of this ability's translation keys ({@code tooltip.simpleflightring.<key>_title/_desc}). */
@@ -115,6 +132,15 @@ public enum RingAbility {
      */
     public int levelLine() {
         return levelLine;
+    }
+
+    /**
+     * 1-based number of the description line that shows the ring's totem charges (0 = none), so
+     * {@link FlightRingItem#abilityHints(ItemStack)} can fill in how many lives the ring can still
+     * save (see {@link RaidCharges}). Only the raid ring uses it so far.
+     */
+    public int chargeLine() {
+        return chargeLine;
     }
 
     /**

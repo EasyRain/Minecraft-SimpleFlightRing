@@ -314,7 +314,8 @@ public class FlightRingItem extends Item {
      * line is its own component, because the vanilla tooltip does not break lines on
      * {@code \n}. The line named by {@link RingAbility#keyLine()} gets the ability key the
      * player actually bound, the one named by {@link RingAbility#levelLine()} the ring's
-     * own strength (the emerald ring's raid level).
+     * own strength (the emerald ring's raid level) and the one named by
+     * {@link RingAbility#chargeLine()} how many totem charges it holds (the raid ring).
      */
     private List<Component> abilityHints(ItemStack stack) {
         List<Component> hints = new ArrayList<>();
@@ -328,6 +329,8 @@ public class FlightRingItem extends Item {
                         ? Component.translatable(key, AbilityKeyHint.keyName())
                         : line == ability.levelLine()
                         ? Component.translatable(key, HeroLevel.roman(HeroLevel.of(stack)))
+                        : line == ability.chargeLine()
+                        ? Component.translatable(key, Integer.toString(RaidCharges.of(stack)))
                         : Component.translatable(key);
                 hints.add(text.withStyle(ChatFormatting.DARK_GRAY));
             }

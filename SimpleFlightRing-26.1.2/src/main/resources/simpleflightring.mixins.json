@@ -9,6 +9,7 @@
     "EntityGlowMixin",
     "PlayerMixin",
     "SculkShriekerBlockEntityMixin",
+    "VillagerFearMixin",
     "WardenMixin"
   ],
   "client": [

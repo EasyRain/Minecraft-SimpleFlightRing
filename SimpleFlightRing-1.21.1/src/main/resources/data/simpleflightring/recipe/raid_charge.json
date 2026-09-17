@@ -1,0 +1,8 @@
+{
+  "type": "simpleflightring:raid_charge",
+  "category": "equipment",
+  "result": {
+    "id": "simpleflightring:raid_flight_ring",
+    "count": 1
+  }
+}

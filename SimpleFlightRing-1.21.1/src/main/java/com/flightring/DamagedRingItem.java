@@ -24,6 +24,9 @@ import java.util.List;
  *       (see {@link EmeraldRingQuest}).</li>
  *   <li><b>Ocean</b>: slay an Elder Guardian while carrying it, then forge the vessel out of a
  *       heart of the sea, prismarine shards and a nautilus shell (see {@link OceanRingQuest}).</li>
+ *   <li><b>Raid</b>: kill three iron golems within sixty seconds while carrying it, then bind a
+ *       totem of undying into it (see {@link RaidRingQuest}). The finished ring works as a totem
+ *       itself, holding up to {@link RaidCharges#MAX} charges, two per totem.</li>
  *   <li><b>Desert</b>: no quest at all - the ring is only weathered, so a plain polish of gold
  *       ingots and lapis lazuli around it is enough (the {@code repair_damaged_desert_flight_ring}
  *       recipe).</li>
@@ -69,11 +72,19 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.GUARDIAN_ACKNOWLEDGED.get());
     }
 
+    /**
+     * True once the illager will accepted the raid ring's trial - three iron golems inside sixty
+     * seconds (see {@link RaidRingQuest}).
+     */
+    public static boolean isIllagerAcknowledged(ItemStack stack) {
+        return stack.has(ModDataComponents.ILLAGER_ACKNOWLEDGED.get());
+    }
+
     /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
         return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack)
-                || isGuardianAcknowledged(stack) || super.isFoil(stack);
+                || isGuardianAcknowledged(stack) || isIllagerAcknowledged(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -134,6 +145,19 @@ public class DamagedRingItem extends Item {
                             ? "tooltip.simpleflightring.ocean_damaged_restore"
                             : "tooltip.simpleflightring.ocean_damaged_prove")
                     .withColor(RingAbility.OCEAN_FAVORED.color()));
+            return;
+        }
+        if (relic == RelicRing.RAID) {
+            // The raid ring's quest text: two grey flavour lines, then the state of the trial in
+            // the ability's own colour. The trial is three iron golems inside sixty seconds.
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.raid_damaged_lost")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.raid_damaged_will")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable(isIllagerAcknowledged(stack)
+                            ? "tooltip.simpleflightring.raid_damaged_acknowledged"
+                            : "tooltip.simpleflightring.raid_damaged_watching")
+                    .withColor(RingAbility.RAID_PLUNDER.color()));
             return;
         }
         if (relic == RelicRing.DESERT) {

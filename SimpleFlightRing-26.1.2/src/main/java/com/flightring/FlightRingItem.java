@@ -330,6 +330,8 @@ public class FlightRingItem extends Item {
                         ? Component.translatable(key, AbilityKeyHint.keyName())
                         : line == ability.levelLine()
                         ? Component.translatable(key, HeroLevel.roman(HeroLevel.of(stack)))
+                        : line == ability.chargeLine()
+                        ? Component.translatable(key, Integer.toString(RaidCharges.of(stack)))
                         : Component.translatable(key);
                 hints.add(text.withStyle(ChatFormatting.DARK_GRAY));
             }

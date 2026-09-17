@@ -1,6 +1,21 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "equipment",
-  "ingredients": [ "simpleflightring:damaged_raid_flight_ring", "minecraft:ominous_bottle" ],
-  "result": { "id": "simpleflightring:raid_flight_ring", "count": 1 }
+  "ingredients": [
+    {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "simpleflightring:damaged_raid_flight_ring",
+      "components": {
+        "simpleflightring:illager_acknowledged": {}
+      }
+    },
+    "minecraft:totem_of_undying"
+  ],
+  "result": {
+    "id": "simpleflightring:raid_flight_ring",
+    "count": 1,
+    "components": {
+      "simpleflightring:raid_charges": 2
+    }
+  }
 }

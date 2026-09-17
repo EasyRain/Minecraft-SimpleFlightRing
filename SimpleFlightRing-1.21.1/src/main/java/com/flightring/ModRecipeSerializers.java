@@ -41,6 +41,14 @@ public class ModRecipeSerializers {
             SERIALIZERS.register("emerald_forge", EmeraldForgeRecipe.Serializer::new);
 
     /**
+     * Shapeless: one raid ring + one totem of undying = the same ring with
+     * {@link RaidCharges#PER_TOTEM} more totem charges. Has to copy the input ring, so that the
+     * enchantments, the durability and the name all survive being charged.
+     */
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RaidChargeRecipe>> RAID_CHARGE =
+            SERIALIZERS.register("raid_charge", RaidChargeRecipe.Serializer::new);
+
+    /**
      * Note: the AllTheModium chain (indestructible ring + that mod's upgrade template + the
      * matching metal ingot) needs no serializer of its own - it is a plain vanilla
      * {@code minecraft:smithing_transform} recipe exactly like AllTheModium's own gear

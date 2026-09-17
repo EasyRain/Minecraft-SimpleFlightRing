@@ -148,8 +148,8 @@ public class ModItems {
     }
 
     /**
-     * Special abilities of a relic ring: the sculk, miner and emerald rings each have one,
-     * the rest are plain rings.
+     * Special abilities of a relic ring: the sculk, miner, emerald, ocean, desert and raid rings
+     * each have one, the rest are plain rings.
      */
     private static Set<RingAbility> relicAbilities(RelicRing relic) {
         return switch (relic) {
@@ -158,6 +158,7 @@ public class ModItems {
             case EMERALD -> EnumSet.of(RingAbility.EMERALD_HERO);
             case OCEAN -> EnumSet.of(RingAbility.OCEAN_FAVORED);
             case DESERT -> EnumSet.of(RingAbility.DESERT_GUIDE);
+            case RAID -> EnumSet.of(RingAbility.RAID_PLUNDER);
             default -> Set.of();
         };
     }

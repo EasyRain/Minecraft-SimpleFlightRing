@@ -33,6 +33,10 @@ public final class RingAbilityKeyHandler {
             MinerVeteranAbility.tryDetonate(player, ring);
             return;
         }
+        if (ring.getItem() instanceof FlightRingItem item && item.hasAbility(RingAbility.RAID_PLUNDER)) {
+            RaidFangAbility.tryCast(player, ring);
+            return;
+        }
 
         // TODO Other active abilities go here as they are added: pick the ability for `slot`,
         //      verify the ring is charged (RingEnergy) and let it fire. Until then:

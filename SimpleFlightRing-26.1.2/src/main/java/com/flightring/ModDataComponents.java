@@ -95,6 +95,28 @@ public class ModDataComponents {
                     .persistent(Unit.CODEC)
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
+    /**
+     * Raid relic ring quest step: the damaged raid ring was carried through the illager will's
+     * trial - three iron golems inside sixty seconds (see {@link RaidRingQuest}) - so only the
+     * totem is missing now (the {@code repair_damaged_raid_flight_ring} recipe). Absent means the
+     * will is still weighing the wearer up.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> ILLAGER_ACKNOWLEDGED =
+            COMPONENTS.registerComponentType("illager_acknowledged", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
+    /**
+     * Totem charges of a raid ring: 0..{@link RaidCharges#MAX}, up to
+     * {@link RaidCharges#PER_TOTEM} per totem of undying crafted into it. One charge is spent
+     * every time the ring saves the wearer's life, exactly like a totem of undying would have
+     * been. Absent means empty.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> RAID_CHARGES =
+            COMPONENTS.registerComponentType("raid_charges", builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT));
+
     private ModDataComponents() {
     }
 }
