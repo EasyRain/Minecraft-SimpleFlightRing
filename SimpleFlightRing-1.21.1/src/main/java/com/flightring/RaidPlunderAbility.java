@@ -10,6 +10,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -61,7 +63,7 @@ import java.util.stream.Stream;
  *   <li><b>Bad Omen cannot take hold</b>: the effect is refused while the ring is worn and any
  *       leftover is cleared once when the ring goes on. The raid omen of an ominous bottle is
  *       deliberately left alone - the wearer still needs it to call a raid on a village.</li>
- *   <li><b>The wearer trades with the host</b>: five emeralds buy an ominous bottle (level I..V)
+ *   <li><b>The wearer trades with the host</b>: thirty-two emeralds buy an ominous bottle (level I..V)
  *       from a raid captain, thirty-two buy a totem of undying from an evoker that has not been
  *       attacked.</li>
  *   <li><b>Villagers know an illager</b>: they refuse to trade and flee from the wearer (see
@@ -83,9 +85,9 @@ public final class RaidPlunderAbility {
     // ------------------------------------------------------------------
 
     /** Emeralds one ominous bottle costs at a raid captain. */
-    private static final int BOTTLE_PRICE = 5;
+    private static final int BOTTLE_PRICE = 32;
     /** Emeralds one totem of undying costs at an evoker. */
-    private static final int TOTEM_PRICE = 32;
+    private static final int TOTEM_PRICE = 64;
     /** An ominous bottle is worth 0..4, i.e. raid omen level I..V - the same as a vanilla drop. */
     private static final int BOTTLE_MAX_AMPLIFIER = 4;
     /** Iron golems this close to the wearer are sent after them. */
@@ -200,24 +202,45 @@ public final class RaidPlunderAbility {
         Entity target = event.getTarget();
         if (target instanceof Villager) {
             // Rule 4: villagers refuse to trade with the wearer (and flee, see VillagerFearMixin).
-            event.setCanceled(true);
-            actionBar(player, "message.simpleflightring.raid_villager_refuses");
+            refuse(event);
+            if (isTradingHand(event)) {
+                actionBar(player, "message.simpleflightring.raid_villager_refuses");
+            }
             return;
         }
         if (target instanceof Raider raider && raider.isCaptain()) {
             // Raid captains are marked by Raider#isCaptain, there is no "raid_captain" entity tag.
-            event.setCanceled(true);
-            tradeOminousBottle(player, raider);
+            refuse(event);
+            if (isTradingHand(event)) {
+                tradeOminousBottle(player, raider);
+            }
             return;
         }
         if (target.getType() == EntityType.EVOKER) {
             // Compared by EntityType: the evoker lives in a different package in 26.1.2.
-            event.setCanceled(true);
-            tradeTotem(player, target);
+            refuse(event);
+            if (isTradingHand(event)) {
+                tradeTotem(player, target);
+            }
         }
     }
 
-    /** Five emeralds buy an ominous bottle of a random level (I..V). */
+    /**
+     * Cancels the vanilla interaction and reports it as a success. The result matters: left at the
+     * default pass the client keeps trying and immediately uses the other hand, so a single right
+     * click would settle the trade twice - once per hand.
+     */
+    private static void refuse(PlayerInteractEvent.EntityInteract event) {
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+    }
+
+    /** True for the hand that settles a trade, so one click pays once. */
+    private static boolean isTradingHand(PlayerInteractEvent.EntityInteract event) {
+        return event.getHand() == InteractionHand.MAIN_HAND;
+    }
+
+    /** Thirty-two emeralds buy an ominous bottle of a random level (I..V). */
     private static void tradeOminousBottle(ServerPlayer player, Raider captain) {
         if (!payEmeralds(player, BOTTLE_PRICE)) {
             return;
@@ -230,7 +253,7 @@ public final class RaidPlunderAbility {
         actionBar(player, "message.simpleflightring.raid_bottle_trade", HeroLevel.roman(amplifier + 1));
     }
 
-    /** Thirty-two emeralds buy a totem of undying - unless the wearer attacked that evoker. */
+    /** Sixty-four emeralds buy a totem of undying - unless the wearer attacked that evoker. */
     private static void tradeTotem(ServerPlayer player, Entity evoker) {
         if (isProvokedEvoker(player, evoker)) {
             actionBar(player, "message.simpleflightring.raid_evoker_refuses");
