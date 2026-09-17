@@ -158,7 +158,7 @@ public class DamagedRingItem extends Item {
                     .withStyle(ChatFormatting.GRAY));
             tooltipComponents.accept(Component.translatable(isIllagerAcknowledged(stack)
                             ? "tooltip.simpleflightring.raid_damaged_acknowledged"
-                            : "tooltip.simpleflightring.raid_damaged_watching")
+                            : "tooltip.simpleflightring.raid_damaged_prove")
                     .withColor(RingAbility.RAID_PLUNDER.color()));
             return;
         }

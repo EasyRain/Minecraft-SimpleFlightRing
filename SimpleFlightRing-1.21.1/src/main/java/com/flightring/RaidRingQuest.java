@@ -51,7 +51,6 @@ public final class RaidRingQuest {
         }
         TRIAL_ENDS.put(id, player.level().getGameTime() + TRIAL_TICKS);
         KILLS.put(id, 0);
-        showOverlay(player, "message.simpleflightring.raid_quest_watching");
     }
 
     /** The third golem felled inside the window acknowledges the ring. */
@@ -84,10 +83,19 @@ public final class RaidRingQuest {
             return;
         }
         Long end = TRIAL_ENDS.get(player.getUUID());
-        if (end != null && player.level().getGameTime() > end) {
+        if (end == null) {
+            return;
+        }
+        long left = end - player.level().getGameTime();
+        if (left <= 0) {
             showOverlay(player, "message.simpleflightring.raid_quest_failed");
             endTrial(player);
+            return;
         }
+        // Sent every tick: the wearer keeps seeing the countdown instead of one line that scrolls
+        // away after the first blow.
+        showOverlay(player, "message.simpleflightring.raid_quest_watching",
+                Long.toString((left + 19L) / 20L));
     }
 
     @SubscribeEvent
@@ -151,8 +159,8 @@ public final class RaidRingQuest {
                 && !stack.has(ModDataComponents.ILLAGER_ACKNOWLEDGED.get());
     }
 
-    private static void showOverlay(ServerPlayer player, String key) {
-        player.displayClientMessage(Component.translatable(key).withColor(RingAbility.RAID_PLUNDER.color()), true);
+    private static void showOverlay(ServerPlayer player, String key, Object... args) {
+        player.displayClientMessage(Component.translatable(key, args).withColor(RingAbility.RAID_PLUNDER.color()), true);
     }
 
     private RaidRingQuest() {

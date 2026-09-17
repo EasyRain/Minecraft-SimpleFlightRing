@@ -72,7 +72,7 @@ public enum RingAbility {
      * charges (see {@link RaidCharges}) which save their life the way a totem of undying would.
      * Its last line names the ability key, which summons the evoker's fangs.
      */
-    RAID_PLUNDER("raid_plunder", 0xFFCC4E46, 7, 7, 0, 6);
+    RAID_PLUNDER("raid_plunder", 0xFFCC4E46, 5, 5, 0, 4);
 
     private final String key;
     private final int color;
