@@ -59,7 +59,16 @@ public final class DesertSense {
 
     /** The colour of a sensed creature: red while it is hostile to the wearer, white otherwise. */
     public static int colorFor(Entity entity) {
-        return HOSTILE.contains(entity.getId()) ? HOSTILE_COLOR : FRIENDLY_COLOR;
+        return isHostile(entity) ? HOSTILE_COLOR : FRIENDLY_COLOR;
+    }
+
+    /**
+     * True while the server reports this creature as hunting the wearer. Used by the outline
+     * mixin, which leaves any creature whose custom name carries a colour to Apotheosis and only
+     * colours the rest (see {@code EntityGlowMixin}).
+     */
+    public static boolean isHostile(Entity entity) {
+        return HOSTILE.contains(entity.getId());
     }
 
     /** Replaces the sensed set (client only, called from the client tick). */
