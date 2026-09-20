@@ -20,7 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ClientFireOverlayMixin {
 
     @Inject(method = "renderFire", at = @At("HEAD"), cancellable = true)
-    private void simpleflightring$noBurningOverlay(CallbackInfo cir) {
+    // renderFire is a static method in both game versions, so the handler has to be static too.
+    private static void simpleflightring$noBurningOverlay(CallbackInfo cir) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && !FlameLordPassives.wornRing(player).isEmpty()) {
             cir.cancel();
