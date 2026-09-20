@@ -16,6 +16,8 @@
     "WardenMixin"
   ],
   "client": [
+    "ClientFireAnimationMixin",
+    "ClientFireOverlayMixin",
     "ElderGuardianCurseMixin"
   ],
   "injectors": {

@@ -52,8 +52,11 @@ public final class FlameLordPassives {
         }
     }
 
-    /** The worn infernal ring, or an empty stack: needs the ability and durability left. */
-    static ItemStack wornRing(Player player) {
+    /**
+     * The worn infernal ring, or an empty stack: needs the ability and durability left. Public
+     * because the client side fire mixins read it for the local player.
+     */
+    public static ItemStack wornRing(Player player) {
         if (!CuriosCompat.isLoaded()) {
             return ItemStack.EMPTY;
         }

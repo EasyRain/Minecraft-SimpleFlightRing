@@ -1,6 +1,8 @@
 package com.flightring;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -72,7 +74,7 @@ public class EternalSoulFireEffect extends MobEffect {
 
     public EternalSoulFireEffect() {
         // BENEFICIAL + soul fire blue: a "good" effect, so nothing treats it as a flame to douse.
-        super(MobEffectCategory.HARMFUL, 0xFF3AD8FF);
+        super(MobEffectCategory.HARMFUL, 0xFF3AD8FF, ParticleTypes.SOUL_FIRE_FLAME);
     }
 
     /**
@@ -135,6 +137,9 @@ public class EternalSoulFireEffect extends MobEffect {
         float damage = DAMAGE_PER_SECOND * (recorded != null ? recorded : NO_RING_MULTIPLIER);
         // magic() ignores Fire Resistance and Fire Protection, so nothing but a ring stops this.
         target.hurtServer(level, target.damageSources().magic(), damage);
+        // Soul fire crawling over the victim, once a second: that is what the mark looks like,
+        // rather than the potion swirl a vanilla effect would show.
+        spawnSoulFireParticles(level, target);
         Mood mood = purifyFireResistance(target);
         if (mood == Mood.LEVEL_DROPPED) {
             // The mark was eaten down by a Fire Resistance potion: every level lost is one step
@@ -187,6 +192,19 @@ public class EternalSoulFireEffect extends MobEffect {
                 target.getName().getString(), next + 1);
     }
 
+    /**
+     * A handful of soul fire particles scattered over the victim, spawned once a second while the
+     * mark burns.
+     */
+    private static void spawnSoulFireParticles(ServerLevel level, LivingEntity target) {
+        double width = Math.max(0.4, target.getBbWidth());
+        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                target.getX(), target.getY(0.5), target.getZ(),
+                6, width * 0.4, target.getBbHeight() * 0.35, width * 0.4, 0.005);
+        level.sendParticles(ParticleTypes.SOUL,
+                target.getX(), target.getY(0.6), target.getZ(),
+                2, width * 0.3, target.getBbHeight() * 0.3, width * 0.3, 0.01);
+    }
     /** Wipes the mark and the damage factor recorded for its victim. */
     private static void clearMark(LivingEntity target) {
         target.removeEffect(ModMobEffects.ETERNAL_SOUL_FIRE);

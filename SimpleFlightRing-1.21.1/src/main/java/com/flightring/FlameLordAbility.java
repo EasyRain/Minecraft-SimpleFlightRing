@@ -18,6 +18,9 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +44,7 @@ import java.util.UUID;
  * The wearer is never caught in their own blast, and neither is any creature wearing a working
  * ocean relic ring, whose blessing shrugs the mark off.
  */
+@EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class FlameLordAbility {
 
     /** Cooldown of the Flame Lord's wrath, as the task specifies. */
@@ -57,6 +61,17 @@ public final class FlameLordAbility {
     private static final List<RecipeType<?>> SMELTING_TYPES =
             List.of(RecipeType.SMELTING, RecipeType.BLASTING, RecipeType.SMOKING);
 
+    /** How long the ring of soul fire takes to sweep out from the wearer, in ticks. */
+    private static final int RING_ANIMATION_TICKS = 12;
+    /** The sweep starts as a small circle on the floor under the wearer. */
+    private static final double RING_START_RADIUS = 0.7;
+
+    /** Sweeps in flight, so a cast can be seen spreading out to the radius it really has. */
+    private static final List<Ring> RINGS = new ArrayList<>();
+
+    /** One cast's sweep: where it started, how far it reaches and when it began. */
+    private record Ring(ServerLevel level, double x, double y, double z, double radius, long start) {
+    }
     /** The ability key's internal cooldown, per player. */
     private static final Map<UUID, Long> READY_AT = new HashMap<>();
 
@@ -81,6 +96,8 @@ public final class FlameLordAbility {
         int smelted = smeltDrops(level, player.position(), radius);
 
         READY_AT.put(player.getUUID(), now + COOLDOWN_TICKS);
+        // Let the wearer see the blast: a small soul fire circle that sweeps out to the real radius.
+        RINGS.add(new Ring(level, player.getX(), player.getY(), player.getZ(), radius, now));
         level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS,
                 1.0F, 1.0F);
         FlightRingMod.LOGGER.debug(
@@ -88,6 +105,45 @@ public final class FlameLordAbility {
                 player.getName().getString(), marked, smelted, radius);
     }
 
+    /** Advances every sweep in flight; a sweep is twelve ticks of expanding soul fire. */
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (RINGS.isEmpty()) {
+            return;
+        }
+        RINGS.removeIf(ring -> {
+            long elapsed = ring.level().getGameTime() - ring.start();
+            if (elapsed > RING_ANIMATION_TICKS) {
+                return true;
+            }
+            drawRing(ring, elapsed);
+            return false;
+        });
+    }
+
+    /**
+     * One frame of a sweep: a small circle under the wearer that spins for the first quarter of
+     * the animation and then rushes outwards to the blast radius, so the reach of the ability is
+     * visible to everyone standing in it.
+     */
+    private static void drawRing(Ring ring, long elapsed) {
+        double progress = Math.min(1.0, elapsed / (double) RING_ANIMATION_TICKS);
+        double grown = progress < 0.25 ? 0.0 : (progress - 0.25) / 0.75;
+        double currentRadius = RING_START_RADIUS + (ring.radius() - RING_START_RADIUS) * grown;
+        int points = Math.max(14, (int) Math.min(64.0, currentRadius * 6.0));
+        double spin = elapsed * 0.35;
+        for (int i = 0; i < points; i++) {
+            double angle = spin + (Math.PI * 2.0 * i) / points;
+            double x = ring.x() + Math.cos(angle) * currentRadius;
+            double z = ring.z() + Math.sin(angle) * currentRadius;
+            ring.level().sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, ring.y() + 0.15, z,
+                    1, 0.0, 0.0, 0.0, 0.0);
+            if (i % 3 == 0) {
+                ring.level().sendParticles(ParticleTypes.SOUL, x, ring.y() + 0.25, z,
+                        1, 0.0, 0.02, 0.0, 0.01);
+            }
+        }
+    }
     /**
      * Lights every living creature in range, except the caster and every wearer of a working ocean
      * ring.
