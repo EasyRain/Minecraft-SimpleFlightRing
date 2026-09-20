@@ -171,7 +171,9 @@ public final class InfernalRingQuest {
 
     /** The quench itself: the ring comes up out of the lava as the working ring. */
     private static void quench(Level level, ItemEntity entity) {
-        ServerLevel server = (ServerLevel) level;
+        if (!(level instanceof ServerLevel server)) {
+            return;
+        }
         server.sendParticles(ModParticles.SOUL_FLAME.get(),
                 entity.getX(), entity.getY() + 0.2, entity.getZ(), 24, 0.25, 0.25, 0.25, 0.02);
         server.playSound(null, entity.blockPosition(), SoundEvents.FIRE_EXTINGUISH,

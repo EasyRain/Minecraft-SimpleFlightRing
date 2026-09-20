@@ -138,6 +138,15 @@ public class EternalSoulFireEffect extends MobEffect {
 
     @Override
     public boolean applyEffectTick(LivingEntity target, int amplifier) {
+        // 1.21.1 ticks effects on BOTH sides (LivingEntity#tickEffects is not client guarded), and
+        // this body is all server decisions: the endless rewrite, the immunity wipe, the damage,
+        // the Fire Resistance purification and the particle burst, which needs a ServerLevel.
+        // Without this guard a client crashes the moment anything marked ticks on it - the local
+        // player with a mark left over from an earlier session, or a mob set alight by the ring.
+        // 26.1.2 does not need it: there the whole method is MobEffectInstance#tickServer only.
+        if (target.level().isClientSide()) {
+            return true;
+        }
         // The instance may have been granted by a command (or by another mod) with a fixed
         // duration, so the endless rewrite has to happen here as well as in apply().
         forceInfiniteDuration(target, amplifier);

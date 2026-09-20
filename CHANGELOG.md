@@ -217,9 +217,12 @@
   3. **熔岩不再遮眼**（纯客户端：`ViewportEvent.RenderFog` 的 `FogType.LAVA`，和海洋戒指去掉水下迷雾同一手法）。
 - **「永恒灵魂火」**（自定义效果 `simpleflightring:eternal_soul_fire`，注册为 **负面效果 `HARMFUL`**
   —— 它是个真正的 debuff；因为它本身不是火，所以照样不会被水浇灭）：
-  - **图标直接用原版面片**：`assets/simpleflightring/textures/mob_effect/eternal_soul_fire.png` 取的是原版
-    `assets/minecraft/textures/block/soul_fire_0.png` 的第 8 帧（那张 16×16 的 2D 灵魂火焰面片，32 帧动画里轮廓最清楚的一帧），
-    按 1:1 贴进 18×18 画布正中（各留 1 像素透明边），所以图标就是玩家熟悉的灵魂火本身，不再是自己画的抽象图案；
+  - **图标直接用原版面片，而且是动画的**：`assets/simpleflightring/textures/mob_effect/eternal_soul_fire.png` 是原版
+    `assets/minecraft/textures/block/soul_fire_0.png` 的全部 **32 帧**（每帧 16×16 按 1:1 贴进 18×18 画布正中，竖排成 18×576），
+    旁边配的 `eternal_soul_fire.png.mcmeta` **逐字照抄原版**那张的 `frames` 序列（`16,17,…,31,0,1,…,15`），
+    所以图标跳动的节奏与原版灵魂火完全一致；**原版那张是 16×512 的动画条，不能整张贴**，
+    否则图标会把第二帧的顶部一起画进来。已用客户端探针验证：该 sprite 确实被 stitch 进 `mob_effects` 图集且
+    帧指纹各不相同（`ANIMATED=true STITCHED=true`）；
   - **每秒 2 点伤害**，**时长永远无限**（连 `/effect` 给的有时间限制的实例也会被自动改成无限，中招后
     只能靠净化或免疫脱身）；
   - **只有戒指的附魔能加伤害**：「能量迸发」每级 +25%（`abilityDamageMultiplier`），**效果等级本身
@@ -249,6 +252,18 @@
   （`visible=false`，HUD 图标靠 `showIcon` 保留）；
   戴着炼狱戒指时**取消自己着火的视觉**（客户端 mixin：`Entity#displayFireAnimation` 与 `ScreenEffectRenderer#renderFire`），
   所以在岩浆里不会满屏火焰挡视野（只影响本人视角；其他玩家看到的仍是各自客户端渲染）。
+
+### 修复 · 1.21.1 客户端身上有「永恒灵魂火」时会闪退
+
+- **症状**：客户端只要有任何实体带着这个 debuff 就会被踢回桌面 —— 报
+  `ClassCastException: ClientLevel cannot be cast to ServerLevel`，位置是
+  `EternalSoulFireEffect#applyEffectTick` 里的 `(ServerLevel) target.level()`。
+- **原因**：1.21.1 的 `LivingEntity#tickEffects` **两端都会跑**，所以效果逻辑（伤害、净化、强制无限时长、灵魂火粒子）
+  在客户端也会被调用，而其中粒子那段需要一个 `ServerLevel`。**26.1.2 没有这个问题**——那边 API 直接把
+  `ServerLevel` 作为参数传进来，而且只在 `MobEffectInstance#tickServer` 里调用（顺手确认过）。
+- **修法**：`applyEffectTick` 开头加客户端守卫（`target.level().isClientSide()` 直接 `return true`）：这些东西本来就是
+  服务器的决定，客户端只负责显示服务器发来的粒子。另外把 `InfernalRingQuest#quench` 里的裸转换改成
+  `instanceof ServerLevel` 提前返回，避免以后重构时再踩同类坑。
 
 ### 新增 · 炼狱戒指的损坏态任务链
 
