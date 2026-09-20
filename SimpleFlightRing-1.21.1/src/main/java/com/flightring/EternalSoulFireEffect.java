@@ -129,7 +129,7 @@ public class EternalSoulFireEffect extends MobEffect {
      */
     @Override
     public ParticleOptions createParticleOptions(MobEffectInstance effectInstance) {
-        return ParticleTypes.SOUL_FIRE_FLAME;
+        return ModParticles.SOUL_FLAME.get();
     }
     @Override
     public boolean shouldApplyEffectTickThisTick(int tickCount, int amplifier) {
@@ -213,12 +213,12 @@ public class EternalSoulFireEffect extends MobEffect {
      */
     private static void spawnSoulFireParticles(ServerLevel level, LivingEntity target) {
         double width = Math.max(0.4, target.getBbWidth());
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+        level.sendParticles(ModParticles.SOUL_FLAME.get(),
                 target.getX(), target.getY(0.5), target.getZ(),
                 6, width * 0.4, target.getBbHeight() * 0.35, width * 0.4, 0.0);
         // No ParticleTypes.SOUL here on purpose: that one is the soul escaping from soul soil,
         // and it drifts diagonally for tens of blocks. Soul fire flame only.
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+        level.sendParticles(ModParticles.SOUL_FLAME.get(),
                 target.getX(), target.getY(0.65), target.getZ(),
                 3, width * 0.3, target.getBbHeight() * 0.3, width * 0.3, 0.0);
     }

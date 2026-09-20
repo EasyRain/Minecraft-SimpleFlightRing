@@ -8,6 +8,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -26,6 +27,7 @@ public class FlightRingMod {
         ModItems.ITEMS.register(modEventBus);
         ModDataComponents.COMPONENTS.register(modEventBus);
         ModMobEffects.EFFECTS.register(modEventBus);
+        ModParticles.PARTICLES.register(modEventBus);
         ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
 
@@ -38,6 +40,8 @@ public class FlightRingMod {
             modEventBus.addListener(RegisterGuiLayersEvent.class, FlightHud::onRegisterGuiLayers);
             // Ring ability key (V by default); the ticking handler lives in ModKeyMappings.
             modEventBus.addListener(RegisterKeyMappingsEvent.class, ModKeyMappings::onRegisterKeyMappings);
+            // The mod's own soul fire particle (see ModParticles).
+            modEventBus.addListener(RegisterParticleProvidersEvent.class, ClientParticles::onRegisterParticleProviders);
         }
 
         // Network payloads (server -> client flight time sync).

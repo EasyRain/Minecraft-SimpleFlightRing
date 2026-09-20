@@ -136,7 +136,7 @@ public final class FlameLordAbility {
             double angle = spin + (Math.PI * 2.0 * i) / points;
             double x = ring.x() + Math.cos(angle) * currentRadius;
             double z = ring.z() + Math.sin(angle) * currentRadius;
-            ring.level().sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, ring.y() + 0.15, z,
+            ring.level().sendParticles(ModParticles.SOUL_FLAME.get(), x, ring.y() + 0.15, z,
                     1, 0.0, 0.0, 0.0, 0.0);
 
         }
