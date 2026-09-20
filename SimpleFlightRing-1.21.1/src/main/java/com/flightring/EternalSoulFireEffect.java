@@ -130,16 +130,17 @@ public class EternalSoulFireEffect extends MobEffect {
         // The instance may have been granted by a command (or by another mod) with a fixed
         // duration, so the endless rewrite has to happen here as well as in apply().
         forceInfiniteDuration(target, amplifier);
-        // The flame lord's own and the sea's own take no damage from the mark - but they are still
-        // purified by a real Fire Resistance potion, so a wearer who was marked before putting the
-        // ring on can drink their way out instead of having to take the ring off first. The ring's
-        // own forty tick Fire Resistance never counts (see purifyFireResistance).
-        if (!isImmune(target)) {
-            Float recorded = DAMAGE_MULTIPLIERS.get(target.getUUID());
-            float damage = DAMAGE_PER_SECOND * (recorded != null ? recorded : NO_RING_MULTIPLIER);
-            // magic() ignores Fire Resistance and Fire Protection, so nothing but a ring stops this.
-            target.hurt(target.damageSources().magic(), damage);
+        if (isImmune(target)) {
+            // The flame lord's own - and the sea's own - simply do not burn: a mark that somehow
+            // landed on them (a command, another mod, or one they carried before putting the ring
+            // on) is wiped the moment the ring is worn.
+            clearMark(target);
+            return true;
         }
+        Float recorded = DAMAGE_MULTIPLIERS.get(target.getUUID());
+        float damage = DAMAGE_PER_SECOND * (recorded != null ? recorded : NO_RING_MULTIPLIER);
+        // magic() ignores Fire Resistance and Fire Protection, so nothing but a ring stops this.
+        target.hurt(target.damageSources().magic(), damage);
         Mood mood = purifyFireResistance(target);
         if (mood == Mood.LEVEL_DROPPED) {
             // The mark was eaten down by a Fire Resistance potion: every level lost is one step
@@ -190,6 +191,12 @@ public class EternalSoulFireEffect extends MobEffect {
         target.addEffect(instance(next));
         FlightRingMod.LOGGER.debug("[FlightRing] eternal soul fire on {} dropped to level {}",
                 target.getName().getString(), next + 1);
+    }
+
+    /** Wipes the mark and the damage factor recorded for its victim. */
+    private static void clearMark(LivingEntity target) {
+        target.removeEffect(ModMobEffects.ETERNAL_SOUL_FIRE);
+        DAMAGE_MULTIPLIERS.remove(target.getUUID());
     }
 
     /**
