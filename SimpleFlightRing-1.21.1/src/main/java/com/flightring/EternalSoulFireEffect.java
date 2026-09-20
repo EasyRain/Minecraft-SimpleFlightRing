@@ -18,8 +18,8 @@ import java.util.UUID;
 /**
  * "Eternal Soul Fire" - the mark the infernal relic ring's Flame Lord leaves on everything
  * around the wearer (see {@link FlameLordAbility}). It is a custom
- * {@link MobEffectCategory#BENEFICIAL} effect rather than a real fire, so water cannot put
- * it out the way it puts out vanilla flames.
+ * {@link MobEffectCategory#HARMFUL} effect rather than a real fire, so water cannot put it
+ * out the way it puts out vanilla flames, and milk cannot wash it off either (see below).
  * <p>
  * What it does, every second:
  * <ol>
@@ -72,7 +72,7 @@ public class EternalSoulFireEffect extends MobEffect {
 
     public EternalSoulFireEffect() {
         // BENEFICIAL + soul fire blue: a "good" effect, so nothing treats it as a flame to douse.
-        super(MobEffectCategory.BENEFICIAL, 0xFF3AD8FF);
+        super(MobEffectCategory.HARMFUL, 0xFF3AD8FF);
     }
 
     /**
@@ -90,7 +90,7 @@ public class EternalSoulFireEffect extends MobEffect {
      * @param damageMultiplier the lighting ring's {@link RingAbilities#abilityDamageMultiplier}
      */
     public static void apply(LivingEntity target, int level, float damageMultiplier) {
-        if (target.level().isClientSide() || isOceanRingWearer(target)) {
+        if (target.level().isClientSide() || isImmune(target)) {
             return;
         }
         int wanted = Math.max(0, level - 1);
@@ -130,13 +130,16 @@ public class EternalSoulFireEffect extends MobEffect {
         // The instance may have been granted by a command (or by another mod) with a fixed
         // duration, so the endless rewrite has to happen here as well as in apply().
         forceInfiniteDuration(target, amplifier);
-        if (isOceanRingWearer(target)) {
-            return true;
+        // The flame lord's own and the sea's own take no damage from the mark - but they are still
+        // purified by a real Fire Resistance potion, so a wearer who was marked before putting the
+        // ring on can drink their way out instead of having to take the ring off first. The ring's
+        // own forty tick Fire Resistance never counts (see purifyFireResistance).
+        if (!isImmune(target)) {
+            Float recorded = DAMAGE_MULTIPLIERS.get(target.getUUID());
+            float damage = DAMAGE_PER_SECOND * (recorded != null ? recorded : NO_RING_MULTIPLIER);
+            // magic() ignores Fire Resistance and Fire Protection, so nothing but a ring stops this.
+            target.hurt(target.damageSources().magic(), damage);
         }
-        Float recorded = DAMAGE_MULTIPLIERS.get(target.getUUID());
-        float damage = DAMAGE_PER_SECOND * (recorded != null ? recorded : NO_RING_MULTIPLIER);
-        // magic() ignores Fire Resistance and Fire Protection, so only an ocean ring stops this.
-        target.hurt(target.damageSources().magic(), damage);
         Mood mood = purifyFireResistance(target);
         if (mood == Mood.LEVEL_DROPPED) {
             // The mark was eaten down by a Fire Resistance potion: every level lost is one step
@@ -156,7 +159,7 @@ public class EternalSoulFireEffect extends MobEffect {
      */
     private static Mood purifyFireResistance(LivingEntity target) {
         MobEffectInstance fireResistance = target.getEffect(MobEffects.FIRE_RESISTANCE);
-        if (fireResistance == null || isInfernalRingWearer(target)) {
+        if (fireResistance == null) {
             return Mood.NOTHING;
         }
         // Only a real potion wears the mark down: it has to have at least three minutes to run.
@@ -222,9 +225,17 @@ public class EternalSoulFireEffect extends MobEffect {
     }
 
     /**
-     * True while this creature wears a usable infernal relic ring. Only those wearers are spared
-     * by the Fire Resistance purification, so their always-on ring buff is not eaten by the mark
-     * they themselves spread.
+     * True while this creature is one of the flame lord's own and cannot be marked at all: either
+     * the sea's blessing ({@link RingAbility#OCEAN_FAVORED}) or a working infernal ring
+     * ({@link RingAbility#FLAME_LORD}) protects it.
+     */
+    static boolean isImmune(LivingEntity entity) {
+        return isOceanRingWearer(entity) || isInfernalRingWearer(entity);
+    }
+
+    /**
+     * True while this creature wears a usable infernal relic ring, in which case the mark cannot
+     * touch it at all - the flame lord's own are the last creatures its fire would burn.
      */
     static boolean isInfernalRingWearer(LivingEntity entity) {
         return entity instanceof Player player && hasUsableRing(player, RingAbility.FLAME_LORD);
