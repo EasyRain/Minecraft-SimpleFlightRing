@@ -128,9 +128,20 @@ public class ModItems {
         for (RelicRing relic : RelicRing.values()) {
             rings.put(relic, ITEMS.registerItem(relic.ringId(), properties -> new FlightRingItem(
                     relic.durability(), relic.enchantmentValue(), relicIntrinsicEnchantments(relic),
-                    relicAbilities(relic), relicDefaultComponents(relic, properties))));
+                    relicAbilities(relic),
+                    infernalProof(relic, relicDefaultComponents(relic, properties)))));
         }
         return Collections.unmodifiableMap(rings);
+    }
+
+    /**
+     * The infernal ring and its broken form are forge work from the Nether, so they are fire proof
+     * exactly like netherite: lava does not burn them up, it floats them back to its surface
+     * (see {@link InfernalRingQuest}) - and for the broken ring it is the quench that finally
+     * turns it into the working ring.
+     */
+    private static Item.Properties infernalProof(RelicRing relic, Item.Properties properties) {
+        return relic == RelicRing.INFERNAL ? properties.fireResistant() : properties;
     }
 
     /**
@@ -148,8 +159,8 @@ public class ModItems {
     }
 
     /**
-     * Special abilities of a relic ring: the sculk, miner, emerald, ocean, desert and raid rings
-     * each have one, the rest are plain rings.
+     * Special abilities of a relic ring: the sculk, miner, emerald, ocean, desert, raid and
+     * infernal rings each have one, the rest are plain rings.
      */
     private static Set<RingAbility> relicAbilities(RelicRing relic) {
         return switch (relic) {
@@ -183,7 +194,7 @@ public class ModItems {
         EnumMap<RelicRing, DeferredItem<DamagedRingItem>> rings = new EnumMap<>(RelicRing.class);
         for (RelicRing relic : RelicRing.values()) {
             rings.put(relic, ITEMS.registerItem(relic.damagedId(),
-                    properties -> new DamagedRingItem(relic, properties.stacksTo(1))));
+                    properties -> new DamagedRingItem(relic, infernalProof(relic, properties.stacksTo(1)))));
         }
         return Collections.unmodifiableMap(rings);
     }

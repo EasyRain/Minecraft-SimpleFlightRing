@@ -9,6 +9,7 @@
     "EntityGlowMixin",
     "EvokerFangsDamageMixin",
     "IllagerAvoidMixin",
+    "InfernalRingLavaMixin",
     "PlayerMixin",
     "SculkShriekerBlockEntityMixin",
     "VillagerFearMixin",

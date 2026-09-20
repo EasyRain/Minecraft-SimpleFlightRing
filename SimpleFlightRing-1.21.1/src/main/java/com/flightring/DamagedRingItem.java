@@ -30,6 +30,8 @@ import java.util.List;
  *   <li><b>Desert</b>: no quest at all - the ring is only weathered, so a plain polish of gold
  *       ingots and lapis lazuli around it is enough (the {@code repair_damaged_desert_flight_ring}
  *       recipe).</li>
+ *   <li><b>Infernal</b>: kill a Wither while carrying it, then throw it into lava, which quenches
+ *       it into the working ring (see {@link InfernalRingQuest}).</li>
  *   <li><b>Everything else</b>: the plain shapeless repair recipe with the theme material.</li>
  * </ul>
  * While a relic has its own quest its tooltip shows the quest text (and it glints once the
@@ -80,11 +82,20 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.ILLAGER_ACKNOWLEDGED.get());
     }
 
+    /**
+     * True once the infernal ring swallowed a Wither's death flame - killing a Wither while
+     * carrying it (see {@link InfernalRingQuest}). That is what lets the lava quench it.
+     */
+    public static boolean isWitherCharged(ItemStack stack) {
+        return stack.has(ModDataComponents.WITHER_CHARGED.get());
+    }
+
     /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
         return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack)
-                || isGuardianAcknowledged(stack) || isIllagerAcknowledged(stack) || super.isFoil(stack);
+                || isGuardianAcknowledged(stack) || isIllagerAcknowledged(stack)
+                || isWitherCharged(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -169,6 +180,24 @@ public class DamagedRingItem extends Item {
                     .withStyle(ChatFormatting.GRAY));
             tooltipComponents.add(Component.translatable("tooltip.simpleflightring.desert_damaged_polish")
                     .withColor(RingAbility.DESERT_GUIDE.color()));
+            return;
+        }
+        if (relic == RelicRing.INFERNAL) {
+            // The infernal ring's quest text: what its fire is waiting for, where the ring stands
+            // right now, then the missing step - the last two swap once the Wither's death flame
+            // is inside it. The fourth line is the ring's own promise: lava cannot destroy it.
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.infernal_damaged_asleep")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable(isWitherCharged(stack)
+                            ? "tooltip.simpleflightring.infernal_damaged_ember"
+                            : "tooltip.simpleflightring.infernal_damaged_smothered")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable(isWitherCharged(stack)
+                            ? "tooltip.simpleflightring.infernal_damaged_quench"
+                            : "tooltip.simpleflightring.infernal_damaged_slay_wither")
+                    .withColor(RingAbility.FLAME_LORD.color()));
+            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.infernal_damaged_lava")
+                    .withStyle(ChatFormatting.GRAY));
             return;
         }
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));

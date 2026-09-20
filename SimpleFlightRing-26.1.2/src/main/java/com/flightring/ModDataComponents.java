@@ -107,6 +107,17 @@ public class ModDataComponents {
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
     /**
+     * Infernal relic ring quest step: the damaged infernal ring was carried while a Wither died
+     * (see {@link InfernalRingQuest}), so it has swallowed the Wither's death flame and only the
+     * quench is missing now: thrown into lava it is forged into the working ring. Absent means the
+     * ring is still asleep.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> WITHER_CHARGED =
+            COMPONENTS.registerComponentType("wither_charged", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
+    /**
      * Totem charges of a raid ring: 0..{@link RaidCharges#MAX}, up to
      * {@link RaidCharges#PER_TOTEM} per totem of undying crafted into it. One charge is spent
      * every time the ring saves the wearer's life, exactly like a totem of undying would have
