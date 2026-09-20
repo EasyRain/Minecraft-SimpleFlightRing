@@ -35,8 +35,8 @@ public enum RelicRing {
     DESERT("desert", 1800, 16, 0xFFF0CE8C, Items.GOLD_INGOT),
     /** Pillager outpost and woodland mansion chests. */
     RAID("raid", 8400, 14, 0xFFCC4E46, Items.OMINOUS_BOTTLE),
-    /** Nether fortress chests. */
-    INFERNAL("infernal", 12000, 15, 0xFFFF8B34, Items.BLAZE_ROD),
+    /** Nether fortress chests. 9000 (150 minutes) - the longest flight of any ring. */
+    INFERNAL("infernal", 9000, 15, 0xFFFF8B34, Items.BLAZE_ROD),
     /** End city chests. */
     ENDER("ender", 14400, 12, 0xFFB074F4, Items.SHULKER_SHELL);
 
