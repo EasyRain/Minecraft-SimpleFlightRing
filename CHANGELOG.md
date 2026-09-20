@@ -216,7 +216,10 @@
   2. **免疫凋零**（`MobEffectEvent.Applicable` 直接拒绝，戴上戒指时已经挂着的凋零也会被清掉）；
   3. **熔岩不再遮眼**（纯客户端：`ViewportEvent.RenderFog` 的 `FogType.LAVA`，和海洋戒指去掉水下迷雾同一手法）。
 - **「永恒灵魂火」**（自定义效果 `simpleflightring:eternal_soul_fire`，注册为 **负面效果 `HARMFUL`**
-  —— 它是个真正的 debuff；因为它本身不是火，所以照样不会被水浇灭，青蓝色 18×18 图标）：
+  —— 它是个真正的 debuff；因为它本身不是火，所以照样不会被水浇灭）：
+  - **图标直接用原版面片**：`assets/simpleflightring/textures/mob_effect/eternal_soul_fire.png` 取的是原版
+    `assets/minecraft/textures/block/soul_fire_0.png` 的第 8 帧（那张 16×16 的 2D 灵魂火焰面片，32 帧动画里轮廓最清楚的一帧），
+    按 1:1 贴进 18×18 画布正中（各留 1 像素透明边），所以图标就是玩家熟悉的灵魂火本身，不再是自己画的抽象图案；
   - **每秒 2 点伤害**，**时长永远无限**（连 `/effect` 给的有时间限制的实例也会被自动改成无限，中招后
     只能靠净化或免疫脱身）；
   - **只有戒指的附魔能加伤害**：「能量迸发」每级 +25%（`abilityDamageMultiplier`），**效果等级本身
