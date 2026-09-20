@@ -140,10 +140,7 @@ public final class FlameLordAbility {
             double z = ring.z() + Math.sin(angle) * currentRadius;
             ring.level().sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, ring.y() + 0.15, z,
                     1, 0.0, 0.0, 0.0, 0.0);
-            if (i % 3 == 0) {
-                ring.level().sendParticles(ParticleTypes.SOUL, x, ring.y() + 0.25, z,
-                        1, 0.0, 0.02, 0.0, 0.01);
-            }
+
         }
     }
     /**

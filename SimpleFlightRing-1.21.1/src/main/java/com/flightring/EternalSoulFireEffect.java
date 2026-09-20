@@ -216,9 +216,11 @@ public class EternalSoulFireEffect extends MobEffect {
         level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
                 target.getX(), target.getY(0.5), target.getZ(),
                 6, width * 0.4, target.getBbHeight() * 0.35, width * 0.4, 0.005);
-        level.sendParticles(ParticleTypes.SOUL,
-                target.getX(), target.getY(0.6), target.getZ(),
-                2, width * 0.3, target.getBbHeight() * 0.3, width * 0.3, 0.01);
+        // No ParticleTypes.SOUL here on purpose: that one is the soul escaping from soul soil,
+        // and it drifts diagonally for tens of blocks. Soul fire flame only.
+        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                target.getX(), target.getY(0.65), target.getZ(),
+                3, width * 0.3, target.getBbHeight() * 0.3, width * 0.3, 0.0);
     }
     /** Wipes the mark and the damage factor recorded for its victim. */
     private static void clearMark(LivingEntity target) {
