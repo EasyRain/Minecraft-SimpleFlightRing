@@ -48,16 +48,22 @@ public final class InfernalRingQuest {
     /** Feedback when the lava turns the broken ring into the working one. */
     private static final String QUENCHED_MESSAGE = "message.simpleflightring.infernal_quenched";
 
-    /** How fast the ring climbs through lava, in blocks per tick. */
-    private static final double RISE_SPEED = 0.12;
-    /** How deep it floats once it is up: its bottom sits this far under the lava's surface. */
-    private static final double FLOAT_DEPTH = 0.05;
     /**
-     * The lava's own idea of "this item has arrived at the surface": the same 0.1 vanilla uses to
-     * decide whether a fallen item still gets pushed up. Deeper than that and the ring is on its
-     * way up; at or above it the ring is level with the lava.
+     * The lava's own idea of "the fluid is holding this item up": the same 0.1 vanilla uses to
+     * decide whether a fallen item still gets pushed up. Deeper than that and the ring is under
+     * the surface, at or above it the ring rides the surface.
      */
     private static final double SURFACE_LEVEL = 0.1;
+    /** How far under the fluid's top a parked ring sits. */
+    private static final double FLOAT_DEPTH = 0.05;
+    /** How fast a ring climbs back up, in blocks per tick - a touch quicker than water (0.33 b/s). */
+    private static final double RISE_SPEED = 0.025;
+    /**
+     * Extra drag on a ring that is still going down. Vanilla's own lava drag already slows the
+     * plunge, this just keeps it short: lava is thicker than water and a ring should not end up
+     * twenty blocks down a lava sea before it starts coming back.
+     */
+    private static final double SINK_DRAG = 0.9;
 
     /**
      * Step one: the Wither dies, the ring swallows its death flame. Only one ring per Wither: if
@@ -96,15 +102,27 @@ public final class InfernalRingQuest {
      * Step two, called every tick for every item entity on both sides (see
      * {@code InfernalRingLavaMixin}).
      * <p>
-     * A ring lying in lava is buoyant: it climbs to the surface of the lava column it fell into
-     * and then floats level with it, under no gravity and pushed by no current, until someone
-     * picks it up. The first time a CHARGED broken ring touches lava the quench happens: the item
-     * entity takes the working ring instead of the broken one, right there in the lava, and the
-     * new ring is what floats up. The swap is a server decision only - the item entity syncs its
-     * stack to every client by itself.
+     * A ring in lava first behaves like an item thrown into water: it goes under with the speed it
+     * arrived at, the fluid slows it down, and then it floats back up - only a touch quicker than
+     * water, because lava would otherwise keep a ring under an opaque surface for half a minute.
+     * Once it is back up it parks just under the fluid's top and stays there until someone picks
+     * it up.
+     * <p>
+     * The one piece of state this needs is {@code noGravity}, which is used as "the lava has taken
+     * this ring over": it is still false while the ring is on its way in (so the plunge is left to
+     * the fluid), and it is set the moment the plunge is over. From then on it also does the work
+     * of keeping a parked ring from bobbing: a floating item normally gets gravity applied again as
+     * soon as it reaches the surface, which is what makes it bob on water - a ring held by lava
+     * does not. It is cleared again the moment the ring is not in lava any more, so nothing else
+     * about the item is ever affected.
+     * <p>
+     * The first time a CHARGED broken ring touches lava the quench happens: the item entity takes
+     * the working ring instead of the broken one, so what sinks in and floats back out is already
+     * the finished ring. The swap is a server decision only - the item entity syncs its stack to
+     * every client by itself.
      *
-     * @return true while the ring is parked on the lava surface, in which case the caller keeps it
-     *     from expiring: it waits for its owner however long that takes.
+     * @return true while the ring is in the lava, in which case the caller keeps it from expiring:
+     *     it waits for its owner however long that takes.
      */
     public static boolean tickInLava(ItemEntity entity) {
         ItemStack stack = entity.getItem();
@@ -113,6 +131,10 @@ public final class InfernalRingQuest {
         }
         Level level = entity.level();
         if (!level.getFluidState(entity.blockPosition()).is(FluidTags.LAVA)) {
+            // Back out of the lava: nothing is holding the ring up any more.
+            if (entity.isNoGravity()) {
+                entity.setNoGravity(false);
+            }
             return false;
         }
 
@@ -121,21 +143,28 @@ public final class InfernalRingQuest {
             quench(level, entity);
         }
 
-        // How much lava stands above the ring's own bottom. Vanilla keeps this at 0.1 or less once
-        // a floating item has arrived, which is exactly the line between "still climbing" and
-        // "already at the surface" - and it is measured locally, so a ring in a lava fall parks on
-        // the surface it is actually in rather than on the top of the whole column.
         double depth = entity.getFluidHeight(FluidTags.LAVA);
-        if (depth > SURFACE_LEVEL) {
-            // Still under the surface: climb. The horizontal speed is halved every tick so the
-            // ring does not swim away with the current on its way up.
-            Vec3 motion = entity.getDeltaMovement();
-            entity.setDeltaMovement(motion.x * 0.5, RISE_SPEED, motion.z * 0.5);
-            return false;
+        Vec3 motion = entity.getDeltaMovement();
+
+        if (!entity.isNoGravity()) {
+            if (motion.y < 0.0) {
+                // Still on the way in. Vanilla's lava drag does most of the work, the extra drag
+                // only keeps the plunge short. No parking here: this is the part that has to look
+                // like an item going into water.
+                entity.setDeltaMovement(motion.x * SINK_DRAG, motion.y * SINK_DRAG, motion.z * SINK_DRAG);
+                return true;
+            }
+            // The fluid has stopped the plunge: from here on the lava carries the ring.
+            entity.setNoGravity(true);
         }
-        // Level with the lava, and pinned there: vanilla applies gravity again as soon as a ring
-        // floats this high, so without the pin it would bob. Its bottom rides FLOAT_DEPTH under
-        // the surface, which is where the surface - measured from the ring - says the lava ends.
+
+        if (depth > SURFACE_LEVEL) {
+            // On the way back up, a touch quicker than an item floating up in water.
+            entity.setDeltaMovement(motion.x * 0.99, RISE_SPEED, motion.z * 0.99);
+            return true;
+        }
+        // Up at the surface: parked with its bottom FLOAT_DEPTH under the fluid's top, and held
+        // there until it is picked up.
         entity.setDeltaMovement(Vec3.ZERO);
         entity.setPos(entity.getX(), entity.getY() + depth - FLOAT_DEPTH, entity.getZ());
         return true;

@@ -10,16 +10,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * The infernal relic ring lives in lava instead of burning up in it
- * (see {@link InfernalRingQuest#tickInLava}): it climbs to the surface of the lava column it fell
- * into, parks there and waits to be picked up, and a charged broken ring is quenched into the
- * working ring on the way.
+ * (see {@link InfernalRingQuest#tickInLava}): it sinks in the way an item thrown into water does,
+ * floats back up and then rides the surface until it is picked up, and a charged broken ring is
+ * quenched into the working ring on the way in.
  * <p>
  * This runs on both sides. The buoyancy is ordinary physics and the client has to simulate exactly
- * the same thing, or the ring would bob up and down against the server's position. The quench
- * itself only ever happens on the server.
+ * the same thing, or the ring would jitter against the server's position. The quench itself only
+ * ever happens on the server.
  * <p>
- * {@code age} is reset while the ring waits on the surface, so a ring thrown into lava can never
- * expire before its owner comes back for it.
+ * {@code age} is reset while the ring is in the lava, so a ring thrown into lava can never expire
+ * before its owner comes back for it - that is the one thing vanilla's own item-in-fluid
+ * behaviour does not do.
  */
 @Mixin(ItemEntity.class)
 public abstract class InfernalRingLavaMixin {
