@@ -183,21 +183,18 @@ public class DamagedRingItem extends Item {
             return;
         }
         if (relic == RelicRing.INFERNAL) {
-            // The infernal ring's quest text: what its fire is waiting for, where the ring stands
-            // right now, then the missing step - the last two swap once the Wither's death flame
-            // is inside it. The fourth line is the ring's own promise: lava cannot destroy it.
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.infernal_damaged_asleep")
+            // The infernal ring's quest text: one grey line for where the flame lord is and one
+            // line in the ability's own colour for what to do about it. Both swap once the ring
+            // has swallowed a Wither's soul.
+            boolean awake = isWitherCharged(stack);
+            tooltipComponents.add(Component.translatable(awake
+                            ? "tooltip.simpleflightring.infernal_damaged_awoken"
+                            : "tooltip.simpleflightring.infernal_damaged_asleep")
                     .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.add(Component.translatable(isWitherCharged(stack)
-                            ? "tooltip.simpleflightring.infernal_damaged_ember"
-                            : "tooltip.simpleflightring.infernal_damaged_smothered")
-                    .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.add(Component.translatable(isWitherCharged(stack)
-                            ? "tooltip.simpleflightring.infernal_damaged_quench"
-                            : "tooltip.simpleflightring.infernal_damaged_slay_wither")
+            tooltipComponents.add(Component.translatable(awake
+                            ? "tooltip.simpleflightring.infernal_damaged_reshape"
+                            : "tooltip.simpleflightring.infernal_damaged_wake")
                     .withColor(RingAbility.FLAME_LORD.color()));
-            tooltipComponents.add(Component.translatable("tooltip.simpleflightring.infernal_damaged_lava")
-                    .withStyle(ChatFormatting.GRAY));
             return;
         }
         tooltipComponents.add(Component.translatable("tooltip.simpleflightring.damaged").withStyle(ChatFormatting.RED));
