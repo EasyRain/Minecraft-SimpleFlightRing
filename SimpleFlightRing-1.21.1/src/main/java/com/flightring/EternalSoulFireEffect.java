@@ -240,14 +240,18 @@ public class EternalSoulFireEffect extends MobEffect {
         }
         target.removeEffect(ModMobEffects.ETERNAL_SOUL_FIRE);
         target.addEffect(new MobEffectInstance(ModMobEffects.ETERNAL_SOUL_FIRE,
-                MobEffectInstance.INFINITE_DURATION, amplifier, current.isAmbient(), current.isVisible(),
+                MobEffectInstance.INFINITE_DURATION, amplifier, current.isAmbient(), false,
                 current.showIcon()));
     }
 
     /** An endless soul fire instance of the given amplifier, visible in the HUD like any buff. */
     private static MobEffectInstance instance(int amplifier) {
+        // showIcon keeps the HUD icon, visible=false keeps vanilla from spawning its own ambient
+        // effect particle: that one is launched with a velocity of (1, 1, 1) and, for a flame
+        // particle, ends up flying diagonally for tens of blocks. The mark's look comes from the
+        // bursts spawnSoulFireParticles sends on the victim instead.
         return new MobEffectInstance(ModMobEffects.ETERNAL_SOUL_FIRE,
-                MobEffectInstance.INFINITE_DURATION, amplifier, false, true, true);
+                MobEffectInstance.INFINITE_DURATION, amplifier, false, false, true);
     }
 
     /**
