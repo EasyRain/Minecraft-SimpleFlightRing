@@ -10,6 +10,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class FlightRingMod {
     public FlightRingMod(IEventBus modEventBus) {
         ModItems.ITEMS.register(modEventBus);
         ModDataComponents.COMPONENTS.register(modEventBus);
+        ModMobEffects.EFFECTS.register(modEventBus);
         ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
 
@@ -41,6 +43,10 @@ public class FlightRingMod {
 
         // Network payloads (server -> client flight time sync).
         modEventBus.addListener(RegisterPayloadHandlersEvent.class, ModPayloads::onRegisterPayloadHandlers);
+
+        // Game bus: the eternal soul fire's recorded damage factors are per loaded world, so they
+        // are dropped when the server shuts down.
+        NeoForge.EVENT_BUS.addListener(EternalSoulFireEffect::onServerStopping);
 
         modEventBus.addListener(FMLCommonSetupEvent.class, event -> event.enqueueWork(() -> {
             if (ModList.get().isLoaded("curios")) {

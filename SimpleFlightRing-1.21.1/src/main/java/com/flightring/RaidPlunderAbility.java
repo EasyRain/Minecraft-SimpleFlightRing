@@ -574,6 +574,7 @@ public final class RaidPlunderAbility {
         PROVOKED.remove(playerId);
         BAD_OMEN_CLEARED.remove(playerId);
         RaidFangAbility.clear(playerId);
+        FlameLordAbility.clear(playerId);
     }
 
     private RaidPlunderAbility() {

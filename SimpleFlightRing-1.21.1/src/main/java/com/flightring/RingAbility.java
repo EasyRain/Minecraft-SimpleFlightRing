@@ -72,7 +72,16 @@ public enum RingAbility {
      * charges (see {@link RaidCharges}) which save their life the way a totem of undying would.
      * Its last line names the ability key, which summons the evoker's fangs.
      */
-    RAID_PLUNDER("raid_plunder", 0xFFCC4E46, 5, 5, 0, 4);
+    RAID_PLUNDER("raid_plunder", 0xFFCC4E46, 5, 5, 0, 4),
+
+    /**
+     * Infernal relic ring: "Flame Lord". The wearer never burns, cannot be withered and sees
+     * straight through lava, and the ability key sets everything around them alight with eternal
+     * soul fire - a custom effect that burns forever, that only an ocean ring can shrug off, and
+     * that fire resistance potions wear down one level at a time. Smeltable drops caught in the
+     * blast come out of it already smelted. The last line names the ability key.
+     */
+    FLAME_LORD("flame_lord", 0xFFFF8B34, 4, 4);
 
     private final String key;
     private final int color;

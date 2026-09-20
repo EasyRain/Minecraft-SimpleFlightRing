@@ -1,0 +1,203 @@
+package com.flightring;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * The ability key of the infernal relic ring: <b>"Flame Lord"</b>. Every living creature within
+ * {@value #BASE_RADIUS} blocks of the wearer is lit with {@link EternalSoulFireEffect} - soul fire
+ * that never goes out and that only the sea's blessing or a Fire Resistance potion can wear down -
+ * and every dropped item that a furnace could have processed comes out of the blast already
+ * smelted.
+ * <p>
+ * <b>Energy Burst</b> ({@link ModEnchantments#ENERGY_BURST}) widens the blast by the same factor it
+ * raises the ring's ability damage with: {@code 5.0 * abilityDamageMultiplier(ring)}, so a level V
+ * enchant reaches 11.25 blocks instead of 5. The burn itself uses that factor too - it is recorded
+ * on every victim by {@link EternalSoulFireEffect#apply} - while the level of the effect is always
+ * III (a 1-based level of 3, i.e. amplifier 2) and adds no damage of its own.
+ * <p>
+ * The wearer is never caught in their own blast, and neither is any creature wearing a working
+ * ocean relic ring, whose blessing shrugs the mark off.
+ */
+public final class FlameLordAbility {
+
+    /** Cooldown of the Flame Lord's wrath, as the task specifies. */
+    private static final int COOLDOWN_TICKS = 300;
+    /** The blast starts at five blocks around the wearer and grows with Energy Burst. */
+    private static final double BASE_RADIUS = 5.0;
+    /** Level of the eternal soul fire the key applies: level III, i.e. amplifier 2. */
+    private static final int EFFECT_LEVEL = 3;
+    /**
+     * Recipe types a caught drop is offered to, in this order. The first one that matches wins, so
+     * a raw food that both a furnace and a smoker would take comes out of the furnace's recipe -
+     * the same order a player would think of "smelting".
+     */
+    private static final List<RecipeType<?>> SMELTING_TYPES =
+            List.of(RecipeType.SMELTING, RecipeType.BLASTING, RecipeType.SMOKING);
+
+    /** The ability key's internal cooldown, per player. */
+    private static final Map<UUID, Long> READY_AT = new HashMap<>();
+
+    /**
+     * Sets everything around the worn infernal ring alight, if the ability is off cooldown. Called
+     * by {@link RingAbilityKeyHandler} when the ability key is pressed.
+     */
+    static void tryCast(ServerPlayer player, ItemStack ring) {
+        ServerLevel level = player.serverLevel();
+        long now = level.getGameTime();
+        Long readyAt = READY_AT.get(player.getUUID());
+        if (readyAt != null && now < readyAt) {
+            long seconds = Math.max(1L, (readyAt - now + 19L) / 20L);
+            player.displayClientMessage(Component.translatable(
+                    "message.simpleflightring.flame_lord_cooldown", seconds).withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
+
+        float multiplier = RingAbilities.abilityDamageMultiplier(ring);
+        double radius = BASE_RADIUS * multiplier;
+        int marked = burnCreatures(player, level, radius, multiplier);
+        int smelted = smeltDrops(level, player.position(), radius);
+
+        READY_AT.put(player.getUUID(), now + COOLDOWN_TICKS);
+        level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS,
+                1.0F, 1.0F);
+        FlightRingMod.LOGGER.debug(
+                "[FlightRing] {} cast Flame Lord: {} creatures lit, {} drops smelted (radius {})",
+                player.getName().getString(), marked, smelted, radius);
+    }
+
+    /**
+     * Lights every living creature in range, except the caster and every wearer of a working ocean
+     * ring.
+     *
+     * @return how many creatures were actually marked
+     */
+    private static int burnCreatures(ServerPlayer player, ServerLevel level, double radius,
+                                     float multiplier) {
+        AABB box = player.getBoundingBox().inflate(radius);
+        int marked = 0;
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box,
+                candidate -> candidate != player && candidate.isAlive())) {
+            if (EternalSoulFireEffect.isOceanRingWearer(target)) {
+                continue;                       // the sea's own cannot be burned
+            }
+            EternalSoulFireEffect.apply(target, EFFECT_LEVEL, multiplier);
+            marked++;
+        }
+        return marked;
+    }
+
+    /**
+     * Turns every smeltable drop in range into what a furnace would have made of it, keeping the
+     * whole stack: the output is the recipe's result count times the input count, capped at the
+     * output item's maximum stack size (so 64 raw beef becomes 64 steak, not 64 * 1 spread out).
+     * Drops no recipe accepts are left exactly as they are.
+     *
+     * @return how many stacks were smelted
+     */
+    private static int smeltDrops(ServerLevel level, Vec3 center, double radius) {
+        AABB box = new AABB(center, center).inflate(radius);
+        // getEntitiesOfClass returns a live list in this version, so the drops are collected first:
+        // every converted entity is replaced while the list is being walked.
+        List<ItemEntity> drops = new ArrayList<>(level.getEntitiesOfClass(ItemEntity.class, box,
+                drop -> !drop.getItem().isEmpty()));
+        int smelted = 0;
+        for (ItemEntity drop : drops) {
+            ItemStack result = smelt(level, drop.getItem());
+            if (result.isEmpty()) {
+                continue;
+            }
+            replaceDrop(level, drop, result);
+            smelted++;
+        }
+        return smelted;
+    }
+
+    /**
+     * The furnace product of one drop: the first of {@link #SMELTING_TYPES} that accepts the item
+     * wins and its result comes back with the count the whole input stack would yield.
+     * {@link ItemStack#EMPTY} when nothing smelts it.
+     */
+    private static ItemStack smelt(ServerLevel level, ItemStack input) {
+        SingleRecipeInput recipeInput = new SingleRecipeInput(input);
+        for (RecipeType<?> type : SMELTING_TYPES) {
+            ItemStack result = recipeResult(level, type, recipeInput, input);
+            if (!result.isEmpty()) {
+                return result;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    /**
+     * The scaled output of the first recipe of {@code type} matching the input, or empty.
+     * <p>
+     * The loop over {@link #SMELTING_TYPES} cannot name a concrete recipe class (smelting, blasting
+     * and smoking are three different ones), so the lookup is done with the raw type. That is safe
+     * here because the recipe type's own generic parameter is checked at runtime: a blasting recipe
+     * is never returned for {@code RecipeType.SMELTING}.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static ItemStack recipeResult(ServerLevel level, RecipeType<?> type,
+                                          SingleRecipeInput recipeInput, ItemStack input) {
+        Optional<RecipeHolder<?>> found = ((RecipeManager) level.getRecipeManager())
+                .getRecipeFor((RecipeType) type, recipeInput, level);
+        if (found.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        // Every one of the three is a SingleItemRecipe, whose result is the raw product; its count
+        // is the recipe's yield for a single input item.
+        ItemStack product = ((Recipe<SingleRecipeInput>) found.get().value())
+                .getResultItem(level.registryAccess());
+        if (product.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        int total = product.getCount() * input.getCount();
+        ItemStack result = product.copy();
+        result.setCount(Math.min(total, result.getMaxStackSize()));
+        return result;
+    }
+
+    /** Throws the smelted stack out where the raw drop was and takes the raw one away. */
+    private static void replaceDrop(ServerLevel level, ItemEntity drop, ItemStack result) {
+        ItemEntity converted = new ItemEntity(level, drop.getX(), drop.getY(), drop.getZ(), result);
+        converted.setDeltaMovement(0.0, 0.0, 0.0);
+        level.addFreshEntity(converted);
+        level.sendParticles(ParticleTypes.SMOKE, drop.getX(), drop.getY() + 0.2, drop.getZ(),
+                6, 0.2, 0.2, 0.2, 0.01);
+        drop.discard();
+    }
+
+    /**
+     * Fired when the wearer leaves, so a returning player starts with a clean cooldown. Called
+     * from {@link RaidPlunderAbility}, which already listens for the logout and clone events.
+     */
+    static void clear(UUID playerId) {
+        READY_AT.remove(playerId);
+    }
+
+    private FlameLordAbility() {
+    }
+}

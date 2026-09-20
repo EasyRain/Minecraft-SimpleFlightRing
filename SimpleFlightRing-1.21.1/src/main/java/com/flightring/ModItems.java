@@ -159,6 +159,7 @@ public class ModItems {
             case OCEAN -> EnumSet.of(RingAbility.OCEAN_FAVORED);
             case DESERT -> EnumSet.of(RingAbility.DESERT_GUIDE);
             case RAID -> EnumSet.of(RingAbility.RAID_PLUNDER);
+            case INFERNAL -> EnumSet.of(RingAbility.FLAME_LORD);
             default -> Set.of();
         };
     }
