@@ -155,8 +155,8 @@ public class ModItems {
     }
 
     /**
-     * Special abilities of a relic ring: the sculk, miner, emerald, ocean, desert, raid and
-     * infernal rings each have one, the rest are plain rings.
+     * Special abilities of a relic ring: the sculk, miner, emerald, ocean, desert, raid, infernal
+     * and ender rings each have one, the rest are plain rings.
      */
     private static Set<RingAbility> relicAbilities(RelicRing relic) {
         return switch (relic) {
@@ -167,6 +167,7 @@ public class ModItems {
             case DESERT -> EnumSet.of(RingAbility.DESERT_GUIDE);
             case RAID -> EnumSet.of(RingAbility.RAID_PLUNDER);
             case INFERNAL -> EnumSet.of(RingAbility.FLAME_LORD);
+            case ENDER -> EnumSet.of(RingAbility.WARP_NEXUS);
             default -> Set.of();
         };
     }
@@ -176,12 +177,14 @@ public class ModItems {
      * enchantments component so nothing can strip them: the miner ring is balanced against
      * the iron ring but ships with Unbreaking I (every point of its durability lasts two
      * seconds of flight), the emerald ring is balanced against the gold ring and ships with
-     * Efficiency I (10% faster sprint flight).
+     * Efficiency I (10% faster sprint flight), and the ender ring - which the task says comes
+     * with it - ships with Rocket Boost I.
      */
     private static Map<ResourceKey<Enchantment>, Integer> relicIntrinsicEnchantments(RelicRing relic) {
         return switch (relic) {
             case MINER -> Map.of(Enchantments.UNBREAKING, 1);
             case EMERALD -> Map.of(Enchantments.EFFICIENCY, 1);
+            case ENDER -> Map.of(ModEnchantments.ROCKET_BOOST, 1);
             default -> Map.of();
         };
     }

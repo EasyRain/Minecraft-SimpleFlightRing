@@ -128,6 +128,17 @@ public class ModDataComponents {
                     .persistent(Codec.INT)
                     .networkSynchronized(ByteBufCodecs.VAR_INT));
 
+    /**
+     * Ender relic ring quest step: the damaged ender ring was carried while the Ender Dragon died
+     * (see {@link EnderRingQuest}), so it has taken the dragon's own place and only the new vessel
+     * is missing: ender pearls above, below and to both sides, shulker shells in the corners (the
+     * {@code ender_flight_ring} recipe). Absent means the ring is still waiting for the dragon.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> DRAGON_CHARGED =
+            COMPONENTS.registerComponentType("dragon_charged", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
     private ModDataComponents() {
     }
 }

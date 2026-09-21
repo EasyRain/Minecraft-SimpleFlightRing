@@ -4,6 +4,7 @@
     "simpleflightring:sculk_flight_ring",
     "simpleflightring:miner_flight_ring",
     "simpleflightring:raid_flight_ring",
-    "simpleflightring:infernal_flight_ring"
+    "simpleflightring:infernal_flight_ring",
+    "simpleflightring:ender_flight_ring"
   ]
 }

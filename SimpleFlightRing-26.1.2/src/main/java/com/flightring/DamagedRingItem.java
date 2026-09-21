@@ -91,12 +91,20 @@ public class DamagedRingItem extends Item {
         return stack.has(ModDataComponents.WITHER_CHARGED.get());
     }
 
+    /**
+     * True once the ender ring was carried through the death of the Ender Dragon (see
+     * {@link EnderRingQuest}). That is what lets the new vessel be crafted around it.
+     */
+    public static boolean isDragonCharged(ItemStack stack) {
+        return stack.has(ModDataComponents.DRAGON_CHARGED.get());
+    }
+
     /** A broken ring glints as soon as its quest step is done and only material is missing. */
     @Override
     public boolean isFoil(ItemStack stack) {
         return hasWardenSoul(stack) || isBlastForged(stack) || isHeroCharged(stack)
                 || isGuardianAcknowledged(stack) || isIllagerAcknowledged(stack)
-                || isWitherCharged(stack) || super.isFoil(stack);
+                || isWitherCharged(stack) || isDragonCharged(stack) || super.isFoil(stack);
     }
 
     @Override
@@ -182,6 +190,20 @@ public class DamagedRingItem extends Item {
                     .withStyle(ChatFormatting.GRAY));
             tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.desert_damaged_polish")
                     .withColor(RingAbility.DESERT_GUIDE.color()));
+            return;
+        }
+        if (relic == RelicRing.ENDER) {
+            // The ender ring's quest text: one grey line for where the ring stands and one line in
+            // the ability's own colour for what to do about it. Both swap once the dragon is dead.
+            boolean charged = isDragonCharged(stack);
+            tooltipComponents.accept(Component.translatable(charged
+                            ? "tooltip.simpleflightring.ender_damaged_charged"
+                            : "tooltip.simpleflightring.ender_damaged_dormant")
+                    .withStyle(ChatFormatting.GRAY));
+            tooltipComponents.accept(Component.translatable(charged
+                            ? "tooltip.simpleflightring.ender_damaged_forge"
+                            : "tooltip.simpleflightring.ender_damaged_wake")
+                    .withColor(RingAbility.WARP_NEXUS.color()));
             return;
         }
         if (relic == RelicRing.INFERNAL) {

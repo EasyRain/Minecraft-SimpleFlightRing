@@ -1,6 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "category": "equipment",
-  "ingredients": [ { "item": "simpleflightring:damaged_ender_flight_ring" }, { "item": "minecraft:shulker_shell" } ],
-  "result": { "id": "simpleflightring:ender_flight_ring", "count": 1 }
-}

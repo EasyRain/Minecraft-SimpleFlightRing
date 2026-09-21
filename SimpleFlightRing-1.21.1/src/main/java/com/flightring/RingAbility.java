@@ -81,7 +81,18 @@ public enum RingAbility {
      * that fire resistance potions wear down one level at a time. Smeltable drops caught in the
      * blast come out of it already smelted. The last line names the ability key.
      */
-    FLAME_LORD("flame_lord", 0xFFFF8B34, 4, 4);
+    FLAME_LORD("flame_lord", 0xFFFF8B34, 4, 4),
+
+    /**
+     * Ender relic ring: "Warp Nexus". The wearer walks among the End's own - endermen, endermites,
+     * shulkers and phantoms never take them as a target, an enderman's stare no longer angers one,
+     * phantoms stop coming for them altogether, levitation cannot touch them, and every projectile
+     * aimed at them is thrown away at random the way an enderman dodges an arrow. The ability key
+     * blinks them fifteen blocks forward, through whatever is in between, and the 能量迸发
+     * enchantment stretches that jump instead of doing anything to damage. Its last line names the
+     * ability key.
+     */
+    WARP_NEXUS("warp_nexus", 0xFFB074F4, 5, 5);
 
     private final String key;
     private final int color;

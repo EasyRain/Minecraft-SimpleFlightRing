@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SPS",
+    "PRP",
+    "SPS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:shulker_shell"
+    },
+    "P": {
+      "item": "minecraft:ender_pearl"
+    },
+    "R": {
+      "type": "neoforge:components",
+      "items": "simpleflightring:damaged_ender_flight_ring",
+      "components": {
+        "simpleflightring:dragon_charged": {}
+      }
+    }
+  },
+  "result": {
+    "id": "simpleflightring:ender_flight_ring",
+    "count": 1
+  }
+}

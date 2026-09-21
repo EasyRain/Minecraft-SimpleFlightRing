@@ -287,10 +287,46 @@
   把 `age` 冻住等于把旋转冻住、只剩每帧插值那点抖动；**26.1.2 用的是 `EntityRenderState.ageInTicks`（= `tickCount`），所以同一个 bug 在 26.1.2 上完全看不出来**。
   现在改成**每 tick 把 `lifespan` 推到 `age + 6000`**（原版会把 `Lifespan` 一起存档，重启也保得住；只在戒指真的在岩浆里时才推），戒指照常旋转、也永远不会过期消失。
 
+### 新增 · 末影戒指的能力「亚空间枢纽」
+
+- 第八枚、也是最后一枚遗迹戒指（末地城宝箱，能力名取自战锤）。**被动四条**，需要戴在 Curios 槽且戒指可用：
+  1. **末影生物中立**：末影人 / 末影螨 / 潜影贝 / 幻翼视佩戴者为同类（新数据包标签 `warp_nexus_neutrals` +
+     `LivingChangeTargetEvent` 清目标，与海洋 / 荒漠 / 劫掠戒指同一套写法），**主动攻击仍会还手**
+     （`LivingIncomingDamageEvent` 记仇，按存活 / 同维度 / 跟随距离校验）；
+  2. **注视不再激怒末影人**：走的是 NeoForge 自己的 **`EnderManAngerEvent`**（南瓜头用的是同一个钩子；1.21.1 在
+     `isLookingAtMe` 里经 `CommonHooks.shouldSuppressEnderManAnger` 触发，26.1.2 在怒气判定里调用），**没有自己 mixin 重写**；
+  3. **不再召唤幻翼**：NeoForge 的 **`PlayerSpawnPhantomsEvent`** 直接回 `DENY`（原版 `PhantomSpawner` 对每个玩家生成前都会问这个事件），
+     **连 mixin 都不需要**；
+  4. **免疫漂浮**：`MobEffectEvent.Applicable` 拒绝，并每 tick 清掉已经挂在身上的实例（照炼狱戒指清凋零的写法）。
+- **弹射物会被随机传送**（`WarpNexusProjectiles`）：照 `KineticDeflectionHandler` 的三段式（`ServerTickEvent.Pre` 的球形屏障 +
+  `ProjectileImpactEvent` + `LivingIncomingDamageEvent` 兜底），但处理方式从"弹开"改成"**送走**"——随机方向 8~16 格、随机新速度，
+  两端各来一次传送门粒子 + 末影传送音效，佩戴者掉血为 0。
+- **V 键向前瞬移**（`WarpNexusAbility`）：基础 **15 格** × `abilityDamageMultiplier`（能量迸发 V 级 = 33.75 格），**冷却 5 秒**（用户指定）。
+  落点逻辑**照抄 Just Dire Things 的蚀空门径手杖**（用户点名的参考，我把 1.5.7 的 `AbilityMethods#voidShift` 字节码读了：它是
+  `player.pick(distance, …)` 做方块射线、命中就落在那个方块面前，外加 `worldBorder.isWithinBounds` 与 `resetFallDistance`）——
+  本实现改成沿视线每 0.25 格取样、**碰到第一个不合法的点就停**：离墙 10 格就只走 10 格，**除水以外的流体一律当方块**
+  （岩浆与其它 mod 的流体都进不去），世界边界也算墙；**完全贴墙时无处可去 → 原地不动、也不进冷却**（沿用矿工戒指"失败不进 CD"的规矩）。
+  落地后有一次**坠落伤害豁免**（`LivingFallEvent` 取消 + `resetFallDistance`，一落地就解除）。戒指自带**火箭加速 I**。
+- 探针实测（1.21.1，17 项 ALL PASS）：四类标签齐全；对佩戴者不激怒 / 对普通玩家仍激怒；幻翼 `DENY`；漂浮被拒；
+  开阔地落点正好 15.0 格；10 格厚的墙 → 只走 9.0 格且不卡在墙里；贴墙 → 无落点；前方 5 格岩浆 → 只走 4.0 格且落点是干的；
+  **被挡那次不写冷却、真传送才写、冷却内再按无效**；瞬移后的坠落事件被取消、普通坠落不取消；箭射向佩戴者 0 伤害且被送走；
+  充能戒指带光效；耐久仍是 14400（240 分钟）。
+
+### 新增 · 末影戒指的损坏态任务链
+
+- 损坏的末影戒指 tooltip 两行：淡灰**「末影的权柄仍在沉睡」** + 主题色**「击败末影龙来夺取它的力量」**，
+  击杀末影龙后换成淡灰**「末影龙的权柄已经易主」** + 主题色**「以末影珍珠与潜影壳重铸媒介」**，并带附魔光效。
+- **带着损坏戒指击杀末影龙**（`EnderRingQuest`，照幽匿 / 海洋 / 炼狱那套 `LivingDeathEvent` 写法；背包 / 副手 / Curios 槽都算，
+  **一只末影龙只充能一枚**）→ 新组件 `simpleflightring:dragon_charged`；反馈：`REVERSE_PORTAL` 粒子 + 末影传送音效 +
+  动作栏**「末影龙的权柄已被戒指夺取」**。
+- **重铸配方**（`ender_flight_ring.json`，`minecraft:crafting_shaped`）：中间放**已充能的损坏戒指**（用 `neoforge:components`
+  闸门卡住组件，未充能的放不进去），**上下左右四个末影珍珠、四角四个潜影壳**；旧的 shapeless「损坏戒指 + 潜影壳」占位配方**已删除**。
+- 这套文案是草稿，等用户最终中文（前七枚的文案都是用户最后一次性给定的）。
+
 ### 新增 · 附魔「能量迸发」
 
 - id `simpleflightring:energy_burst`，1~5 级，附魔台可出（也会出现在村民交易与战利品里），
-  **仅能附在带主动能力的戒指上**（`#simpleflightring:active_ability_rings`：幽匿 / 矿工 / 劫掠 / 炼狱）。
+  **仅能附在带主动能力的戒指上**（`#simpleflightring:active_ability_rings`：幽匿 / 矿工 / 劫掠 / 炼狱 / 末影）。
 - 每级 **+25% 主动特殊能力伤害**，并且**爆破半径同步放大**（V 级：伤害 ×2.25、半径 4 → 9）；音波同样吃加成。
 - tooltip：`能量迸发附魔：主动特殊能力伤害增加N%%`；同时把沿用的 `魔能增幅：` 标题统一成 `魔能增幅附魔：`。
 
