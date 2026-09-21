@@ -72,7 +72,7 @@ gradlew.bat build
 ## 安装
 
 1. 安装对应版本的 NeoForge。
-2. 将对应版本的 `simpleflightring-1.2.0-<游戏版本>.jar` 放入 `mods` 文件夹。
+2. 将对应版本的 `simpleflightring-1.3.0-<游戏版本>.jar` 放入 `mods` 文件夹。
 3. （可选）安装对应版本的 Curios API / Cloth Config / Sophisticated Backpacks / Allthemodium 以获得额外集成。
 
 ## 许可

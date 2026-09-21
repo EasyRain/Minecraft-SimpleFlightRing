@@ -10,7 +10,7 @@ Supported versions: **Minecraft 1.21.1 (NeoForge)** and **Minecraft 26.1.2 (NeoF
 - 💜 **Indestructible Core** — forge any ring with it and that ring never runs out of flight again.
 - ⚡ **Two special rings** — Stable and Powered, each with enchantments of its own built in.
 - 🗝️ **Eight relic rings** — they have no recipe at all: only their **damaged** form can be found (deep in structures, or bought from a librarian). Getting one back into shape is a little adventure of its own, and each finished ring carries a unique ability.
-- 🌀 **Special abilities** — a warden's sonic boom, a miner's blast, and more to come. The rings with an active ability fire it with the ability key (**V** by default, rebindable).
+- 🌀 **Special abilities** — all eight relic rings have their own: a warden's sonic boom, a miner's blast, an evoker's fangs, the flame lord's soul fire, the warp nexus' blink and more. The rings with an active ability fire it with the ability key (**V** by default, rebindable).
 - 🟣 **Enchantments** — Flight Stability, Rocket Boost, Arcane Amplification and Energy Burst.
 - 🖥️ **HUD** — flight time countdown and an energy bar, both positionable in `config/simpleflightring-client.toml` (Cloth Config gives you an in-game screen).
 - 🎒 **Optional integrations** — Sophisticated Backpacks (rings stored inside backpacks count) and Allthemodium (three linked endgame rings, only registered when Allthemodium is installed).

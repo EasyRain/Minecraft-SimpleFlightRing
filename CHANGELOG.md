@@ -1,6 +1,6 @@
 # 更新日志 Changelog
 
-## 未发布（1.2.0 之后）
+## 1.3.0
 
 > 适用版本：Minecraft **1.21.1**（NeoForge 21.1.248+）与 Minecraft **26.1.2**（NeoForge 26.1.2.97+）
 
