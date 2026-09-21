@@ -92,7 +92,7 @@ public enum RingAbility {
      * enchantment stretches that jump instead of doing anything to damage. Its last line names the
      * ability key.
      */
-    WARP_NEXUS("warp_nexus", 0xFFB074F4, 5, 5);
+    WARP_NEXUS("warp_nexus", 0xFFB074F4, 4, 4);
 
     private final String key;
     private final int color;

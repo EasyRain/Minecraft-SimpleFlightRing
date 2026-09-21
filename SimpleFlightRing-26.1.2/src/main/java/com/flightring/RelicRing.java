@@ -37,8 +37,8 @@ public enum RelicRing {
     RAID("raid", 8400, 14, 0xFFCC4E46, Items.OMINOUS_BOTTLE),
     /** Nether fortress chests. 9000 (150 minutes) - the longest flight of any ring. */
     INFERNAL("infernal", 9000, 15, 0xFFFF8B34, Items.BLAZE_ROD),
-    /** End city chests. */
-    ENDER("ender", 14400, 12, 0xFFB074F4, Items.SHULKER_SHELL);
+    /** End city chests. 8400 (140 minutes). */
+    ENDER("ender", 8400, 12, 0xFFB074F4, Items.SHULKER_SHELL);
 
     private final String id;
     private final int durability;

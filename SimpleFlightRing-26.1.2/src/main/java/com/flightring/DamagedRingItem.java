@@ -193,17 +193,22 @@ public class DamagedRingItem extends Item {
             return;
         }
         if (relic == RelicRing.ENDER) {
-            // The ender ring's quest text: one grey line for where the ring stands and one line in
-            // the ability's own colour for what to do about it. Both swap once the dragon is dead.
+            // The ender ring's quest text: the broken shell is always stated in grey; while the ring
+            // is dormant a second grey line describes the power that has bled away, and once the
+            // dragon is dead that line is replaced by the instruction to restore the shell. The last
+            // line is always in the ability's own colour.
             boolean charged = isDragonCharged(stack);
-            tooltipComponents.accept(Component.translatable(charged
-                            ? "tooltip.simpleflightring.ender_damaged_charged"
-                            : "tooltip.simpleflightring.ender_damaged_dormant")
+            tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ender_damaged_dormant")
                     .withStyle(ChatFormatting.GRAY));
-            tooltipComponents.accept(Component.translatable(charged
-                            ? "tooltip.simpleflightring.ender_damaged_forge"
-                            : "tooltip.simpleflightring.ender_damaged_wake")
-                    .withColor(RingAbility.WARP_NEXUS.color()));
+            if (charged) {
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ender_damaged_forge")
+                        .withColor(RingAbility.WARP_NEXUS.color()));
+            } else {
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ender_damaged_dormant2")
+                        .withStyle(ChatFormatting.GRAY));
+                tooltipComponents.accept(Component.translatable("tooltip.simpleflightring.ender_damaged_wake")
+                        .withColor(RingAbility.WARP_NEXUS.color()));
+            }
             return;
         }
         if (relic == RelicRing.INFERNAL) {
