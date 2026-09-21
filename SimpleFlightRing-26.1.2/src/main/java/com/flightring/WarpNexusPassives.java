@@ -54,6 +54,9 @@ public final class WarpNexusPassives {
     /** The monsters this player has attacked: those are allowed to fight back. */
     private static final Map<UUID, Set<UUID>> PROVOKED = new HashMap<>();
 
+    /** Wearers whose leftover levitation has already been wiped for this wearing session. */
+    private static final Set<UUID> LEVITATION_CLEARED = new HashSet<>();
+
     /** An enderman's stare never angers a wearer. */
     @SubscribeEvent
     public static void onEnderManAnger(EnderManAngerEvent event) {
@@ -73,11 +76,24 @@ public final class WarpNexusPassives {
         }
     }
 
-    /** ...and one that is already on them (a command, another mod) is wiped. */
+    /**
+     * Levitation that was already on the player when the ring went on is cured as well. Edge
+     * triggered like the desert ring's Hunger and Poison: only the tick that notices the ring being
+     * worn does the work, and taking the ring off arms it again - there is nothing to re-check
+     * every tick, because anything that tries to apply it in the meantime is refused above.
+     */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || wornRing(player).isEmpty()) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
+        }
+        UUID id = player.getUUID();
+        if (wornRing(player).isEmpty()) {
+            LEVITATION_CLEARED.remove(id);      // next time the ring goes on, cure again
+            return;
+        }
+        if (!LEVITATION_CLEARED.add(id)) {
+            return;                             // already handled for this wearing session
         }
         if (player.hasEffect(MobEffects.LEVITATION)) {
             player.removeEffect(MobEffects.LEVITATION);
@@ -149,11 +165,13 @@ public final class WarpNexusPassives {
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         PROVOKED.remove(event.getEntity().getUUID());
+        LEVITATION_CLEARED.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
         PROVOKED.remove(event.getOriginal().getUUID());
+        LEVITATION_CLEARED.remove(event.getOriginal().getUUID());
     }
 
     /** The worn ender ring, or an empty stack: needs the ability and durability left. */
