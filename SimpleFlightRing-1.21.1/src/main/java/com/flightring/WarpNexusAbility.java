@@ -10,8 +10,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -46,8 +49,12 @@ public final class WarpNexusAbility {
     private static final int COOLDOWN_TICKS = 100;
     /** Fifteen blocks at level 0 of Energy Burst; the enchantment multiplies it. */
     private static final double BASE_DISTANCE = 15.0;
-    /** How finely the way forward is sampled when the far end turns out to be blocked. */
+    /** How finely the way forward is sampled, and how far the wearer is lifted onto a step. */
     private static final double STEP = 0.25;
+    /** How far short of whatever the aim ray hits the wearer is placed. */
+    private static final double BACKOFF = 0.35;
+    /** Highest step the wearer is lifted onto; a wall taller than this ends the jump. */
+    private static final double LIFT_LIMIT = 1.25;
     /** Shortest jump worth making; anything less leaves the wearer where they stand. */
     private static final double MIN_JUMP = 1.0;
     /** How long a fresh jump keeps its wearer safe from the landing, in ticks. */
@@ -99,26 +106,42 @@ public final class WarpNexusAbility {
     /**
      * Where a blink from here would land, or null when there is nowhere to go.
      * <p>
-     * The way forward is walked in small steps and the first spot the wearer no longer fits in
-     * ends it: a wall ten blocks ahead simply means a ten block jump that stops just outside it,
-     * and the world border counts as one of those walls. There is no reaching past an obstruction
-     * to something clear further on - Just Dire Things' wand behaves the same way, with a block
-     * raycast instead of a walk, which is where this comes from.
-     * <p>
-     * Package private so the dev probe can check the landing spot without a client that would have
-     * to move a real player.
+     * Two things decide it, the way Just Dire Things' wand does it with a single block raycast:
+     * <ul>
+     *   <li>a <b>block ray</b> along the line of sight, cast from the eyes, says how far the aim
+     *       actually reaches. Whatever it hits ends the jump just short of that face, which is what
+     *       makes a wall ten blocks ahead a ten block jump - and what makes aiming at the ground
+     *       land the wearer on it instead of refusing, because the ray stops at the floor rather
+     *       than the walk pushing the whole hitbox into it;</li>
+     *   <li>the way there is then walked in small steps, and each step has to be somewhere the
+     *       wearer fits. The ground is not an obstruction - a step or a slope lifts the wearer onto
+     *       it (up to {@link #LIFT_LIMIT} blocks) - but a wall is, and so is every fluid except
+     *       water: lava and other mods' fluids are never lifted out of, they simply end the jump
+     *       where they start.</li>
+     * </ul>
+     * The world border counts as one of those walls. Package private so the dev probe can check the
+     * landing spot without a client that would have to move a real player.
      */
     static Vec3 findDestination(ServerPlayer player, double distance) {
         ServerLevel level = player.serverLevel();
         Vec3 from = player.position();
+        Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
+
+        Vec3 end = eye.add(look.scale(distance));
+        BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, player));
+        double reach = hit.getType() == HitResult.Type.MISS
+                ? distance
+                : Math.min(distance, eye.distanceTo(hit.getLocation()) - BACKOFF);
+
         Vec3 last = null;
-        for (double travelled = STEP; travelled <= distance + 1.0E-6D; travelled += STEP) {
-            Vec3 candidate = from.add(look.scale(travelled));
-            if (!isClear(level, player, candidate)) {
+        for (double travelled = STEP; travelled <= reach + 1.0E-6D; travelled += STEP) {
+            Vec3 spot = placeable(level, player, from.add(look.scale(travelled)));
+            if (spot == null) {
                 break;
             }
-            last = candidate;
+            last = spot;
         }
         if (last == null || last.distanceTo(from) < MIN_JUMP) {
             return null;
@@ -127,16 +150,28 @@ public final class WarpNexusAbility {
     }
 
     /**
-     * True when the wearer's own hitbox fits at {@code at} without touching a block, and when the
-     * only fluid it would end up in is water. Everything else - lava, and any fluid another mod
-     * adds - counts as a wall, exactly like the blocks around it. Other creatures are ignored: a
-     * blink is not blocked by whatever happens to be standing at the far end.
+     * Where the wearer ends up on this sample of the way, or null when they cannot be there at all.
+     * The fluid check comes first and is never lifted out of, so a pool of lava is a wall; the block
+     * check comes second and may be answered by standing on top of what is in the way.
      */
-    private static boolean isClear(ServerLevel level, ServerPlayer player, Vec3 at) {
-        AABB box = player.getBoundingBox().move(at.subtract(player.position()));
-        if (!level.noBlockCollision(player, box)) {
-            return false;
+    private static Vec3 placeable(ServerLevel level, ServerPlayer player, Vec3 sample) {
+        AABB box = player.getBoundingBox().move(sample.subtract(player.position()));
+        if (!onlyWaterOrAir(level, box)) {
+            return null;
         }
+        if (level.noBlockCollision(player, box)) {
+            return sample;
+        }
+        for (double lift = STEP; lift <= LIFT_LIMIT + 1.0E-6D; lift += STEP) {
+            if (level.noBlockCollision(player, box.move(0.0D, lift, 0.0D))) {
+                return sample.add(0.0D, lift, 0.0D);
+            }
+        }
+        return null;
+    }
+
+    /** True while the box is in nothing but air and water (any other fluid counts as a wall). */
+    private static boolean onlyWaterOrAir(ServerLevel level, AABB box) {
         BlockPos min = BlockPos.containing(box.minX, box.minY, box.minZ);
         BlockPos max = BlockPos.containing(box.maxX - 1.0E-4, box.maxY - 1.0E-4, box.maxZ - 1.0E-4);
         for (BlockPos pos : BlockPos.betweenClosed(min, max)) {

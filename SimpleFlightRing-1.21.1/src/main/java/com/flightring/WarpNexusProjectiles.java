@@ -41,6 +41,13 @@ public final class WarpNexusProjectiles {
     private static final double MIN_DISTANCE = 8.0D;
     private static final double MAX_DISTANCE = 16.0D;
 
+    /**
+     * Slowest approach that still counts as an attack. A shot that has already stopped - one stuck
+     * in the ground next to the wearer, or one that hit a wall and is settling - is not coming for
+     * anyone, and walking past it must not send it flying.
+     */
+    private static final double MIN_APPROACH_SPEED = 0.1D;
+
     private WarpNexusProjectiles() {
     }
 
@@ -54,12 +61,15 @@ public final class WarpNexusProjectiles {
             AABB area = new AABB(center, center).inflate(BARRIER_RADIUS);
             for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, area)) {
                 Vec3 offset = projectile.position().subtract(center);
-                if (offset.lengthSqr() > BARRIER_RADIUS * BARRIER_RADIUS) {
+                if (offset.lengthSqr() > BARRIER_RADIUS * BARRIER_RADIUS || offset.lengthSqr() < 1.0E-6D) {
                     continue;
                 }
-                // Only catch shots that are still coming in; one that was already sent away is
-                // leaving and must not be moved again.
-                if (projectile.getDeltaMovement().dot(offset) >= 0.0D) {
+                // Only catch shots that are still coming in, and only ones that are really moving:
+                // an arrow that is already stuck in the ground at the wearer's feet (or crawling
+                // down a wall) has an approach speed of about zero and is left where it is.
+                Vec3 motion = projectile.getDeltaMovement();
+                double approach = -motion.dot(offset.normalize());
+                if (approach < MIN_APPROACH_SPEED) {
                     continue;
                 }
                 warp(player, projectile);
