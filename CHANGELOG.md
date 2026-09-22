@@ -34,6 +34,11 @@
     所以本 mod 对神话**零编译期、零运行时依赖**（与 Allthemodium 联动同一套思路）。
   - **没装神话时**由 `RelicDodgeHandler` 用**完全相同**的规则自己掷骰（同样的两处判定、同样的确定性种子、
     同样的反馈，音效用原版 `PLAYER_ATTACK_SWEEP` + 同样的烟雾）。
+  - **没装神话时闪避同样要显示在 tooltip 底部**：本 mod 注册了自己的 **`simpleflightring:dodge_chance`**
+    （同为 NeoForge `PercentageAttribute`，范围 0..1，+0.25 显示 "+25%"），并用 `EntityAttributeModificationEvent`
+    把它加进**玩家**的属性表，于是 Curios 照常把它列在物品 tooltip 的属性组里；`RelicDodgeHandler` 直接读这条属性掷骰。
+    **装了神话时一滴都不会加到自己这条上** —— `ApothicAttributesCompat#dodgeTarget()` 优先返回神话的属性，
+    所以任何情况下都只有一条闪避属性、只掷一次骰。
 - 探针实测（两版本各 **58 项 ALL PASS**）：八枚戒指的数值表与用户给定的一致；每枚戒指都把附加值挂到了自己身上
   （普通戒指/联动戒指为 `null`）；修饰符的数值与 `Operation` 正确（含 ÷100 的百分比与荒漠那条 `LUCK 10`）；
   未装神话时不产生闪避属性、由自有处理器接管；50% 掷骰 1000 tick 命中 524 次且**同一 tick 结果稳定**、
