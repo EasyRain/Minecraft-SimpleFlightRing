@@ -358,11 +358,6 @@ public class FlightRingItem extends Item {
                         : Component.translatable(key);
                 hints.add(text.withStyle(ChatFormatting.DARK_GRAY));
             }
-            if (relicBonuses != null) {
-                // The relic ring's attributes, one summary line (their own lang key per ring).
-                hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + "_bonus")
-                        .withStyle(ChatFormatting.DARK_GRAY));
-            }
         }
         return hints;
     }
