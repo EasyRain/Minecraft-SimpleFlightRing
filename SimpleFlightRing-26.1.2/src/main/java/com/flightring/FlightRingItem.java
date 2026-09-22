@@ -60,6 +60,12 @@ public class FlightRingItem extends Item {
      */
     private final RingBonuses bonuses;
     /**
+     * Attribute bonuses of a relic ring (see {@link RelicRing}), granted while it is worn in
+     * the Curios slot; {@code null} for every other ring (the tiered, special and linked ones).
+     * Left non-final so the five existing constructors stay untouched.
+     */
+    private RelicBonuses relicBonuses;
+    /**
      * Special abilities of the linked rings; upgrades inherit the lower tiers'
      * abilities, so Unobtainium has everything. Empty for all other rings.
      */
@@ -161,6 +167,23 @@ public class FlightRingItem extends Item {
                 ? EnumSet.noneOf(RingAbility.class)
                 : EnumSet.copyOf(abilities);
         this.maxEnergy = 0.0F;
+    }
+
+    /**
+     * Relic ring with its attribute bonuses (see {@link RelicBonuses}): armour, toughness,
+     * damage, reach, health, luck and dodge, all granted only while the ring sits in the Curios
+     * "flight ring" slot. Every relic ring goes through this constructor.
+     */
+    public FlightRingItem(int maxDurability, int enchantmentValue,
+                          Map<ResourceKey<Enchantment>, Integer> intrinsicBase,
+                          Set<RingAbility> abilities, RelicBonuses relicBonuses, Properties properties) {
+        this(maxDurability, enchantmentValue, intrinsicBase, abilities, properties);
+        this.relicBonuses = relicBonuses;
+    }
+
+    /** The ring's relic attribute bonuses, or {@code null} when it has none. */
+    public RelicBonuses getRelicBonuses() {
+        return relicBonuses;
     }
 
     /** Whether this ring has the given special ability (see {@link RingAbility}). */
@@ -334,6 +357,11 @@ public class FlightRingItem extends Item {
                         ? Component.translatable(key, Integer.toString(RaidCharges.of(stack)))
                         : Component.translatable(key);
                 hints.add(text.withStyle(ChatFormatting.DARK_GRAY));
+            }
+            if (relicBonuses != null) {
+                // The relic ring's attributes, one summary line (their own lang key per ring).
+                hints.add(Component.translatable("tooltip.simpleflightring." + ability.key() + "_bonus")
+                        .withStyle(ChatFormatting.DARK_GRAY));
             }
         }
         return hints;

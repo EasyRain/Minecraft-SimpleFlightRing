@@ -55,7 +55,7 @@ public enum RingAbility {
     OCEAN_FAVORED("ocean_favored", 0xFF2BB8D8, 5),
 
     /**
-     * Desert relic ring: the desert wastes nothing - a permanent point of Luck (a real attribute
+     * Desert relic ring: the desert wastes nothing - ten points of Luck (a real attribute
      * bonus, so a Luck potion stacks on top of it), immunity to Hunger and Poison, half again as
      * much food value out of everything eaten, and a sixth sense that outlines every living
      * creature within 32 blocks for the wearer alone, white until it turns on the wearer and red

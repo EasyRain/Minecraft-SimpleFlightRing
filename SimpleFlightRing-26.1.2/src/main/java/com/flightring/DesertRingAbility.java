@@ -20,9 +20,11 @@ import java.util.UUID;
  * very little. Passive, and like every other relic ability it only works while the ring is worn
  * in the Curios slot with durability left.
  * <ol>
- *   <li><b>A point of Luck</b>: a real attribute bonus ({@code Attributes.LUCK}), handed to
- *       Curios like the linked rings' armour, so the Luck <b>effect</b> still stacks on top of it
- *       and vanilla's luck driven loot rolls (fishing, chest loot) use the total.</li>
+ *   <li><b>Luck</b>: a real attribute bonus ({@code Attributes.LUCK}) worth ten points, granted
+ *       through Curios like the linked rings' armour (see {@link RelicBonuses}), so the Luck
+ *       <b>effect</b> still stacks on top of it and vanilla's luck driven loot rolls (fishing,
+ *       chest loot) use the total. Past five points the quality rolls saturate, so this mostly
+ *       guarantees that luck driven loot is always at its best.</li>
  *   <li><b>Hunger and Poison cannot touch the wearer</b>: refused in
  *       {@link MobEffectEvent.Applicable}, whatever the source.</li>
  *   <li><b>Half again as much out of every meal</b>: see the food mixin of this mod
@@ -34,9 +36,6 @@ import java.util.UUID;
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class DesertRingAbility {
-
-    /** Attribute bonus the desert ring grants; a Luck potion adds its own levels on top. */
-    static final double LUCK_BONUS = 1.0;
 
     /**
      * Extra food value the wearer gets, as a fraction of what the food normally gives: the food

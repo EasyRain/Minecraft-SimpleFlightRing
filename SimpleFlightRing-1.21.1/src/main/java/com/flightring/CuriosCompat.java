@@ -45,40 +45,42 @@ public final class CuriosCompat {
             CuriosApi.registerCurio(ring.get(), new ICurioItem() {
 
                 /**
-                 * The linked (AllTheModium chain) rings grant armour, armour toughness,
-                 * attack damage and reach while worn. Curios applies these to the wearer
-                 * every tick and also lists them in the tooltip; a ring carried in the
-                 * inventory is never consulted here, so it only gives flight time.
-                 * <p>
-                 * Two relic rings add an attribute of their own, both only while the ring still
-                 * has durability left:
+                 * Attribute bonuses granted while the ring is worn, applied by Curios to the
+                 * wearer every tick and listed in the tooltip; a ring carried in the inventory
+                 * is never consulted here, so it only gives flight time.
                  * <ul>
-                 *   <li>ocean: {@code SUBMERGED_MINING_SPEED} - vanilla multiplies the mining
-                 *       speed by 0.2 whenever the eyes are in water, so +0.8 brings it back to
-                 *       1.0, i.e. no slowdown underwater;</li>
-                 *   <li>desert: a point of {@code LUCK}, the same attribute a Luck potion
-                 *       raises, so the effect stacks on top of it.</li>
+                 *   <li><b>linked rings</b> (the AllTheModium chain): armour, toughness, attack
+                 *       damage and reach, see {@link RingBonuses};</li>
+                 *   <li><b>relic rings</b>: their own mix of armour, toughness, damage, attack
+                 *       speed, movement speed, max health, reach, luck and dodge, see
+                 *       {@link RelicBonuses}. The dodge value is only handed over when
+                 *       ApothicAttributes owns the roll - otherwise {@link RelicDodgeHandler}
+                 *       rolls it itself;</li>
+                 *   <li><b>ocean</b>: {@code SUBMERGED_MINING_SPEED} - vanilla multiplies the
+                 *       mining speed by 0.2 whenever the eyes are in water, so +0.8 brings it
+                 *       back to 1.0, i.e. no slowdown underwater.</li>
                  * </ul>
                  */
                 @Override
                 public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext,
                                                                                             ResourceLocation id,
                                                                                             ItemStack stack) {
-                    RingBonuses bonuses = ring.get().getBonuses();
-                    Multimap<Holder<Attribute>, AttributeModifier> modifiers = bonuses == null
-                            ? LinkedHashMultimap.create()
-                            : bonuses.attributeModifiers();
-                    if (stack.getItem() instanceof FlightRingItem item && item.isUsable(stack)) {
-                        if (item.hasAbility(RingAbility.OCEAN_FAVORED)) {
-                            modifiers.put(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
-                                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
-                                    OceanFavoredAbility.submergedMiningBonus(), AttributeModifier.Operation.ADD_VALUE));
-                        }
-                        if (item.hasAbility(RingAbility.DESERT_GUIDE)) {
-                            modifiers.put(Attributes.LUCK, new AttributeModifier(
-                                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "desert_luck"),
-                                    DesertRingAbility.LUCK_BONUS, AttributeModifier.Operation.ADD_VALUE));
-                        }
+                    Multimap<Holder<Attribute>, AttributeModifier> modifiers = LinkedHashMultimap.create();
+                    if (!(stack.getItem() instanceof FlightRingItem item) || !item.isUsable(stack)) {
+                        return modifiers;
+                    }
+                    RingBonuses bonuses = item.getBonuses();
+                    if (bonuses != null) {
+                        modifiers.putAll(bonuses.attributeModifiers());
+                    }
+                    RelicBonuses relicBonuses = item.getRelicBonuses();
+                    if (relicBonuses != null) {
+                        modifiers.putAll(relicBonuses.attributeModifiers(ApothicAttributesCompat.dodgeChance()));
+                    }
+                    if (item.hasAbility(RingAbility.OCEAN_FAVORED)) {
+                        modifiers.put(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
+                                ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
+                                OceanFavoredAbility.submergedMiningBonus(), AttributeModifier.Operation.ADD_VALUE));
                     }
                     return modifiers;
                 }

@@ -128,7 +128,7 @@ public class ModItems {
         for (RelicRing relic : RelicRing.values()) {
             rings.put(relic, ITEMS.registerItem(relic.ringId(), properties -> new FlightRingItem(
                     relic.durability(), relic.enchantmentValue(), relicIntrinsicEnchantments(relic),
-                    relicAbilities(relic),
+                    relicAbilities(relic), RelicBonuses.of(relic),
                     infernalProof(relic, relicDefaultComponents(relic, properties)))));
         }
         return Collections.unmodifiableMap(rings);

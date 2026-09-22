@@ -57,8 +57,7 @@ public final class CuriosCompat {
                 }
 
                 /**
-                 * The linked (AllTheModium chain) rings grant armour, armour toughness,
-                 * attack damage and reach while worn.
+                 * Attribute bonuses granted while the ring is worn.
                  * <p>
                  * Curios 15 collects curio attributes through the STATIC
                  * {@code ICurioItem#forEachModifier(stack, slotContext, consumer)}, which only
@@ -68,20 +67,28 @@ public final class CuriosCompat {
                  * nothing here: both the per-tick attribute application and the tooltip use
                  * the static path, so the bonuses must come from this method.
                  * <p>
-                 * Two relic rings add an attribute of their own, both only while the ring still
-                 * has durability left: the ocean ring the submerged mining speed (vanilla
-                 * multiplies the mining speed by 0.2 whenever the eyes are in water, so +0.8
-                 * brings it back to 1.0 - no slowdown underwater) and the desert ring a point of
-                 * {@code LUCK}, the same attribute a Luck potion raises, so the effect stacks.
+                 * Three kinds of rings have something to hand over:
+                 * <ul>
+                 *   <li><b>linked rings</b> (the AllTheModium chain): armour, toughness, attack
+                 *       damage and reach, see {@link RingBonuses};</li>
+                 *   <li><b>relic rings</b>: their own mix of armour, toughness, damage, attack
+                 *       speed, movement speed, max health, reach, luck and dodge, see
+                 *       {@link RelicBonuses}. The dodge value is only handed over when
+                 *       ApothicAttributes owns the roll - otherwise {@link RelicDodgeHandler}
+                 *       rolls it itself;</li>
+                 *   <li><b>ocean</b>: the submerged mining speed (vanilla multiplies the mining
+                 *       speed by 0.2 whenever the eyes are in water, so +0.8 brings it back to
+                 *       1.0 - no slowdown underwater).</li>
+                 * </ul>
                  */
                 @Override
                 public CurioAttributeModifiers getDefaultCurioAttributeModifiers(ItemStack stack) {
-                    RingBonuses bonuses = ring.get().getBonuses();
                     FlightRingItem item = stack.getItem() instanceof FlightRingItem ringItem ? ringItem : null;
                     boolean usable = item != null && item.isUsable(stack);
+                    RingBonuses bonuses = usable ? item.getBonuses() : null;
+                    RelicBonuses relicBonuses = usable ? item.getRelicBonuses() : null;
                     boolean underwaterMining = usable && item.hasAbility(RingAbility.OCEAN_FAVORED);
-                    boolean lucky = usable && item.hasAbility(RingAbility.DESERT_GUIDE);
-                    if (bonuses == null && !underwaterMining && !lucky) {
+                    if (bonuses == null && relicBonuses == null && !underwaterMining) {
                         return CurioAttributeModifiers.EMPTY;
                     }
                     CurioAttributeModifiers.Builder builder = CurioAttributeModifiers.builder();
@@ -89,15 +96,14 @@ public final class CuriosCompat {
                         bonuses.attributeModifiers()
                                 .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
                     }
+                    if (relicBonuses != null) {
+                        relicBonuses.attributeModifiers(ApothicAttributesCompat.dodgeChance())
+                                .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
+                    }
                     if (underwaterMining) {
                         builder.addModifier(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
                                 Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
                                 OceanFavoredAbility.submergedMiningBonus(), AttributeModifier.Operation.ADD_VALUE), SLOT_ID);
-                    }
-                    if (lucky) {
-                        builder.addModifier(Attributes.LUCK, new AttributeModifier(
-                                Identifier.fromNamespaceAndPath(FlightRingMod.MODID, "desert_luck"),
-                                DesertRingAbility.LUCK_BONUS, AttributeModifier.Operation.ADD_VALUE), SLOT_ID);
                     }
                     return builder.build().withTooltip(true);
                 }
