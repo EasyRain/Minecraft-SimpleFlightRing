@@ -168,6 +168,8 @@
   "tooltip.simpleflightring.ender_damaged_dormant2": "他的力量早已逸散殆尽",
   "tooltip.simpleflightring.ender_damaged_wake": "击败末影龙来汲取他的力量",
   "tooltip.simpleflightring.ender_damaged_forge": "修复外壳后才能释放它的能力",
+  "simpleflightring:dodge_chance": "闪避率",
+  "simpleflightring:dodge_chance.desc": "有几率完全躲开近战攻击与弹射物；摔落、岩浆、中毒这类环境伤害不会被闪避。",
   "key.simpleflightring.ability": "触发戒指能力",
   "message.simpleflightring.ability_no_ring": "未佩戴带有特殊能力的飞行戒指",
   "message.simpleflightring.ability_passive": "%s 没有主动能力",

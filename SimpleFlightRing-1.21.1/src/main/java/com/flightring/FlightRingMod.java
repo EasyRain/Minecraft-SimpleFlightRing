@@ -12,6 +12,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +29,12 @@ public class FlightRingMod {
         ModItems.ITEMS.register(modEventBus);
         ModDataComponents.COMPONENTS.register(modEventBus);
         ModMobEffects.EFFECTS.register(modEventBus);
+        ModAttributes.ATTRIBUTES.register(modEventBus);
         ModParticles.PARTICLES.register(modEventBus);
         ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModCreativeTabs.TABS.register(modEventBus);
+        // Our dodge attribute has to be part of the player's attribute supplier to be applied.
+        modEventBus.addListener(EntityAttributeModificationEvent.class, ModAttributes::onEntityAttributeModification);
 
         // Client config (HUD flight timer): config/simpleflightring-client.toml
         ModList.get().getModContainerById(MODID).ifPresent(container ->

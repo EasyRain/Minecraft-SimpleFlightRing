@@ -11,7 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -30,9 +29,10 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
  *   <li>a dodge plays a whoosh and puffs smoke where the blow would have landed.</li>
  * </ul>
  * <p>
- * When ApothicAttributes is installed this class does nothing: its {@code dodge_chance}
- * attribute already carries our values (see {@link RelicBonuses} and {@link CuriosCompat}) and
- * its own handler rolls them - one roll, one sound, no double counting.
+ * The chance comes from {@link ModAttributes#DODGE_CHANCE}, which the worn ring grants through
+ * Curios - so it is displayed on the tooltip like every other attribute. When ApothicAttributes
+ * is installed this class does nothing at all: the values go into ITS {@code dodge_chance}
+ * attribute instead and its own handler rolls them - one roll, one sound, no double counting.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class RelicDodgeHandler {
@@ -110,17 +110,13 @@ public final class RelicDodgeHandler {
         return ROLL.nextFloat() <= chance;
     }
 
-    /** The dodge chance of the ring the entity wears, or 0 when it wears none. */
-    private static double dodgeChance(LivingEntity entity) {
-        if (!(entity instanceof Player player) || !CuriosCompat.isLoaded()) {
-            return 0.0D;
-        }
-        ItemStack ring = CuriosCompat.findRingInSlot(player);
-        if (!(ring.getItem() instanceof FlightRingItem item) || !item.isUsable(ring)) {
-            return 0.0D;
-        }
-        RelicBonuses bonuses = item.getRelicBonuses();
-        return bonuses == null ? 0.0D : bonuses.dodgeChance();
+    /**
+     * The dodge chance of the entity, read from our own {@link ModAttributes#DODGE_CHANCE}
+     * (only ever non-zero for a player wearing one of the rings - Curios applies it). Public so
+     * together with {@link #roll} a probe can drive the whole path.
+     */
+    public static double dodgeChance(LivingEntity entity) {
+        return entity.getAttributeValue(ModAttributes.DODGE_CHANCE);
     }
 
     /** ApothicAttributes' seed: the tick and the entity id mixed with the golden-ratio hash. */

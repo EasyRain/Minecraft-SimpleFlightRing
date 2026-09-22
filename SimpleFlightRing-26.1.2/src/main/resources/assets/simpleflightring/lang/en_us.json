@@ -168,6 +168,8 @@
   "tooltip.simpleflightring.ender_damaged_dormant2": "Its power long since bled away",
   "tooltip.simpleflightring.ender_damaged_wake": "Slay the Ender Dragon to draw his power in",
   "tooltip.simpleflightring.ender_damaged_forge": "Its power cannot be released until the shell is restored",
+  "simpleflightring:dodge_chance": "Dodge Chance",
+  "simpleflightring:dodge_chance.desc": "Chance to completely avoid melee attacks and projectiles; environmental damage such as fall, lava or poison is never dodged.",
   "key.simpleflightring.ability": "Trigger Ring Ability",
   "message.simpleflightring.ability_no_ring": "No flight ring with a special ability is equipped",
   "message.simpleflightring.ability_passive": "%s has no active ability",

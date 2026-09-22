@@ -54,4 +54,14 @@ public final class ApothicAttributesCompat {
     public static boolean handlesDodge() {
         return dodgeChance() != null;
     }
+
+    /**
+     * The attribute our relic rings should add their dodge to: the mythic one when the mod is
+     * installed (its handler then rolls it), our own {@link ModAttributes#DODGE_CHANCE} otherwise
+     * ({@link RelicDodgeHandler} rolls that one). Either way Curios lists it on the tooltip.
+     */
+    public static Holder<Attribute> dodgeTarget() {
+        Holder<Attribute> theirs = dodgeChance();
+        return theirs != null ? theirs : ModAttributes.DODGE_CHANCE;
+    }
 }

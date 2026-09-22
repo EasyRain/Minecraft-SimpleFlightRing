@@ -73,9 +73,11 @@ public final class CuriosCompat {
                  *       damage and reach, see {@link RingBonuses};</li>
                  *   <li><b>relic rings</b>: their own mix of armour, toughness, damage, attack
                  *       speed, movement speed, max health, reach, luck and dodge, see
-                 *       {@link RelicBonuses}. The dodge value is only handed over when
-                 *       ApothicAttributes owns the roll - otherwise {@link RelicDodgeHandler}
-                 *       rolls it itself;</li>
+                 *       {@link RelicBonuses}. The dodge goes to the mythic
+                 *       {@code apothic_attributes:dodge_chance} when that mod is installed and to
+                 *       our own {@link ModAttributes#DODGE_CHANCE} otherwise (see
+                 *       {@link ApothicAttributesCompat#dodgeTarget()}) - either way Curios lists
+                 *       it on the tooltip and exactly one handler rolls it;</li>
                  *   <li><b>ocean</b>: the submerged mining speed (vanilla multiplies the mining
                  *       speed by 0.2 whenever the eyes are in water, so +0.8 brings it back to
                  *       1.0 - no slowdown underwater).</li>
@@ -97,7 +99,7 @@ public final class CuriosCompat {
                                 .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
                     }
                     if (relicBonuses != null) {
-                        relicBonuses.attributeModifiers(ApothicAttributesCompat.dodgeChance())
+                        relicBonuses.attributeModifiers(ApothicAttributesCompat.dodgeTarget())
                                 .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
                     }
                     if (underwaterMining) {
