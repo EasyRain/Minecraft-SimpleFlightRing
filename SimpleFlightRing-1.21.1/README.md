@@ -422,7 +422,7 @@ S P S     R = 已充能的损坏末影戒指
 ## 安装
 
 1. 安装 [NeoForge 21.1.x](https://neoforged.net/)（需 21.1.228 或更高）。
-2. 将 `build/libs/simpleflightring-1.3.0-1.21.1.jar` 放入 `mods` 文件夹。
+2. 将 `build/libs/simpleflightring-1.3.1-1.21.1.jar` 放入 `mods` 文件夹。
 3. （可选）安装 [Curios API 9.5.1+1.21.1](https://modrinth.com/mod/curios) 以获得饰品槽位。
 4. （可选）安装 [Cloth Config API 15.x](https://modrinth.com/mod/cloth-config) 以获得游戏内配置界面。
 5. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
@@ -437,7 +437,7 @@ S P S     R = 已充能的损坏末影戒指
 gradlew.bat build
 ```
 
-产物位于 `build/libs/simpleflightring-1.3.0-1.21.1.jar`。
+产物位于 `build/libs/simpleflightring-1.3.1-1.21.1.jar`。
 
 开发环境运行（含 Curios，来自本地 `libs/` 目录的 jar）：
 
