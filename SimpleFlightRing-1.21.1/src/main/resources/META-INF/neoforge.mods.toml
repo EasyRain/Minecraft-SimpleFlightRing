@@ -6,6 +6,7 @@ license="MIT"
 modId="simpleflightring"
 version="${file.jarVersion}"
 displayName="简易飞行戒指 Simple Flight Ring"
+logoFile="logo.png"
 authors="EasyRain"
 description='''简易飞行戒指 (Simple Flight Ring)
 
