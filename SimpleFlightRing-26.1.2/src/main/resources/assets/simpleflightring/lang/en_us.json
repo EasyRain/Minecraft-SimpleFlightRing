@@ -1,5 +1,6 @@
 {
   "itemGroup.simpleflightring": "Simple Flight Ring",
+  "fml.menu.mods.info.description.simpleflightring": "Wear a flight ring and fly like in creative mode: double-tap Space to take off, hold Space to rise, Shift to descend. Flight costs 1 durability per second; the six tiers of rings upgrade into each other, and eight relic rings each carry an ability of their own.",
   "item.simpleflightring.wood_flight_ring": "Wooden Flight Ring",
   "item.simpleflightring.stone_flight_ring": "Stone Flight Ring",
   "item.simpleflightring.iron_flight_ring": "Iron Flight Ring",
