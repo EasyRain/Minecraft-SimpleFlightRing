@@ -20,9 +20,11 @@ Thumbs.db
 desktop.ini
 
 # ---- Local environment (not part of this repository) ----
-# Agent / developer notes and upload copy for this project only (local archive)
-/PROJECT_MEMORY.md
-/MODRINTH_DESCRIPTION.md
+# 公开文档随仓库走：docs/README.md（仓库首页）、docs/CHANGELOG.md、docs/GUIDE.md（玩法/配方详解）
+# 以下是本地档案（Agent / developer notes + Modrinth 上传文案）：只留本机、不进 git
+/docs/PROJECT_MEMORY.md
+/docs/MODRINTH_DESCRIPTION.md
+/docs/[0-9]*.md
 
 # Gradle tooling & caches used by this workspace
 .gradle-home/

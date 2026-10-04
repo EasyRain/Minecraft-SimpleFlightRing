@@ -3,6 +3,9 @@
 一个面向 **Minecraft 1.21.1 / NeoForge** 的小型 MOD，添加 6 种材质的飞行戒指：
 木 → 石 → 铁 → 金 → 钻石 → 下界合金。
 
+> 本文按 **1.21.1** 版撰写。26.1.2 版的玩法、配方与数值与之一致，只有安装/构建所用的
+> NeoForge 与工具链版本不同（两者对照见同目录 [`README.md`](README.md)）。
+
 ## 特性
 
 - **传统创造飞行**：佩戴（或背包内携带）有耐久的戒指时，玩家获得创造模式的飞行能力，
@@ -448,7 +451,7 @@ gradlew.bat runClient
 ## 项目结构
 
 ```
-FlightRing/
+SimpleFlightRing-1.21.1/                                 # 26.1.2 版目录结构相同（NeoGradle + Java 25）
 ├── build.gradle / settings.gradle / gradle.properties   # NeoForge 21.1.228 + ModDevGradle 1.0.17
 ├── libs/                                                # 本地 Curios jar（API/完整版/源码）
 └── src/main/

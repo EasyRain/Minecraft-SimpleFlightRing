@@ -7,8 +7,8 @@
 
 | 目录 | 游戏版本 | NeoForge | 工具链 |
 |------|---------|----------|--------|
-| [`SimpleFlightRing-1.21.1/`](SimpleFlightRing-1.21.1) | Minecraft **1.21.1** | NeoForge 21.1.248 | Gradle 8.14.3 / JDK 21 / ModDevGradle 1.0.17 |
-| [`SimpleFlightRing-26.1.2/`](SimpleFlightRing-26.1.2) | Minecraft **26.1.2** | NeoForge 26.1.2.97 | Gradle 9.2.1 / JDK 25 / NeoGradle userdev 7.1.38 |
+| [`SimpleFlightRing-1.21.1/`](../SimpleFlightRing-1.21.1) | Minecraft **1.21.1** | NeoForge 21.1.248 | Gradle 8.14.3 / JDK 21 / ModDevGradle 1.0.17 |
+| [`SimpleFlightRing-26.1.2/`](../SimpleFlightRing-26.1.2) | Minecraft **26.1.2** | NeoForge 26.1.2.97 | Gradle 9.2.1 / JDK 25 / NeoGradle userdev 7.1.38 |
 
 ## 功能特性
 
@@ -77,4 +77,4 @@ gradlew.bat build
 
 ## 许可
 
-MIT（见 [LICENSE](LICENSE)）
+MIT（见 [LICENSE](../LICENSE)）
