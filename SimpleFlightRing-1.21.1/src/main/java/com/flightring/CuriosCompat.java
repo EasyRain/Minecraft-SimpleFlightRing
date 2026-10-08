@@ -45,6 +45,17 @@ public final class CuriosCompat {
             CuriosApi.registerCurio(ring.get(), new ICurioItem() {
 
                 /**
+                 * Curios defaults this to {@code false} ({@code ICurio#canEquipFromUse}), and its
+                 * right-click handler ({@code CuriosEventHandler#curioRightClick}) only equips a
+                 * stack when this returns true - so without the override a ring could only be put
+                 * into the slot through the Curios menu, never by right-clicking it.
+                 */
+                @Override
+                public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
+                    return true;
+                }
+
+                /**
                  * Attribute bonuses granted while the ring is worn, applied by Curios to the
                  * wearer every tick and listed in the tooltip; a ring carried in the inventory
                  * is never consulted here, so it only gives flight time.

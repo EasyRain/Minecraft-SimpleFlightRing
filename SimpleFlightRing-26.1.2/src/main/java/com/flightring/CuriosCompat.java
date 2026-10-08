@@ -39,6 +39,17 @@ public final class CuriosCompat {
         }
         for (var ring : ModItems.ALL) {
             CuriosApi.registerCurio(ring.get(), new ICurioItem() {
+                /**
+                 * Curios defaults this to {@code false} ({@code ICurio#canEquipFromUse}), and its
+                 * right-click handler ({@code CuriosEventHandler#curioRightClick}) only equips a
+                 * stack when this returns true - so without the override a ring could only be put
+                 * into the slot through the Curios menu, never by right-clicking it.
+                 */
+                @Override
+                public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
+                    return true;
+                }
+
                 @Override
                 public void onEquipFromUse(SlotContext slotContext, ItemStack stack) {
                     // Curios 15.x plays the equip sound whenever the slot content is

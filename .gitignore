@@ -25,6 +25,7 @@ desktop.ini
 /docs/PROJECT_MEMORY.md
 /docs/MODRINTH_DESCRIPTION.md
 /docs/[0-9]*.md
+/docs/PLAN-*.md
 
 # Gradle tooling & caches used by this workspace
 .gradle-home/
