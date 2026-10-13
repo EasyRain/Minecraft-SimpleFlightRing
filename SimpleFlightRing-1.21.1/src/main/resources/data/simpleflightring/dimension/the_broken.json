@@ -1,0 +1,9 @@
+{
+  "type": "simpleflightring:the_broken",
+  "generator": {
+    "type": "simpleflightring:island",
+    "biome_source": {
+      "type": "simpleflightring:island"
+    }
+  }
+}

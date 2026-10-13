@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="simpleflightring"
 version="${file.jarVersion}"
-displayName="简易飞行戒指 Simple Flight Ring"
+displayName="Simple Flight Ring"
 logoFile="logo.png"
 authors="EasyRain"
 description='''
