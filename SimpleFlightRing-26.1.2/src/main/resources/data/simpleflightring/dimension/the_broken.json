@@ -1,0 +1,13 @@
+{
+  "type": "simpleflightring:the_broken",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "layers": [],
+      "biome": "minecraft:the_void",
+      "structure_overrides": [],
+      "features": false,
+      "lakes": false
+    }
+  }
+}

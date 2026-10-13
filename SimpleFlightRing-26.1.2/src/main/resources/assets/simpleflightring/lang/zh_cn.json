@@ -1,5 +1,7 @@
 {
   "itemGroup.simpleflightring": "简易飞行戒指",
+  "message.simpleflightring.ender_ring_resonance": "末影戒指似乎对传送门产生了共鸣",
+  "block.simpleflightring.broken_portal": "破碎传送门",
   "fml.menu.mods.info.description.simpleflightring": "戴上戒指即可像创造模式一样飞行：双击空格起飞，按住空格上升、Shift 下降。飞行每秒消耗 1 点耐久；六阶戒指可逐级合成升级，另有八枚遗迹戒指，各带独特能力。",
   "item.simpleflightring.wood_flight_ring": "木飞行戒指",
   "item.simpleflightring.stone_flight_ring": "石飞行戒指",
