@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_end",
+  "features": "simpleflightring:broken_snow",
+  "step": "top_layer_modification"
+}
