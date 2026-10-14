@@ -28,13 +28,6 @@ ordering="AFTER"
 side="BOTH"
 
 [[dependencies.simpleflightring]]
-modId="cloth_config"
-type="optional"
-versionRange="[15,16)"
-ordering="AFTER"
-side="CLIENT"
-
-[[dependencies.simpleflightring]]
 modId="sophisticatedbackpacks"
 type="optional"
 versionRange="[3.20,4)"

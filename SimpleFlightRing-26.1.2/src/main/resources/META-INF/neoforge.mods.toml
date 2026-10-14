@@ -24,13 +24,6 @@ ordering="AFTER"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
-modId="cloth_config"
-type="optional"
-versionRange="[26,27)"
-ordering="AFTER"
-side="CLIENT"
-
-[[dependencies.${mod_id}]]
 modId="sophisticatedbackpacks"
 type="optional"
 versionRange="[3.25,4)"

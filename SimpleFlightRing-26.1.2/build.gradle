@@ -116,10 +116,6 @@ dependencies {
     compileOnly files("libs/curios-neoforge-15.0.0+26.1.2-api.jar")
     localRuntime files("libs/curios-neoforge-15.0.0+26.1.2.jar")
 
-    // Cloth Config API - optional dependency for the in-game config screen.
-    compileOnly files("libs/cloth-config-26.1.154.jar")
-    localRuntime files("libs/cloth-config-26.1.154.jar")
-
     // Sophisticated Backpacks - optional dependency; Sophisticated Core is its
     // required dependency (parent classes of the backpack API live there).
     compileOnly files("libs/sophisticatedbackpacks-26.1.2-3.25.90.2106.jar")

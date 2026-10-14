@@ -28,7 +28,7 @@
   - 但**飞行**本身在背包/副手里同样生效（优先检测饰品槽位，其次背包）。
 - **HUD 飞行时间倒计时**：携带可用戒指时在游戏界面显示剩余飞行时间（默认左下角），
   可在配置文件中开关与调整位置。
-- **配置界面**：游戏内 Mod 列表 → 「Config」（1.21.1 用 NeoForge 自带界面，26.1.2 沿用 Cloth Config），
+- **配置界面**：游戏内 Mod 列表 → 「Config」（**两版都用 NeoForge 自带界面**），
   可调整 HUD 开关与位置；直接编辑配置文件同样生效。
 - **精妙背包 Sophisticated Backpacks 可选适配**（非必须）：戒指放在精妙背包内同样生效——
   背包在主物品栏、**盔甲栏（穿在背上）**、副手或 Curios 槽位中均可，支持**嵌套背包**（最深 3 层）；
@@ -52,8 +52,8 @@
 - 倒计时显示格式为「飞行时间：X 分 Y 秒」；持有**多枚戒指**（饰品槽位 + 背包 + 副手）时，
   剩余飞行时间会**累加**显示。
 - 打开聊天框输入文字时倒计时自动隐藏（可在配置中关闭此行为），避免遮挡聊天输入。
-- 1.21.1 起配置界面改用 **NeoForge 自带界面**（Mod 列表 → Config）；26.1.2 暂时仍用 [Cloth Config API](https://modrinth.com/mod/cloth-config)。
-- **[Curios API](https://modrinth.com/mod/curios) 是必需依赖**（没有它游戏无法启动）；Cloth Config 等其余集成为可选项。
+- 配置界面用 **NeoForge 自带界面**（Mod 列表 → Config），**两个版本一致**，不需要任何额外前置。
+- **[Curios API](https://modrinth.com/mod/curios) 是必需依赖**（没有它游戏无法启动）；精妙背包 / Allthemodium 等其余集成均为可选。
 
 ## 各材质飞行时间
 
@@ -430,7 +430,7 @@ S P S     R = 已充能的损坏末影戒指
 4. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
    及其前置 [Sophisticated Core](https://modrinth.com/mod/sophisticated-core)，戒指放在精妙背包内也能生效。
 5. （可选）安装 [Allthemodium](https://modrinth.com/mod/allthemodium) 以获得三枚联动戒指与「魔能增幅」附魔。
-6. 配置界面用 NeoForge 自带界面（Mod 列表 → Config），1.21.1 **不需要** Cloth Config。
+6. 配置界面用 NeoForge 自带界面（Mod 列表 → Config），**两版都不需要**任何额外前置。
 
 ## 从源码构建
 
@@ -461,7 +461,6 @@ SimpleFlightRing-1.21.1/                                 # 26.1.2 版目录结�
     │   ├── FlightRingItem.java       # 戒指物品（耐久=飞行分钟数×60、Tooltip 显示剩余分/秒）
     │   ├── FlightRingConfig.java     # 客户端配置（HUD 开关与位置，config/simpleflightring-client.toml）
     │   ├── FlightHud.java            # 客户端 HUD：飞行时间倒计时渲染（多戒指累加）
-    │   ├── ClothConfigCompat.java    # Cloth Config 集成（26.1.2 用；1.21.1 已改用 NeoForge 自带界面，本类保留未用）
     │   ├── BackpackCompat.java       # 精妙背包可选集成（扫描背包内戒指，支持嵌套）
     │   ├── ModItems.java             # 物品注册
     │   ├── ModRecipeSerializers.java # 自定义配方序列化器注册
