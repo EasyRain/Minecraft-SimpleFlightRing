@@ -76,7 +76,7 @@ gradlew.bat build
 1. 安装对应版本的 NeoForge。
 2. 安装 **[Curios API](https://modrinth.com/mod/curios)**（**必需**；1.21.1 用 9.5.1+，26.1.2 用 15.x）。
 3. 将对应版本的 `simpleflightring-1.3.1-<游戏版本>.jar` 放入 `mods` 文件夹。
-4. （可选）安装对应版本的 Sophisticated Backpacks / Allthemodium 以获得额外集成。配置界面用的是 **NeoForge 自带界面**（Mod 列表 → Config），不需要任何额外前置。
+4. （可选）安装对应版本的 Sophisticated Backpacks / Allthemodium 以获得额外集成。
 
 ## 许可
 

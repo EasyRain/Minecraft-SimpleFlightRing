@@ -186,7 +186,7 @@ public final class BrokenConfig {
     /**
      * One editable option, as the in-game screen needs it: a label, a way to read and write the value, and its
      * kind. Deliberately free of any client class, so {@link BrokenConfig} stays safe on a dedicated server -
-     * only the client-side screen renderer touches Cloth.
+     * only the client-side screen renderer (see ConfigScreens) touches client classes.
      */
     public record Option(String label, java.util.function.Supplier<Object> get,
                          java.util.function.Consumer<Object> set, Class<?> kind, Object defaultValue) {

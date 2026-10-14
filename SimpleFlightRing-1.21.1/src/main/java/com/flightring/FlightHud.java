@@ -20,7 +20,7 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
  * (Curios flight ring slot, inventory and offhand), their remaining flight
  * times are summed up.
  * Position and visibility are controlled by {@link FlightRingConfig}
- * (config/simpleflightring-client.toml) and can be edited in-game with Cloth Config.
+ * (config/simpleflightring-client.toml), or in-game from the mod list's Config screen (NeoForge's own).
  * <p>
  * Registered manually on the mod event bus by {@link FlightRingMod} (client side only).
  */

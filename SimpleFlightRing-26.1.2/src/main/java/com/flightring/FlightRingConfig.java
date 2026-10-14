@@ -6,7 +6,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * Client-side configuration (config/simpleflightring-client.toml).
  * <p>
  * The HUD flight timer can be toggled here and its position adjusted; the same
- * options are exposed in-game through Cloth Config when it is installed.
+ * options are exposed in-game from the mod list's Config screen (NeoForge's own).
  */
 public class FlightRingConfig {
 

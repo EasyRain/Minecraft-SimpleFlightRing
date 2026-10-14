@@ -52,7 +52,7 @@
 - 倒计时显示格式为「飞行时间：X 分 Y 秒」；持有**多枚戒指**（饰品槽位 + 背包 + 副手）时，
   剩余飞行时间会**累加**显示。
 - 打开聊天框输入文字时倒计时自动隐藏（可在配置中关闭此行为），避免遮挡聊天输入。
-- 配置界面用 **NeoForge 自带界面**（Mod 列表 → Config），**两个版本一致**，不需要任何额外前置。
+- 配置界面用 **NeoForge 自带界面**（Mod 列表 → Config），**两个版本一致**。
 - **[Curios API](https://modrinth.com/mod/curios) 是必需依赖**（没有它游戏无法启动）；精妙背包 / Allthemodium 等其余集成均为可选。
 
 ## 各材质飞行时间
@@ -430,7 +430,7 @@ S P S     R = 已充能的损坏末影戒指
 4. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
    及其前置 [Sophisticated Core](https://modrinth.com/mod/sophisticated-core)，戒指放在精妙背包内也能生效。
 5. （可选）安装 [Allthemodium](https://modrinth.com/mod/allthemodium) 以获得三枚联动戒指与「魔能增幅」附魔。
-6. 配置界面用 NeoForge 自带界面（Mod 列表 → Config），**两版都不需要**任何额外前置。
+6. 配置界面用 NeoForge 自带界面（Mod 列表 → Config）。
 
 ## 从源码构建
 
