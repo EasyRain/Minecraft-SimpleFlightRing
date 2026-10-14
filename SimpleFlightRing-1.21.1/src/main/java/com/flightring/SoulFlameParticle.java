@@ -8,8 +8,6 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The mod's own soul fire: vanilla's soul fire flame look, none of vanilla's motion.
@@ -28,7 +26,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * The texture is vanilla's own ({@code minecraft:soul_fire_flame}, see
  * {@code assets/simpleflightring/particles/soul_flame.json}), so nothing new is drawn.
  */
-@OnlyIn(Dist.CLIENT)
 public class SoulFlameParticle extends TextureSheetParticle {
 
     protected SoulFlameParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
@@ -84,8 +81,7 @@ public class SoulFlameParticle extends TextureSheetParticle {
     }
 
     /** Handed to {@code RegisterParticleProvidersEvent} by {@link ClientParticles}. */
-    @OnlyIn(Dist.CLIENT)
-    public static class Provider implements ParticleProvider<SimpleParticleType> {
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
 
         private final SpriteSet sprites;
 

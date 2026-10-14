@@ -7,8 +7,6 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * The broken portal's own wisp: vanilla's portal particle, in light gray instead of purple.
@@ -27,7 +25,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  * The texture is vanilla's own generic particle sheet, see
  * {@code assets/simpleflightring/particles/broken_portal.json}.
  */
-@OnlyIn(Dist.CLIENT)
 public class BrokenPortalParticle extends TextureSheetParticle {
 
     private final double xStart;
@@ -108,8 +105,7 @@ public class BrokenPortalParticle extends TextureSheetParticle {
     }
 
     /** Handed to {@code RegisterParticleProvidersEvent} by {@link ClientParticles}. */
-    @OnlyIn(Dist.CLIENT)
-    public static class Provider implements ParticleProvider<SimpleParticleType> {
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
 
         private final SpriteSet sprites;
 
