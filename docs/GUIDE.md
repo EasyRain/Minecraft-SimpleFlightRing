@@ -21,14 +21,15 @@
   - 升级配方**忽略输入戒指的剩余耐久**（哪怕耐久为 0 也能升级）；
   - 升级产物为满耐久的新戒指。
 - **下界合金戒指**：通过**锻造台**升级——下界合金升级锻造模板 + 钻石飞行戒指 + 下界合金锭。
-- **Curios API 可选集成**（非必须）：
-  - 安装 Curios 后自动添加一个额外的**「飞行戒指」饰品槽位**，戒指可右键直接佩戴；
-  - 未安装 Curios 时，戒指放在背包内即可生效；
-  - 即使安装了 Curios，放在背包内同样生效（优先检测饰品槽位，其次背包）。
+- **Curios API（必需依赖）**：
+  - 没有 Curios **无法启动游戏**（`neoforge.mods.toml` 里是 `type="required"`）；
+  - 它提供「飞行戒指」饰品槽位，戒指可右键直接佩戴；
+  - **主动能力（V 键）只认 Curios 飞行戒指槽里的戒指**，放背包里不触发；
+  - 但**飞行**本身在背包/副手里同样生效（优先检测饰品槽位，其次背包）。
 - **HUD 飞行时间倒计时**：携带可用戒指时在游戏界面显示剩余飞行时间（默认左下角），
   可在配置文件中开关与调整位置。
-- **Cloth Config API 可选适配**（非必须）：安装后可在游戏内 Mod 列表点击「Config」打开配置界面，
-  用滑块条实时调整 HUD 位置；未安装时直接编辑配置文件同样生效。
+- **配置界面**：游戏内 Mod 列表 → 「Config」（1.21.1 用 NeoForge 自带界面，26.1.2 沿用 Cloth Config），
+  可调整 HUD 开关与位置；直接编辑配置文件同样生效。
 - **精妙背包 Sophisticated Backpacks 可选适配**（非必须）：戒指放在精妙背包内同样生效——
   背包在主物品栏、**盔甲栏（穿在背上）**、副手或 Curios 槽位中均可，支持**嵌套背包**（最深 3 层）；
   HUD 倒计时同样累加背包内戒指。
@@ -51,9 +52,8 @@
 - 倒计时显示格式为「飞行时间：X 分 Y 秒」；持有**多枚戒指**（饰品槽位 + 背包 + 副手）时，
   剩余飞行时间会**累加**显示。
 - 打开聊天框输入文字时倒计时自动隐藏（可在配置中关闭此行为），避免遮挡聊天输入。
-- 安装 [Cloth Config API](https://modrinth.com/mod/cloth-config)（15.x，1.21.1）后，
-  打开游戏内 Mod 列表 → 简易飞行戒指 → 「Config」即可用开关与滑块条调整上述选项并保存。
-- 安装 [Curios API](https://modrinth.com/mod/curios) 与 Cloth Config 均为可选项，MOD 单独运行不受影响。
+- 1.21.1 起配置界面改用 **NeoForge 自带界面**（Mod 列表 → Config）；26.1.2 暂时仍用 [Cloth Config API](https://modrinth.com/mod/cloth-config)。
+- **[Curios API](https://modrinth.com/mod/curios) 是必需依赖**（没有它游戏无法启动）；Cloth Config 等其余集成为可选项。
 
 ## 各材质飞行时间
 
@@ -425,12 +425,12 @@ S P S     R = 已充能的损坏末影戒指
 ## 安装
 
 1. 安装 [NeoForge 21.1.x](https://neoforged.net/)（需 21.1.228 或更高）。
-2. 将 `build/libs/simpleflightring-1.3.1-1.21.1.jar` 放入 `mods` 文件夹。
-3. （可选）安装 [Curios API 9.5.1+1.21.1](https://modrinth.com/mod/curios) 以获得饰品槽位。
-4. （可选）安装 [Cloth Config API 15.x](https://modrinth.com/mod/cloth-config) 以获得游戏内配置界面。
-5. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
+2. 安装 **[Curios API 9.5.1+1.21.1](https://modrinth.com/mod/curios)（必需依赖，没有它游戏无法启动）**。
+3. 将 `build/libs/simpleflightring-1.3.1-1.21.1.jar` 放入 `mods` 文件夹。
+4. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
    及其前置 [Sophisticated Core](https://modrinth.com/mod/sophisticated-core)，戒指放在精妙背包内也能生效。
-6. （可选）安装 [Allthemodium](https://modrinth.com/mod/allthemodium) 以获得三枚联动戒指与「魔能增幅」附魔。
+5. （可选）安装 [Allthemodium](https://modrinth.com/mod/allthemodium) 以获得三枚联动戒指与「魔能增幅」附魔。
+6. 配置界面用 NeoForge 自带界面（Mod 列表 → Config），1.21.1 **不需要** Cloth Config。
 
 ## 从源码构建
 
@@ -456,12 +456,12 @@ SimpleFlightRing-1.21.1/                                 # 26.1.2 版目录结�
 ├── libs/                                                # 本地 Curios jar（API/完整版/源码）
 └── src/main/
     ├── java/com/simpleflightring/
-    │   ├── FlightRingMod.java        # 主类：注册物品/配方序列化器/创造标签/配置，可选加载 Curios 与 Cloth Config
+    │   ├── FlightRingMod.java        # 主类：注册物品/配方序列化器/创造标签/配置，Curios 为必需依赖
     │   ├── RingTier.java             # 6 种材质：飞行分钟数、附魔能力（耐久 = 分钟 × 60）
     │   ├── FlightRingItem.java       # 戒指物品（耐久=飞行分钟数×60、Tooltip 显示剩余分/秒）
     │   ├── FlightRingConfig.java     # 客户端配置（HUD 开关与位置，config/simpleflightring-client.toml）
     │   ├── FlightHud.java            # 客户端 HUD：飞行时间倒计时渲染（多戒指累加）
-    │   ├── ClothConfigCompat.java    # Cloth Config 可选集成（游戏内配置界面）
+    │   ├── ClothConfigCompat.java    # Cloth Config 集成（26.1.2 用；1.21.1 已改用 NeoForge 自带界面，本类保留未用）
     │   ├── BackpackCompat.java       # 精妙背包可选集成（扫描背包内戒指，支持嵌套）
     │   ├── ModItems.java             # 物品注册
     │   ├── ModRecipeSerializers.java # 自定义配方序列化器注册
@@ -470,7 +470,7 @@ SimpleFlightRing-1.21.1/                                 # 26.1.2 版目录结�
     │   ├── RingSmithingRecipe.java   # 锻造台升级配方（继承 SmithingTransformRecipe，兼容 JEI 显示）
     │   ├── RingUpgradeHelper.java    # 组件复制逻辑
     │   ├── FlightHandler.java        # 飞行逻辑：授予创造飞行、按秒消耗耐久
-    │   └── CuriosCompat.java         # Curios 可选集成（槽位查询、右键佩戴）
+    │   └── CuriosCompat.java         # Curios 集成（必需依赖：槽位查询、右键佩戴）
     └── resources/
         ├── META-INF/neoforge.mods.toml
         ├── assets/simpleflightring/        # 语言(zh_cn/en_us)、模型、贴图

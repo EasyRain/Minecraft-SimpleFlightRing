@@ -29,10 +29,13 @@
   **劫掠戒指要在 60 秒内击败 3 只铁傀儡获得认可，再用不死图腾唤醒并充能**）。
   另新增按键 **V**（占位、可改键），用于触发特殊戒指的主动能力。
 - **HUD 飞行时间倒计时**：默认左下角；多枚戒指剩余时间累加；打开聊天框时自动隐藏。
-  位置与开关可在 `config/simpleflightring-client.toml` 配置，支持 Cloth Config 游戏内调整。
+  位置与开关可在 `config/simpleflightring-client.toml` 配置，也可在游戏内 Mod 列表 → Config 中调整。
+- **依赖**：
+  - **Curios API（必需）**：提供「飞行戒指」饰品槽位（可右键佩戴）。**没有 Curios 无法启动**；
+    八枚遗迹戒指的**主动能力（V 键）只在 Curios 飞行戒指槽中生效**，放在背包里只有飞行时间。
+  - **NeoForge**（必需，版本随游戏版本）。
 - **可选集成**（均非必须）：
-  - **Curios API**：添加「飞行戒指」饰品槽位（可右键佩戴；未安装时背包内生效，背包始终生效）。
-  - **Cloth Config API**：游戏内 Mod 列表 → Config 打开配置界面（开关 + 位置滑块）。
+  - **Cloth Config API**（26.1.2 提供游戏内配置界面；1.21.1 已改用 NeoForge 自带界面，不再需要）。
   - **精妙背包 Sophisticated Backpacks**：戒指放在精妙背包内同样生效
     （主物品栏/盔甲栏/副手/Curios 槽中的背包均可，支持嵌套背包）。
   - **Allthemodium**：新增 ATM / 振金 / 难得素 三枚联动戒指（自带不毁、能量池 100/300/700、
@@ -66,14 +69,15 @@ gradlew.bat build
 
 开发环境运行：`gradlew.bat runClient` / `runServer`。
 
-> `libs/` 目录包含本地下载的可选依赖 jar（Curios / Cloth Config / Sophisticated Backpacks 及核心库），
+> `libs/` 目录包含本地下载的依赖 jar（Curios 必需，其余为可选集成如 Cloth Config / Sophisticated Backpacks 及核心库），
 > 已随仓库提交以便开箱即用。
 
 ## 安装
 
 1. 安装对应版本的 NeoForge。
-2. 将对应版本的 `simpleflightring-1.3.1-<游戏版本>.jar` 放入 `mods` 文件夹。
-3. （可选）安装对应版本的 Curios API / Cloth Config / Sophisticated Backpacks / Allthemodium 以获得额外集成。
+2. 安装 **[Curios API](https://modrinth.com/mod/curios)**（**必需**；1.21.1 用 9.5.1+，26.1.2 用 15.x）。
+3. 将对应版本的 `simpleflightring-1.3.1-<游戏版本>.jar` 放入 `mods` 文件夹。
+4. （可选）安装对应版本的 Sophisticated Backpacks / Allthemodium 以获得额外集成（26.1.2 的配置界面还需要 Cloth Config）。
 
 ## 许可
 
