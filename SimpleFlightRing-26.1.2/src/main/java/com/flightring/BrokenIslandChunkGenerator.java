@@ -421,6 +421,14 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
         // 26.x replaced the old `boolean isMoving` with `@Block.UpdateFlags int flags`; the two-argument
         // overload is that same call with UPDATE_ALL, i.e. movedByPiston == false, which is exactly what the
         // 1.21.1 code's `false` meant (it only ever reached BlockState#onPlace/onRemove as isMoving).
+        // <p>
+        // ⚠️ Do NOT "optimise" this into a direct LevelChunkSection write (tried 2026-10-14): vanilla's own
+        // fillFromNoise does that, but here it CHANGES THE TERRAIN. The per-block heightmap updates this call
+        // performs are not redundant - the explicit per-column rebuild below runs afterwards and its result
+        // depends on the heightmap it finds, so skipping them leaves OCEAN_FLOOR_WG / WORLD_SURFACE_WG
+        // different, and the features that place against those heightmaps land elsewhere. Measured on a
+        // radius-319 island: 36 fresh chunks hashed to 4883610711835966337 through setBlockState versus
+        // -5408189431018110979 through the section (same non-air count), for a gain of only ~3 ms/chunk.
         chunk.setBlockState(pos, state);
     }
 
