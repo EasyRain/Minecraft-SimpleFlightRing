@@ -221,6 +221,24 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
     private final HolderLookup.RegistryLookup<NoiseGeneratorSettings> noiseSettings;
     private final HolderGetter<NormalNoise.NoiseParameters> noiseParameters;
 
+    /**
+     * The same lookup as {@link #noiseSettings}, but static: the island's column shape is computed by the
+     * static {@link #column}, and a column must not come out differently depending on which generator
+     * instance happens to ask. Set in the constructor (the generator is built from the dimension JSON's
+     * codec, so this happens long before any chunk is generated).
+     */
+    private static HolderLookup.RegistryLookup<NoiseGeneratorSettings> settingsLookup;
+
+    /**
+     * Per family: the y its own surface rule switches the rock to deepslate at ("this dimension's floor"),
+     * or {@link #NO_FLOOR} when it has no such marker. Memoised because {@link #familyFloor} is called for
+     * every column.
+     */
+    private static final Map<net.minecraft.resources.ResourceKey<NoiseGeneratorSettings>, Integer> FAMILY_FLOORS =
+            new ConcurrentHashMap<>();
+
+    private static final int NO_FLOOR = Integer.MIN_VALUE;
+
     private final Map<Family, Bundle> bundles = new ConcurrentHashMap<>();
 
     /**
@@ -274,6 +292,7 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
         super(biomeSource, BrokenIslandChunkGenerator::islandSettings);
         this.noiseSettings = noiseSettings;
         this.noiseParameters = noiseParameters;
+        settingsLookup = noiseSettings;
     }
 
     private HolderLookup.RegistryLookup<NoiseGeneratorSettings> noiseSettings() {
@@ -626,7 +645,7 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
     }
 
     /** Which family's rock and surface rule this island borrows. */
-    private Family familyOf(BrokenIslandLayout.Island island) {
+    private static Family familyOf(BrokenIslandLayout.Island island) {
         Holder<Biome> biome = biomeOf(island);
         if (biome == null) {
             return Family.OVERWORLD;
@@ -663,14 +682,17 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
      * entry - that one, because then there is no ambiguity. Otherwise {@code null} and the island falls
      * back to the overworld.
      */
-    private Family modDimension(Identifier biomeId) {
+    private static Family modDimension(Identifier biomeId) {
+        if (settingsLookup == null) {
+            return null;
+        }
         net.minecraft.resources.ResourceKey<NoiseGeneratorSettings> exact =
                 net.minecraft.resources.ResourceKey.create(Registries.NOISE_SETTINGS, biomeId);
-        if (noiseSettings.get(exact).isPresent()) {
+        if (settingsLookup.get(exact).isPresent()) {
             return new Family(exact, biomeId.getNamespace() + " (same id)");
         }
         Family only = null;
-        for (Holder.Reference<NoiseGeneratorSettings> candidate : noiseSettings.listElements().toList()) {
+        for (Holder.Reference<NoiseGeneratorSettings> candidate : settingsLookup.listElements().toList()) {
             Identifier id = candidate.key().identifier();
             if (!id.getNamespace().equals(biomeId.getNamespace())) {
                 continue;
@@ -681,6 +703,113 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
             only = new Family(candidate.key(), id.getNamespace() + " (only entry)");
         }
         return only;
+    }
+
+    // ------------------------------------------------------------------ "this dimension's floor"
+
+    /**
+     * The y at which this family's own surface rule turns its rock into deepslate - which is how a dimension
+     * spells out where it considers its floor to be - or {@code null} when it has no such rule.
+     * <p>
+     * Why this exists (user 2026-10-14): {@code allthemodium:the_other} declares {@code min_y = -64}, and both
+     * ATM builds carry a surface rule that switches to deepslate at {@code absolute 0} - because in ATM's own
+     * dimension the terrain only reaches down to about y = 0, so that rule is never seen there. Our islands
+     * used to reach the world floor (-56), which dragged that rule - and the carving of that region - into
+     * view (user: "atm的the_other维度最低只到0层，我们生成0层以下就出问题了"). The fix is to stop an island at
+     * the y the borrowed rule itself calls the floor.
+     * <p>
+     * The rule tree's node types are package-private in both versions (SurfaceRules.SequenceRuleSource and
+     * friends), so instead of pattern matching this encodes the rule with the public
+     * {@code SurfaceRules.RuleSource.CODEC} and looks for the marker in the data. Version-portable, and it
+     * costs one encode per family (memoised).
+     * <p>
+     * The overworld family is deliberately excluded: below y = 0 is real overworld space there, the deepslate
+     * layer is wanted, and its own rule carries the very same marker. The nether and the end have no such
+     * marker, so their islands keep their full thickness.
+     */
+    static Integer familyFloor(Family family) {
+        Integer marker = familyFloorMarker(family);
+        // Wanted there: below y = 0 is real overworld space and its deepslate layer is a feature (and its own
+        // rule carries the marker for the same reason every dimension's does).
+        return NoiseGeneratorSettings.OVERWORLD.equals(family.preset()) ? null : marker;
+    }
+
+    /**
+     * The marker itself, without the overworld exemption - kept separate so the startup dump can show what the
+     * detection found for every family (including the overworld, which is the one case that can be checked
+     * without any mod installed).
+     */
+    static Integer familyFloorMarker(Family family) {
+        Integer cached = FAMILY_FLOORS.get(family.preset());
+        if (cached != null) {
+            return cached == NO_FLOOR ? null : cached;
+        }
+        Integer floor = null;
+        if (settingsLookup != null) {
+            Holder<NoiseGeneratorSettings> holder = settingsLookup.get(family.preset()).orElse(null);
+            if (holder != null) {
+                floor = deepslateAnchor(holder.value().surfaceRule());
+            }
+        }
+        FAMILY_FLOORS.put(family.preset(), floor == null ? NO_FLOOR : floor);
+        FlightRingMod.LOGGER.info("[ISLANDS] family {} floor = {}", family.label(),
+                floor == null ? "world bottom (no deepslate marker)" : "y " + floor);
+        return floor;
+    }
+
+    /** Encodes the surface rule and scans it for the deepslate marker; see {@link #familyFloor}. */
+    private static Integer deepslateAnchor(net.minecraft.world.level.levelgen.SurfaceRules.RuleSource rule) {
+        com.google.gson.JsonElement json = net.minecraft.world.level.levelgen.SurfaceRules.RuleSource.CODEC
+                .encodeStart(com.mojang.serialization.JsonOps.INSTANCE, rule)
+                .result().orElse(null);
+        return json == null ? null : scanDeepslateAnchor(json);
+    }
+
+    private static Integer scanDeepslateAnchor(com.google.gson.JsonElement element) {
+        Integer best = null;
+        if (element.isJsonArray()) {
+            for (com.google.gson.JsonElement child : element.getAsJsonArray()) {
+                best = higher(best, scanDeepslateAnchor(child));
+            }
+        } else if (element.isJsonObject()) {
+            com.google.gson.JsonObject object = element.getAsJsonObject();
+            com.google.gson.JsonElement condition = object.get("if_true");
+            if (condition != null && condition.isJsonObject()) {
+                com.google.gson.JsonObject test = condition.getAsJsonObject();
+                if (isDeepslateMarker(test)) {
+                    best = higher(best, absoluteAnchor(test.get("true_at_and_below")));
+                }
+            }
+            for (java.util.Map.Entry<String, com.google.gson.JsonElement> entry : object.entrySet()) {
+                best = higher(best, scanDeepslateAnchor(entry.getValue()));
+            }
+        }
+        return best;
+    }
+
+    private static boolean isDeepslateMarker(com.google.gson.JsonObject condition) {
+        return "minecraft:vertical_gradient".equals(string(condition.get("type")))
+                && "minecraft:deepslate".equals(string(condition.get("random_name")));
+    }
+
+    /** Only absolute anchors mean anything here; {@code above_bottom} / {@code below_top} are skipped. */
+    private static Integer absoluteAnchor(com.google.gson.JsonElement anchor) {
+        if (anchor == null || !anchor.isJsonObject()) {
+            return null;
+        }
+        com.google.gson.JsonElement absolute = anchor.getAsJsonObject().get("absolute");
+        return absolute == null ? null : absolute.getAsInt();
+    }
+
+    private static String string(com.google.gson.JsonElement element) {
+        return element == null || !element.isJsonPrimitive() ? null : element.getAsString();
+    }
+
+    private static Integer higher(Integer a, Integer b) {
+        if (a == null) {
+            return b;
+        }
+        return b == null ? a : Math.max(a, b);
     }
 
     // ------------------------------------------------------------------ island shape
@@ -707,6 +836,12 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
         // to MIN_Y + 8 so no island ever grows into the void floor.
         int topLimit = MIN_Y + GEN_DEPTH - TOP_MARGIN;
         int bottomLimit = MIN_Y + BOTTOM_MARGIN;
+        // A family that spells out its own floor must not be built below it (see familyFloor): that region does
+        // not exist in that dimension, so the rules it has down there were never meant to be seen.
+        Integer floorOfFamily = familyFloor(familyOf(island));
+        if (floorOfFamily != null && floorOfFamily > bottomLimit) {
+            bottomLimit = floorOfFamily;
+        }
         int solidTop = Math.min(topLimit, centerY + (int) Math.round((8.0 + radius * 0.02) * bulge));
         int solidBottom = Math.max(bottomLimit,
                 centerY - (int) Math.round(8.0 + (70.0 + radius * 0.42) * bulge));
@@ -1136,6 +1271,9 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
                         + island.radius() + " biomeIndex=" + island.biomeIndex()
                         + " biome=" + biomeName(island)
                         + " family=" + familyOf(island).label()
+                        // The floor the borrowed dimension declares for itself (see familyFloor): a mod family
+                        // that marks one (allthemodium:the_other does, at y 0) is not built below it.
+                        + " familyFloor=" + familyFloor(familyOf(island))
                         // Shown so a world can be judged on the spot: a dry island's caves must be water-free,
                         // a "wet" one (one in WET_ISLAND_CHANCE) keeps vanilla's water on purpose.
                         + (wetIsland(island) ? " wet-caves" : " dry-caves")
