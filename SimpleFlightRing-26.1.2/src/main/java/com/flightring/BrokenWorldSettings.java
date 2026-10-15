@@ -49,6 +49,9 @@ public class BrokenWorldSettings extends SavedData {
             Codec.DOUBLE.fieldOf("max_stretch").forGetter(settings -> settings.maxStretch),
             Codec.INT.fieldOf("top_margin").forGetter(settings -> settings.topMargin),
             Codec.INT.fieldOf("bottom_margin").forGetter(settings -> settings.bottomMargin),
+            // Optional so that a world frozen before this knob existed still parses: it then keeps 1.0, which is
+            // exactly the shape those worlds were generated with.
+            Codec.DOUBLE.optionalFieldOf("thickness_scale", 1.0).forGetter(settings -> settings.thicknessScale),
             Codec.INT.fieldOf("wet_island_chance").forGetter(settings -> settings.wetIslandChance),
             Codec.INT.fieldOf("carver_water_table").forGetter(settings -> settings.carverWaterTable),
             Codec.STRING.listOf().fieldOf("biomes").forGetter(settings -> settings.biomeIds)
@@ -65,6 +68,7 @@ public class BrokenWorldSettings extends SavedData {
     private double maxStretch;
     private int topMargin;
     private int bottomMargin;
+    private double thicknessScale = 1.0;
     private int wetIslandChance;
     private int carverWaterTable;
     private final List<String> biomeIds = new ArrayList<>();
@@ -75,8 +79,8 @@ public class BrokenWorldSettings extends SavedData {
 
     /** The codec's constructor: the parameter order has to match the {@code group(...)} above. */
     private BrokenWorldSettings(int minRadius, int maxRadius, int gapMin, int gapMax, List<Integer> heightLayers,
-                                double maxStretch, int topMargin, int bottomMargin, int wetIslandChance,
-                                int carverWaterTable, List<String> biomeIds) {
+                                double maxStretch, int topMargin, int bottomMargin, double thicknessScale,
+                                int wetIslandChance, int carverWaterTable, List<String> biomeIds) {
         this.minRadius = minRadius;
         this.maxRadius = maxRadius;
         this.gapMin = gapMin;
@@ -85,6 +89,7 @@ public class BrokenWorldSettings extends SavedData {
         this.maxStretch = maxStretch;
         this.topMargin = topMargin;
         this.bottomMargin = bottomMargin;
+        this.thicknessScale = thicknessScale;
         this.wetIslandChance = wetIslandChance;
         this.carverWaterTable = carverWaterTable;
         this.biomeIds.addAll(biomeIds);
@@ -130,6 +135,7 @@ public class BrokenWorldSettings extends SavedData {
         maxStretch = BrokenIslandLayout.MAX_STRETCH;
         topMargin = BrokenIslandChunkGenerator.TOP_MARGIN;
         bottomMargin = BrokenIslandChunkGenerator.BOTTOM_MARGIN;
+        thicknessScale = BrokenIslandChunkGenerator.THICKNESS_SCALE;
         // The cave knobs belong here too: they are decided per island, so changing them mid-world would give one
         // island a dry half and a wet half.
         wetIslandChance = BrokenIslandChunkGenerator.WET_ISLAND_CHANCE;
@@ -154,14 +160,18 @@ public class BrokenWorldSettings extends SavedData {
         BrokenIslandLayout.MAX_STRETCH = maxStretch;
         BrokenIslandChunkGenerator.TOP_MARGIN = topMargin;
         BrokenIslandChunkGenerator.BOTTOM_MARGIN = bottomMargin;
+        if (thicknessScale > 0) {
+            BrokenIslandChunkGenerator.THICKNESS_SCALE = thicknessScale;
+        }
         if (wetIslandChance > 0) {
             BrokenIslandChunkGenerator.WET_ISLAND_CHANCE = wetIslandChance;
             BrokenIslandChunkGenerator.CARVER_WATER_TABLE = carverWaterTable;
         }
         BrokenBiomePool.frozenBiomeIds = List.copyOf(biomeIds);
         FlightRingMod.LOGGER.info(
-                "[Config] world settings are frozen to radius {}..{}, gap {}..{}, {} height layers, {} biomes"
-                        + " - config edits apply to new worlds only",
-                minRadius, maxRadius, gapMin, gapMax, heightLayers == null ? 0 : heightLayers.length, biomeIds.size());
+                "[Config] world settings are frozen to radius {}..{}, gap {}..{}, {} height layers, thickness x{},"
+                        + " {} biomes - config edits apply to new worlds only",
+                minRadius, maxRadius, gapMin, gapMax, heightLayers == null ? 0 : heightLayers.length,
+                thicknessScale, biomeIds.size());
     }
 }

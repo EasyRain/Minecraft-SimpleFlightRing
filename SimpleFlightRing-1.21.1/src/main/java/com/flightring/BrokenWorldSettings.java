@@ -37,6 +37,7 @@ public class BrokenWorldSettings extends net.minecraft.world.level.saveddata.Sav
     private double maxStretch;
     private int topMargin;
     private int bottomMargin;
+    private double thicknessScale = 1.0;
     private int wetIslandChance;
     private int carverWaterTable;
     private final List<String> biomeIds = new ArrayList<>();
@@ -66,6 +67,7 @@ public class BrokenWorldSettings extends net.minecraft.world.level.saveddata.Sav
         maxStretch = BrokenIslandLayout.MAX_STRETCH;
         topMargin = BrokenIslandChunkGenerator.TOP_MARGIN;
         bottomMargin = BrokenIslandChunkGenerator.BOTTOM_MARGIN;
+        thicknessScale = BrokenIslandChunkGenerator.THICKNESS_SCALE;
         // The cave knobs belong here too: they are decided per island, so changing them mid-world would give one
         // island a dry half and a wet half.
         wetIslandChance = BrokenIslandChunkGenerator.WET_ISLAND_CHANCE;
@@ -90,15 +92,19 @@ public class BrokenWorldSettings extends net.minecraft.world.level.saveddata.Sav
         BrokenIslandLayout.MAX_STRETCH = maxStretch;
         BrokenIslandChunkGenerator.TOP_MARGIN = topMargin;
         BrokenIslandChunkGenerator.BOTTOM_MARGIN = bottomMargin;
+        if (thicknessScale > 0) {
+            BrokenIslandChunkGenerator.THICKNESS_SCALE = thicknessScale;
+        }
         if (wetIslandChance > 0) {
             BrokenIslandChunkGenerator.WET_ISLAND_CHANCE = wetIslandChance;
             BrokenIslandChunkGenerator.CARVER_WATER_TABLE = carverWaterTable;
         }
         BrokenBiomePool.frozenBiomeIds = List.copyOf(biomeIds);
         FlightRingMod.LOGGER.info(
-                "[Config] world settings are frozen to radius {}..{}, gap {}..{}, {} height layers, {} biomes"
-                        + " - config edits apply to new worlds only",
-                minRadius, maxRadius, gapMin, gapMax, heightLayers == null ? 0 : heightLayers.length, biomeIds.size());
+                "[Config] world settings are frozen to radius {}..{}, gap {}..{}, {} height layers, thickness x{},"
+                        + " {} biomes - config edits apply to new worlds only",
+                minRadius, maxRadius, gapMin, gapMax, heightLayers == null ? 0 : heightLayers.length,
+                thicknessScale, biomeIds.size());
     }
 
     @Override
@@ -111,6 +117,7 @@ public class BrokenWorldSettings extends net.minecraft.world.level.saveddata.Sav
         tag.putDouble("maxStretch", maxStretch);
         tag.putInt("topMargin", topMargin);
         tag.putInt("bottomMargin", bottomMargin);
+        tag.putDouble("thicknessScale", thicknessScale);
         tag.putInt("wetIslandChance", wetIslandChance);
         tag.putInt("carverWaterTable", carverWaterTable);
         ListTag ids = new ListTag();
@@ -129,6 +136,9 @@ public class BrokenWorldSettings extends net.minecraft.world.level.saveddata.Sav
         settings.maxStretch = tag.getDouble("maxStretch");
         settings.topMargin = tag.getInt("topMargin");
         settings.bottomMargin = tag.getInt("bottomMargin");
+        // Absent in a file frozen before this knob existed: those worlds keep the shape they were made with,
+        // and 1.0 is exactly that shape (getDouble would hand back 0.0 for a missing key).
+        settings.thicknessScale = tag.contains("thicknessScale") ? tag.getDouble("thicknessScale") : 1.0;
         settings.wetIslandChance = tag.getInt("wetIslandChance");
         settings.carverWaterTable = tag.getInt("carverWaterTable");
         ListTag ids = tag.getList("biomes", Tag.TAG_STRING);

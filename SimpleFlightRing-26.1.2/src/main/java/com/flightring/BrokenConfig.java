@@ -36,6 +36,7 @@ public final class BrokenConfig {
     private static final ModConfigSpec.DoubleValue REPAIR_RIM_FROM;
     private static final ModConfigSpec.IntValue TOP_MARGIN;
     private static final ModConfigSpec.IntValue BOTTOM_MARGIN;
+    private static final ModConfigSpec.DoubleValue THICKNESS_SCALE;
 
     // structures --------------------------------------------------------------
     private static final ModConfigSpec.IntValue STRUCTURE_UNDERSIDE_MARGIN;
@@ -111,6 +112,18 @@ public final class BrokenConfig {
                         "reach it (blocks). Raise it to keep islands clear of the bottom of the world.",
                         "岛体过深时，距世界底部保留的余量（格）。调大可以让岛底离世界底更远。", "Default: 8")
                 .defineInRange("bottomMargin", 8, 0, 64);
+        THICKNESS_SCALE = builder.comment("Multiplier on how far an island reaches down from its centre. / 岛体自中心向下的深度乘数。",
+                        "1.0 = the shipped shape (roughly 120-226 blocks from top to bottom at radius 80-320).",
+                        "Raise it to fit larger underground structures inside an island; volume grows linearly with",
+                        "it, so generation costs more and large islands reach the world floor and get cut flat",
+                        "sooner. Lower it for lighter generation and thinner islands (more structures are then",
+                        "skipped for not fitting). Only the downward half is scaled - the top stays put, so an",
+                        "island keeps its clearance from the build limit either way.",
+                        "1.0 = 默认形状（半径 80~320 时上下合计约 120~226 格）。调大可以让更大的地下结构装进岛里，",
+                        "但岛体体积线性增长 ⇒ 生成更慢、大岛更早触到世界底而被削平；调小则更轻更薄（会有更多结构",
+                        "因为装不下而被跳过）。只缩放向下的那一半，顶部不动，所以顶部余量不受影响。",
+                        "属于世界生成设置：已生成的世界保持创建时的取值。", "Default: 1.0")
+                .defineInRange("thicknessScale", 1.0, 0.3, 2.0);
         REPAIR_RIM_FROM = builder.comment("Air repair covers this much of the island's outer radius (0..1).",
                         "边缘补洞覆盖的外圈比例（0~1）。", "Default: 0.8")
                 .defineInRange("repairRimFrom", 0.8, 0.0, 1.0);
@@ -200,7 +213,8 @@ public final class BrokenConfig {
                 intOption("最大岛半径 maxRadius", MAX_RADIUS),
                 intOption("最小岛间距 gapMin", GAP_MIN),
                 intOption("最大岛间距 gapMax", GAP_MAX),
-                doubleOption("最大长宽比 maxStretch", MAX_STRETCH)));
+                doubleOption("最大长宽比 maxStretch", MAX_STRETCH),
+                doubleOption("厚度乘数 thicknessScale", THICKNESS_SCALE)));
         groups.put("caves 洞穴", List.of(
                 intOption("水淹岛比例 1/N wetIslandChance", WET_ISLAND_CHANCE),
                 intOption("雕刻水位 carverWaterTable", CARVER_WATER_TABLE),
@@ -289,6 +303,7 @@ public final class BrokenConfig {
         BrokenIslandChunkGenerator.REPAIR_RIM_FROM = REPAIR_RIM_FROM.get();
         BrokenIslandChunkGenerator.TOP_MARGIN = TOP_MARGIN.get();
         BrokenIslandChunkGenerator.BOTTOM_MARGIN = BOTTOM_MARGIN.get();
+        BrokenIslandChunkGenerator.THICKNESS_SCALE = THICKNESS_SCALE.get();
         BrokenIslandChunkGenerator.STRUCTURE_UNDERSIDE_MARGIN = STRUCTURE_UNDERSIDE_MARGIN.get();
         BrokenIslandChunkGenerator.STRUCTURE_HEADROOM = STRUCTURE_HEADROOM.get();
         BrokenIslandChunkGenerator.STRUCTURE_RIM_MARGIN = STRUCTURE_RIM_MARGIN.get();

@@ -691,12 +691,13 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
         // The dome scales with the island, and it is deliberately <b>thick</b>: the user wants large
         // underground structures (dungeon mods in particular) to fit inside an island, and at radius 320
         // this is ~226 blocks from top to bottom, roughly 3.3x what it used to be. The bottom is clamped
-        // to MIN_Y + 8 so no island ever grows into the void floor.
+        // to MIN_Y + 8 so no island ever grows into the void floor. THICKNESS_SCALE multiplies the downward
+        // part only (1.0 = the shipped shape, and 1.0 is exact: the default reproduces the old numbers).
         int topLimit = MIN_Y + GEN_DEPTH - TOP_MARGIN;
         int bottomLimit = MIN_Y + BOTTOM_MARGIN;
         int solidTop = Math.min(topLimit, centerY + (int) Math.round((8.0 + radius * 0.02) * bulge));
         int solidBottom = Math.max(bottomLimit,
-                centerY - (int) Math.round(8.0 + (70.0 + radius * 0.42) * bulge));
+                centerY - (int) Math.round((8.0 + (70.0 + radius * 0.42) * bulge) * THICKNESS_SCALE));
         if (!isLiquid(seed, island)) {
             return new int[]{solidBottom, solidTop, -1};
         }
@@ -896,6 +897,18 @@ public class BrokenIslandChunkGenerator extends ChunkGenerator {
      * it drops structures that would hug the edge, at the price of skipping more of them.
      */
     static int STRUCTURE_RIM_MARGIN = 0;
+
+    /**
+     * Multiplier on how far an island's body reaches <b>down</b> from its centre (1.0 = the shipped shape).
+     * <p>
+     * The downward depth is {@code 8 + (70 + 0.42 * radius) * bulge}, i.e. roughly 120-226 blocks from top to
+     * bottom at radius 80-320. Raising it fits larger underground structures inside an island (the user's reason
+     * for thick islands in the first place); the cost is linear in volume, so generation gets slower and large
+     * islands reach the world floor and get cut flat sooner. <b>Only the downward half is scaled</b>: the top
+     * stays where it is, because the upward extent is what keeps islands clear of the build limit and of
+     * {@link #TOP_MARGIN}. Worldgen setting, so it is frozen per world like the rest.
+     */
+    static double THICKNESS_SCALE = 1.0;
 
     /**
      * TEMPORARY (2026-10-11): force every island to be carved dry, so the user can settle whether carved
