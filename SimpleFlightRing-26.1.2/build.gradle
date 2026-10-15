@@ -133,10 +133,18 @@ tasks.named('jar', Jar).configure {
                 'Specification-Version'   : '1',
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'Implementation-Vendor'   : mod_authors
         ])
     }
+}
+
+// Reproducible archives: no build timestamp in the manifest, and fixed entry timestamps plus a stable entry
+// order. Without this, building the identical source twice produced different jars (the manifest's
+// Implementation-Timestamp alone was enough), so an MD5 could never be used as evidence that the source had
+// not changed. With it, two consecutive builds of the same source are byte-identical.
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
 }
 
 // Copy the built mod jar to the workspace root (D:\DshWorkSpace\MCMOD) for easy access.

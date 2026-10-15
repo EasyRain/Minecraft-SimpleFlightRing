@@ -96,8 +96,9 @@ public final class BrokenConfig {
         CARVER_WATER_TABLE = builder.comment("Water table used while carving dry islands (lava stays below -54).",
                         "干岛雕刻时使用的水位（-54 以下仍是岩浆）。", "Default: -54")
                 .defineInRange("carverWaterTable", -54, -64, 63);
-        FORCE_ALL_DRY = builder.comment("Force every island dry (debug switch, normally false).",
-                        "强制所有岛都是干洞（调试用，正常保持 false）。", "Default: false")
+        FORCE_ALL_DRY = builder.comment("Force every island dry, including the ones that would otherwise keep water (for players who want a completely dry world).",
+                        "强制所有岛都是干洞，连本该保留水的水淹岛也不例外（想要一个完全干燥世界的玩家可以打开）。",
+                        "Default: false")
                 .define("forceAllDry", false);
         BOWL_SHELL_MIN = builder.comment("Least solid rock kept under a bowl island's basin floor (blocks).",
                         "Used when the basin is cut, so a deep basin cannot break through its own floor; the",
