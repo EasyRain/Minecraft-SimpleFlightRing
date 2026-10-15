@@ -202,68 +202,6 @@ public final class BrokenConfig {
     private BrokenConfig() {
     }
 
-    /**
-     * One editable option, as the in-game screen needs it: a label, a way to read and write the value, and its
-     * kind. Deliberately free of any client class, so {@link BrokenConfig} stays safe on a dedicated server -
-     * only the client-side screen renderer (see ConfigScreens) touches client classes.
-     */
-    public record Option(String label, java.util.function.Supplier<Object> get,
-                         java.util.function.Consumer<Object> set, Class<?> kind, Object defaultValue) {
-    }
-
-    /** Every editable option, grouped by the section it lives in (for the in-game screen). */
-    public static java.util.Map<String, List<Option>> screenOptions() {
-        java.util.Map<String, List<Option>> groups = new java.util.LinkedHashMap<>();
-        groups.put("islands 岛屿", List.of(
-                intOption("最小岛半径 minRadius", MIN_RADIUS),
-                intOption("最大岛半径 maxRadius", MAX_RADIUS),
-                intOption("最小岛间距 gapMin", GAP_MIN),
-                intOption("最大岛间距 gapMax", GAP_MAX),
-                doubleOption("最大长宽比 maxStretch", MAX_STRETCH),
-                doubleOption("厚度乘数 thicknessScale", THICKNESS_SCALE)));
-        groups.put("caves 洞穴", List.of(
-                intOption("水淹岛比例 1/N wetIslandChance", WET_ISLAND_CHANCE),
-                intOption("雕刻水位 carverWaterTable", CARVER_WATER_TABLE),
-                boolOption("全部干洞 forceAllDry", FORCE_ALL_DRY),
-                intOption("盆底岩层 bowlShellMin", BOWL_SHELL_MIN),
-                doubleOption("补边范围 repairRimFrom", REPAIR_RIM_FROM),
-                intOption("顶部余量 topMargin", TOP_MARGIN),
-                intOption("底部余量 bottomMargin", BOTTOM_MARGIN)));
-        groups.put("structures 结构", List.of(
-                intOption("结构底部间隙 undersideMargin", STRUCTURE_UNDERSIDE_MARGIN),
-                intOption("结构离沿余量 rimMargin", STRUCTURE_RIM_MARGIN),
-                intOption("结构额外预留 headroom", STRUCTURE_HEADROOM)));
-        groups.put("biomes 群系", List.of(
-                boolOption("接受模组群系 allowModBiomes", ALLOW_MOD_BIOMES),
-                stringListOption("命名空间黑名单 namespaceBlacklist (= mod id)", NAMESPACE_BLACKLIST),
-                stringListOption("群系黑名单 biomeBlacklist", BIOME_BLACKLIST),
-                stringListOption("群系白名单 biomeAllowlist", BIOME_ALLOWLIST),
-                stringListOption("功能群系关键字 functionalKeywords", FUNCTIONAL_KEYWORDS),
-                boolOption("排除无地物群系 excludeFeaturelessBiomes", EXCLUDE_FEATURELESS_BIOMES),
-                boolOption("排除纯功能群系 excludeFunctionalBiomes", EXCLUDE_FUNCTIONAL_BIOMES),
-                boolOption("记录池子日志 logPool", LOG_POOL),
-                boolOption("记录布局日志 logLayout", LOG_LAYOUT)));
-        return groups;
-    }
-
-    // heightLayers is a list of y levels and is edited in the file, not in the screen.
-    private static Option intOption(String label, ModConfigSpec.ConfigValue<Integer> value) {
-        return new Option(label, value::get, v -> value.set((Integer) v), Integer.class, value.getDefault());
-    }
-
-    private static Option doubleOption(String label, ModConfigSpec.DoubleValue value) {
-        return new Option(label, value::get, v -> value.set((Double) v), Double.class, value.getDefault());
-    }
-
-    private static Option boolOption(String label, ModConfigSpec.BooleanValue value) {
-        return new Option(label, value::get, v -> value.set((Boolean) v), Boolean.class, value.getDefault());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Option stringListOption(String label, ModConfigSpec.ConfigValue<List<? extends String>> value) {
-        return new Option(label, value::get, v -> value.set((List<String>) v), List.class, value.getDefault());
-    }
-
     /** Copies every configured value into the fields worldgen reads. Called on load and on reload. */
     static void snapshot() {
         int minRadius = MIN_RADIUS.get();
