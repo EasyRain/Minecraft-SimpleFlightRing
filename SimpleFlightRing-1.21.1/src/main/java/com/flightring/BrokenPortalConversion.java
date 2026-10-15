@@ -87,27 +87,23 @@ public final class BrokenPortalConversion {
      * True when right-clicking this block with a flight ring is a <b>portal action</b>: the click is going to
      * rewrite a lit nether portal, or form one inside a complete portal frame.
      * <p>
+     * A frame click only counts when it comes through the face that looks <b>into</b> the opening - the top of
+     * the bottom border, the underside of the top border, the inner side of a side column. Clicking a frame from
+     * the outside (its top, its underside, its outer side, or its flat front) does nothing, the same way clicking
+     * the frame instead of the opening does not light a portal in vanilla: assembling a portal stays deliberate,
+     * and the ring is not consumed as a tool by a click that was aimed at the frame's exterior.
+     * <p>
      * Pure test, no writes, so the client runs the very same check and cancels the click there too (see
      * {@link #onRightClickBlock} for why that matters). Both sides have to reach the same verdict, which is why
      * nothing here uses data the client does not have: the clicked block and its neighbours are always loaded.
      * Public for the same reason {@link #rewrite} is - probes can ask it without faking a right click.
      */
-    public static boolean isPortalAction(LevelReader level, BlockPos clicked, @Nullable Direction face) {
+    public static boolean isPortalAction(LevelReader level, BlockPos clicked, Direction face) {
         BlockState state = level.getBlockState(clicked);
         if (state.is(Blocks.NETHER_PORTAL) || state.is(ModBlocks.BROKEN_PORTAL.get())) {
             return true;
         }
-        // A frame can be clicked from its outside face, so all six neighbours are tried, the clicked one first.
-        Direction front = face == null ? Direction.UP : face;
-        if (hasFrameAround(level, clicked.relative(front))) {
-            return true;
-        }
-        for (Direction direction : Direction.values()) {
-            if (direction != front && hasFrameAround(level, clicked.relative(direction))) {
-                return true;
-            }
-        }
-        return false;
+        return hasFrameAround(level, clicked.relative(face));
     }
 
     /** True when {@code inside} is the inner corner of a complete portal frame, in either horizontal axis. */
@@ -164,33 +160,21 @@ public final class BrokenPortalConversion {
     }
 
     /**
-     * Forms a broken portal inside an empty nether portal frame: the clicked block's neighbours are
-     * measured as portal rectangles with our own frame rules (see {@link BrokenPortalFrames} - vanilla's
-     * {@code PortalShape} would treat our own blocks as an obstruction), and the first intact frame that
-     * is not filled yet gets the portal blocks.
+     * Forms a broken portal inside an empty nether portal frame: the cell the clicked face looks at is
+     * measured as a portal rectangle with our own frame rules (see {@link BrokenPortalFrames} - vanilla's
+     * {@code PortalShape} would treat our own blocks as an obstruction), and it gets the portal blocks when
+     * the frame is intact and not filled yet.
      * <p>
-     * Both horizontal axes are tried, and all six neighbours: a frame can be clicked on its outside face,
-     * in which case the inside is on the opposite side of the obsidian.
+     * Only that one cell, and only the face the player aimed through: the same rule {@link #isPortalAction}
+     * uses. Trying the other neighbours as well would let a click on a frame - even on one that is already a
+     * portal - assemble a portal somewhere the player did not aim at.
      * <p>
      * Public for the same reason {@link #rewrite} is: probes (and future content) can drive it without
      * faking a right click.
      */
     public static int formInFrame(ServerLevel level, BlockPos clicked, @Nullable Direction clickedFace) {
         Direction front = clickedFace == null ? Direction.UP : clickedFace;
-        int converted = tryForm(level, clicked.relative(front));
-        if (converted > 0) {
-            return converted;
-        }
-        for (Direction direction : Direction.values()) {
-            if (direction == front) {
-                continue;
-            }
-            converted = tryForm(level, clicked.relative(direction));
-            if (converted > 0) {
-                return converted;
-            }
-        }
-        return 0;
+        return tryForm(level, clicked.relative(front));
     }
 
     /** Forms a portal in either horizontal axis at one inner position; returns 0 when there is none. */
