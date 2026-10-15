@@ -107,6 +107,30 @@ tasks.named('jar', Jar).configure {
     }
 }
 
+// Expand the declared replace properties in the mod metadata, so the built jar carries a real version
+// instead of the "${file.jarVersion}" placeholder. NeoForge resolves that placeholder at runtime, but
+// Modrinth (and other tooling) reads META-INF/neoforge.mods.toml literally, and therefore showed
+// "${file.jarVersion}" as the version of every 1.21.1 upload. This is the same block the 26.1.2 project
+// and the other 1.21.1 projects in this workspace use.
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
 // Copy the built mod jar to the workspace root (D:\DshWorkSpace\MCMOD) for easy access.
 // Implemented as an imperative copy so Gradle does not track the workspace root
 // (it contains unrelated files, e.g. gradle caches with lock files).
