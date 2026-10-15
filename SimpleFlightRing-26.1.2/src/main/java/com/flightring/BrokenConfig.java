@@ -21,7 +21,7 @@ public final class BrokenConfig {
     public static final ModConfigSpec SPEC;
 
     // islands -----------------------------------------------------------------
-    private static final ModConfigSpec.IntValue MIN_RADIUS;
+    private static final ModConfigSpec.ConfigValue<Integer> MIN_RADIUS;
     private static final ModConfigSpec.IntValue MAX_RADIUS;
     private static final ModConfigSpec.IntValue GAP_MIN;
     private static final ModConfigSpec.IntValue GAP_MAX;
@@ -29,19 +29,19 @@ public final class BrokenConfig {
     private static final ModConfigSpec.DoubleValue MAX_STRETCH;
 
     // caves / surface ---------------------------------------------------------
-    private static final ModConfigSpec.IntValue WET_ISLAND_CHANCE;
-    private static final ModConfigSpec.IntValue CARVER_WATER_TABLE;
+    private static final ModConfigSpec.ConfigValue<Integer> WET_ISLAND_CHANCE;
+    private static final ModConfigSpec.ConfigValue<Integer> CARVER_WATER_TABLE;
     private static final ModConfigSpec.BooleanValue FORCE_ALL_DRY;
-    private static final ModConfigSpec.IntValue BOWL_SHELL_MIN;
+    private static final ModConfigSpec.ConfigValue<Integer> BOWL_SHELL_MIN;
     private static final ModConfigSpec.DoubleValue REPAIR_RIM_FROM;
-    private static final ModConfigSpec.IntValue TOP_MARGIN;
-    private static final ModConfigSpec.IntValue BOTTOM_MARGIN;
+    private static final ModConfigSpec.ConfigValue<Integer> TOP_MARGIN;
+    private static final ModConfigSpec.ConfigValue<Integer> BOTTOM_MARGIN;
     private static final ModConfigSpec.DoubleValue THICKNESS_SCALE;
 
     // structures --------------------------------------------------------------
-    private static final ModConfigSpec.IntValue STRUCTURE_UNDERSIDE_MARGIN;
-    private static final ModConfigSpec.IntValue STRUCTURE_RIM_MARGIN;
-    private static final ModConfigSpec.IntValue STRUCTURE_HEADROOM;
+    private static final ModConfigSpec.ConfigValue<Integer> STRUCTURE_UNDERSIDE_MARGIN;
+    private static final ModConfigSpec.ConfigValue<Integer> STRUCTURE_RIM_MARGIN;
+    private static final ModConfigSpec.ConfigValue<Integer> STRUCTURE_HEADROOM;
 
     // biome pool --------------------------------------------------------------
     private static final ModConfigSpec.BooleanValue ALLOW_MOD_BIOMES;
@@ -59,7 +59,7 @@ public final class BrokenConfig {
 
         builder.comment("Island size and spacing / 岛屿大小与间距").push("islands");
         MIN_RADIUS = builder.comment("Smallest island radius (blocks). / 最小岛半径（格）。", "Default: 80")
-                .defineInRange("minRadius", 80, 48, 256);
+                .define("minRadius", 80, o -> o instanceof Integer v && v >= 48 && v <= 256);
         MAX_RADIUS = builder.comment("Largest island radius (blocks). / 最大岛半径（格）。",
                         "The grid cell size is derived from this, and the minimum gap is guaranteed against it.",
                         "格边长按这个值推算；最小间距的几何保证也是按它算的。",
@@ -92,10 +92,10 @@ public final class BrokenConfig {
                         "every other island is carved dry. 1 = every island, 100 = 1 in 100.",
                         "每 N 座岛里有一座保留原版含水洞穴（水淹岛），其余为干洞。1 = 全部含水，100 = 百分之一。",
                         "Default: 10 (= 10%)")
-                .defineInRange("wetIslandChance", 10, 1, 100);
+                .define("wetIslandChance", 10, o -> o instanceof Integer v && v >= 1 && v <= 100);
         CARVER_WATER_TABLE = builder.comment("Water table used while carving dry islands (lava stays below -54).",
                         "干岛雕刻时使用的水位（-54 以下仍是岩浆）。", "Default: -54")
-                .defineInRange("carverWaterTable", -54, -64, 63);
+                .define("carverWaterTable", -54, o -> o instanceof Integer v && v >= -64 && v <= 63);
         FORCE_ALL_DRY = builder.comment("Force every island dry, including the ones that would otherwise keep water (for players who want a completely dry world).",
                         "强制所有岛都是干洞，连本该保留水的水淹岛也不例外（想要一个完全干燥世界的玩家可以打开）。",
                         "Default: false")
@@ -105,14 +105,14 @@ public final class BrokenConfig {
                         "floor is not refilled after carving - the rim is what keeps the water in.",
                         "碗形岛盆底下方至少保留的实心岩层（格）：用于挖盆时防止盆底穿透自身；雕刻之后不再回填",
                         "盆底，挡水靠碗沿。", "Default: 16")
-                .defineInRange("bowlShellMin", 16, 0, 64);
+                .define("bowlShellMin", 16, o -> o instanceof Integer v && v >= 0 && v <= 64);
         TOP_MARGIN = builder.comment("Headroom kept under the build limit when an island's own height would",
                         "reach it (blocks). / 岛体过高时，距建筑上限保留的余量（格）。", "Default: 8")
-                .defineInRange("topMargin", 8, 0, 64);
+                .define("topMargin", 8, o -> o instanceof Integer v && v >= 0 && v <= 64);
         BOTTOM_MARGIN = builder.comment("Headroom kept above the world floor when an island's own depth would",
                         "reach it (blocks). Raise it to keep islands clear of the bottom of the world.",
                         "岛体过深时，距世界底部保留的余量（格）。调大可以让岛底离世界底更远。", "Default: 8")
-                .defineInRange("bottomMargin", 8, 0, 64);
+                .define("bottomMargin", 8, o -> o instanceof Integer v && v >= 0 && v <= 64);
         THICKNESS_SCALE = builder.comment("Multiplier on how far an island reaches down from its centre. / 岛体自中心向下的深度乘数。",
                         "1.0 = the shipped shape (roughly 120-226 blocks from top to bottom at radius 80-320).",
                         "Raise it to fit larger underground structures inside an island; volume grows linearly with",
@@ -133,12 +133,12 @@ public final class BrokenConfig {
         builder.comment("Structures / 结构").push("structures");
         STRUCTURE_UNDERSIDE_MARGIN = builder.comment("Clearance between a structure's lowest block and the island's",
                         "underside (blocks). / 结构最低点与岛底之间要求的最小间隙（格）。", "Default: 4")
-                .defineInRange("undersideMargin", 4, 0, 64);
+                .define("undersideMargin", 4, o -> o instanceof Integer v && v >= 0 && v <= 64);
         STRUCTURE_RIM_MARGIN = builder.comment("Extra margin a structure's bounding box must keep from the island rim",
                         "(blocks). 0 = a structure may touch the rim.", "Raise it to stop structures from hugging the edge;",
                         "the cost is that more of them are skipped. / 结构包围盒距岛沿要求额外留出的余量（格）。",
                         "0 = 允许贴沿；调大可以避免结构贴边，代价是被跳过的结构变多。", "Default: 0")
-                .defineInRange("rimMargin", 0, 0, 64);
+                .define("rimMargin", 0, o -> o instanceof Integer v && v >= 0 && v <= 64);
         STRUCTURE_HEADROOM = builder.comment("Extra space reserved above the default band for structures (blocks).",
                         "0 by default: the default height layers already stop at 128, so everything above them is",
                         "free for structures and an island only keeps topMargin clear of the build limit.",
@@ -146,7 +146,7 @@ public final class BrokenConfig {
                         "在**默认高度带之上**额外为结构预留的空间（格）。默认 0：默认层最高 128，上方本来就全是",
                         "给结构的，岛只要和建筑上限保持 topMargin 的距离即可。只有整合包的结构确实更高时才调大",
                         "（它会把所有岛压低）。", "Default: 0")
-                .defineInRange("headroom", 0, 0, 192);
+                .define("headroom", 0, o -> o instanceof Integer v && v >= 0 && v <= 192);
         builder.pop();
 
         builder.comment("Biome pool / 群系池",
@@ -247,7 +247,7 @@ public final class BrokenConfig {
     }
 
     // heightLayers is a list of y levels and is edited in the file, not in the screen.
-    private static Option intOption(String label, ModConfigSpec.IntValue value) {
+    private static Option intOption(String label, ModConfigSpec.ConfigValue<Integer> value) {
         return new Option(label, value::get, v -> value.set((Integer) v), Integer.class, value.getDefault());
     }
 

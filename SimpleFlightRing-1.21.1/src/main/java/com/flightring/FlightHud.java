@@ -87,8 +87,8 @@ public class FlightHud {
         }
     }
 
-    /** Percentage of the screen (0..100) as a pixel offset in GUI-scaled coordinates. */
-    private static int percentToPixels(double percent, int screenSize) {
+    /** Whole percent of the screen (0..100) as a pixel offset in GUI-scaled coordinates. */
+    private static int percentToPixels(int percent, int screenSize) {
         return (int) Math.round(screenSize * (percent / 100.0));
     }
 

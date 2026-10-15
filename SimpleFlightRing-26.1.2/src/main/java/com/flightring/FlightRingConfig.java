@@ -25,10 +25,10 @@ public class FlightRingConfig {
      * changes the resolution or the GUI scale (pixel values only looked right at the resolution they were
      * tuned on).
      */
-    public static final ModConfigSpec.DoubleValue HUD_X_PERCENT;
+    public static final ModConfigSpec.IntValue HUD_X_PERCENT;
 
     /** Vertical HUD position: percentage of the screen height, measured from the bottom edge. */
-    public static final ModConfigSpec.DoubleValue HUD_Y_PERCENT;
+    public static final ModConfigSpec.IntValue HUD_Y_PERCENT;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -45,15 +45,15 @@ public class FlightRingConfig {
                         "Default: true")
                 .define("hideWhileChatOpen", true);
         HUD_X_PERCENT = builder
-                .comment("Horizontal position of the countdown and the energy bar: percentage of the screen width, from the left edge.",
-                        "倒计时与能量条的水平位置：屏幕宽度的百分比，从左边缘算起。",
-                        "Default: 1.0 (= 1% of the width, about the old 4 pixels)")
-                .defineInRange("hudXPercent", 1.0, 0.0, 100.0);
+                .comment("Horizontal position of the countdown and the energy bar: whole percent of the screen width, from the left edge (slider, 0-100).",
+                        "倒计时与能量条的水平位置：屏幕宽度的整数百分比，从左边缘算起（滑块，0~100）。",
+                        "Default: 1 (= 1% of the width, about the old 4 pixels)")
+                .defineInRange("hudXPercent", 1, 0, 100);
         HUD_Y_PERCENT = builder
-                .comment("Vertical position of the countdown and the energy bar: percentage of the screen height, from the bottom edge.",
-                        "倒计时与能量条的垂直位置：屏幕高度的百分比，从底部边缘算起。",
-                        "Default: 2.0 (= 2% of the height, about the old 4 pixels)")
-                .defineInRange("hudYPercent", 2.0, 0.0, 100.0);
+                .comment("Vertical position of the countdown and the energy bar: whole percent of the screen height, from the bottom edge (slider, 0-100).",
+                        "倒计时与能量条的垂直位置：屏幕高度的整数百分比，从底部边缘算起（滑块，0~100）。",
+                        "Default: 2 (= 2% of the height, about the old 4 pixels)")
+                .defineInRange("hudYPercent", 2, 0, 100);
         builder.pop();
         SPEC = builder.build();
     }
