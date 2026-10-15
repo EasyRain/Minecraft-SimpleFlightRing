@@ -21,6 +21,13 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.simpleflightring]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.simpleflightring]]
 modId="curios"
 type="required"
 versionRange="[9.5.1,10)"
