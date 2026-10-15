@@ -71,8 +71,12 @@ public class FlightHud {
             return;
         }
 
-        int x = FlightRingConfig.HUD_X.get();
-        int textY = minecraft.getWindow().getGuiScaledHeight() - FlightRingConfig.HUD_Y.get() - 9;
+        // Positions are percentages, so turn them into GUI pixels for this frame's screen size. The GUI-scaled
+        // size is the whole screen in GUI coordinates, so a percentage of it is a percentage of the screen.
+        int screenWidth = minecraft.getWindow().getGuiScaledWidth();
+        int screenHeight = minecraft.getWindow().getGuiScaledHeight();
+        int x = percentToPixels(FlightRingConfig.HUD_X_PERCENT.get(), screenWidth);
+        int textY = screenHeight - percentToPixels(FlightRingConfig.HUD_Y_PERCENT.get(), screenHeight) - 9;
 
         Component timerText = flightTimeText(minecraft.player);
         // The energy bar sits right above the countdown. Indestructible rings hide the
@@ -81,6 +85,11 @@ public class FlightHud {
         if (timerText != null) {
             guiGraphics.drawString(minecraft.font, timerText, x, textY, 0xFFFFFF, true);
         }
+    }
+
+    /** Percentage of the screen (0..100) as a pixel offset in GUI-scaled coordinates. */
+    private static int percentToPixels(double percent, int screenSize) {
+        return (int) Math.round(screenSize * (percent / 100.0));
     }
 
     /** The countdown line, or {@code null} when there is no flight time to show. */
