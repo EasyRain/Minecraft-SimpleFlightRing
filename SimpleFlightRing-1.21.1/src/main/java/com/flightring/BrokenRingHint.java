@@ -9,18 +9,18 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
- * The one and only hint about the hidden broken dimension, exactly as specified: while carrying the
- * ender ring, stepping through a nether portal prints a single line in chat.
+ * The one and only hint about the hidden broken dimension, exactly as specified: while carrying a
+ * flight ring, stepping through a nether portal prints a single line in chat.
  * <p>
  * "Carrying" means anywhere on the player - equipped or not, in the inventory, the offhand, a
  * sophisticated backpack, or the Curios slot. The line is shown <b>once per player</b> and never to
- * players who already rewrote a portal (or have been to the dimension) themselves.
+ * players who already built a portal (or have been to the dimension) themselves.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class BrokenRingHint {
 
-    /** See the lang files: 「末影戒指似乎对传送门产生了共鸣」. */
-    private static final String MESSAGE_KEY = "message.simpleflightring.ender_ring_resonance";
+    /** See the lang files: 「飞行戒指似乎对传送门产生了共鸣」. */
+    private static final String MESSAGE_KEY = "message.simpleflightring.flight_ring_resonance";
 
     @SubscribeEvent
     public static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
@@ -36,28 +36,28 @@ public final class BrokenRingHint {
         if (BrokenPortalData.hintShown(player) || BrokenPortalData.knowsDimension(player)) {
             return;
         }
-        if (!carriesEnderRing(player)) {
+        if (!carriesFlightRing(player)) {
             return;
         }
         BrokenPortalData.setHintShown(player);
         player.sendSystemMessage(Component.translatable(MESSAGE_KEY));
     }
 
-    private static boolean carriesEnderRing(ServerPlayer player) {
-        if (CuriosCompat.isLoaded() && isEnderRing(CuriosCompat.findRingInSlot(player))) {
+    private static boolean carriesFlightRing(ServerPlayer player) {
+        if (CuriosCompat.isLoaded() && isFlightRing(CuriosCompat.findRingInSlot(player))) {
             return true;
         }
         for (ItemStack stack : player.getInventory().items) {
-            if (isEnderRing(stack)) {
+            if (isFlightRing(stack)) {
                 return true;
             }
         }
-        if (isEnderRing(player.getInventory().offhand.get(0))) {
+        if (isFlightRing(player.getInventory().offhand.get(0))) {
             return true;
         }
         if (BackpackCompat.isLoaded()) {
             for (BackpackCompat.BackpackRing ring : BackpackCompat.findRingsInBackpacks(player)) {
-                if (isEnderRing(ring.stack())) {
+                if (isFlightRing(ring.stack())) {
                     return true;
                 }
             }
@@ -65,8 +65,9 @@ public final class BrokenRingHint {
         return false;
     }
 
-    private static boolean isEnderRing(ItemStack stack) {
-        return stack.getItem() instanceof FlightRingItem ring && ring.hasAbility(RingAbility.WARP_NEXUS);
+    /** Any flight ring counts, the same rule the portal itself uses. */
+    private static boolean isFlightRing(ItemStack stack) {
+        return stack.getItem() instanceof FlightRingItem;
     }
 
     private BrokenRingHint() {

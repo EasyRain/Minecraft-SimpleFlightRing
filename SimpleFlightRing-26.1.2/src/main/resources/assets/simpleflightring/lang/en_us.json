@@ -1,6 +1,6 @@
 {
   "itemGroup.simpleflightring": "Simple Flight Ring",
-  "message.simpleflightring.ender_ring_resonance": "The Ender Ring seems to resonate with the portal.",
+  "message.simpleflightring.flight_ring_resonance": "The Flight Ring seems to resonate with the portal.",
   "block.simpleflightring.broken_portal": "Broken Portal",
   "fml.menu.mods.info.description.simpleflightring": "Wear a flight ring and fly like in creative mode: double-tap Space to take off, hold Space to rise, Shift to descend. Flight costs 1 durability per second; the six tiers of rings upgrade into each other, and eight relic rings each carry an ability of their own.",
   "item.simpleflightring.wood_flight_ring": "Wooden Flight Ring",

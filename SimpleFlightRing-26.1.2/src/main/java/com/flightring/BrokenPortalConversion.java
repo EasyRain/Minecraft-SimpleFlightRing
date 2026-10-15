@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -22,13 +23,19 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
- * Rewrites a lit nether portal into a broken portal: right-clicking the portal while carrying the
- * ender ring (not sneaking) turns every block of that one portal into
- * {@link ModBlocks#BROKEN_PORTAL} and plays the vanilla portal-shatter sound.
- * <p>
- * Only the connected portal that was clicked is touched - a second portal standing right next to it
- * keeps working as a nether portal. Nothing is announced in chat: the hint players get is the
- * separate one-time line in {@link BrokenRingHint}, and the rest is for them to notice.
+ * Builds broken portals with a flight ring, in two ways:
+ * <ul>
+ *   <li><b>A lit nether portal</b> is rewritten into a broken portal: right-clicking it (not sneaking)
+ *       turns every block of that one portal into {@link ModBlocks#BROKEN_PORTAL} and plays the vanilla
+ *       portal-shatter sound. Only the connected portal that was clicked is touched - a second portal
+ *       standing right next to it keeps working as a nether portal.</li>
+ *   <li><b>An empty nether portal frame</b> gets a broken portal formed inside it (see
+ *       {@link #formInFrame}). This is the way to build a portal in the broken dimension, where vanilla
+ *       refuses to light a nether portal at all, and it also saves lighting one in the overworld first.</li>
+ * </ul>
+ * <b>Any flight ring works</b> - tiers, specials, relics and the linked ones alike. Nothing is announced
+ * in chat: the hint players get is the separate one-time line in {@link BrokenRingHint}, and the rest is
+ * for them to notice.
  */
 @EventBusSubscriber(modid = FlightRingMod.MODID)
 public final class BrokenPortalConversion {
@@ -46,13 +53,21 @@ public final class BrokenPortalConversion {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        if (!isEnderRing(event.getItemStack())) {
+        if (!isFlightRing(event.getItemStack())) {
             return;
         }
-        if (rewrite(level, event.getPos()) == 0) {
+        // A lit nether portal is rewritten (the original ritual); otherwise the ring forms a broken
+        // portal inside an empty nether portal frame. That second path is the only way to build a way
+        // home in the broken dimension, because vanilla refuses to light a nether portal outside the
+        // overworld and the nether (BaseFireBlock#inPortalDimension).
+        int converted = rewrite(level, event.getPos());
+        if (converted == 0) {
+            converted = formInFrame(level, event.getPos(), event.getFace());
+        }
+        if (converted == 0) {
             return;
         }
-        // Whoever rewrites a portal is in the know: the chat hint is for everybody else.
+        // Whoever builds a portal is in the know: the chat hint is for everybody else.
         BrokenPortalData.setKnowsDimension(event.getEntity());
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
@@ -92,9 +107,82 @@ public final class BrokenPortalConversion {
         return portal.size();
     }
 
-    /** The ender ring is the only ring with the warp ability. */
-    private static boolean isEnderRing(ItemStack stack) {
-        return stack.getItem() instanceof FlightRingItem ring && ring.hasAbility(RingAbility.WARP_NEXUS);
+    /**
+     * Any flight ring works: the six tiers, the two special rings, the eight relics and the three linked
+     * ones. The damaged loot variants are not rings one can use, so they do not count.
+     */
+    private static boolean isFlightRing(ItemStack stack) {
+        return stack.getItem() instanceof FlightRingItem;
+    }
+
+    /**
+     * Forms a broken portal inside an empty nether portal frame: the clicked block's neighbours are
+     * measured as portal rectangles with our own frame rules (see {@link BrokenPortalFrames} - vanilla's
+     * {@code PortalShape} would treat our own blocks as an obstruction), and the first intact frame that
+     * is not filled yet gets the portal blocks.
+     * <p>
+     * Both horizontal axes are tried, and all six neighbours: a frame can be clicked on its outside face,
+     * in which case the inside is on the opposite side of the obsidian.
+     * <p>
+     * Public for the same reason {@link #rewrite} is: probes (and future content) can drive it without
+     * faking a right click.
+     */
+    public static int formInFrame(ServerLevel level, BlockPos clicked, @Nullable Direction clickedFace) {
+        Direction front = clickedFace == null ? Direction.UP : clickedFace;
+        int converted = tryForm(level, clicked.relative(front));
+        if (converted > 0) {
+            return converted;
+        }
+        for (Direction direction : Direction.values()) {
+            if (direction == front) {
+                continue;
+            }
+            converted = tryForm(level, clicked.relative(direction));
+            if (converted > 0) {
+                return converted;
+            }
+        }
+        return 0;
+    }
+
+    /** Forms a portal in either horizontal axis at one inner position; returns 0 when there is none. */
+    private static int tryForm(ServerLevel level, BlockPos inside) {
+        for (Direction.Axis axis : new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z}) {
+            BrokenPortalFrames.Rect rect = BrokenPortalFrames.measure(level, inside, axis);
+            if (rect == null || !BrokenPortalFrames.frameIntact(level, rect)) {
+                continue;
+            }
+            if (BrokenPortalFrames.interiorFilled(level, rect)) {
+                // Already a finished portal - a lit one was handled by rewrite() above, and a broken one
+                // needs nothing.
+                return 0;
+            }
+            return fillFrame(level, rect);
+        }
+        return 0;
+    }
+
+    /**
+     * Writes the broken portal into a measured rectangle, in one batch so no block deletes itself while
+     * the surface is still incomplete, and plays vanilla's portal-lighting sound. Nothing is shattered
+     * here: the frame is being turned into a portal, it is the rewrite path that shatters a lit one.
+     */
+    private static int fillFrame(ServerLevel level, BrokenPortalFrames.Rect rect) {
+        BlockState broken = ModBlocks.BROKEN_PORTAL.get().defaultBlockState()
+                .setValue(BrokenPortalBlock.AXIS, rect.axis());
+        BrokenPortalFrames.beginBulkEdit();
+        try {
+            for (int i = 0; i < rect.width(); i++) {
+                for (int j = 0; j < rect.height(); j++) {
+                    level.setBlock(rect.min().relative(rect.axis(), i).above(j), broken, Block.UPDATE_ALL);
+                }
+            }
+        } finally {
+            BrokenPortalFrames.endBulkEdit();
+        }
+        level.playSound(null, rect.min(), SoundEvents.PORTAL_TRIGGER, SoundSource.BLOCKS, 0.6F,
+                0.9F + level.getRandom().nextFloat() * 0.2F);
+        return rect.width() * rect.height();
     }
 
     /** Flood fill of the connected portal blocks of one portal (same axis, same surface). */
