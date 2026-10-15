@@ -426,7 +426,7 @@ S P S     R = 已充能的损坏末影戒指
 
 1. 安装 [NeoForge 21.1.x](https://neoforged.net/)（需 21.1.228 或更高）。
 2. 安装 **[Curios API 9.5.1+1.21.1](https://modrinth.com/mod/curios)（必需依赖，没有它游戏无法启动）**。
-3. 将 `build/libs/simpleflightring-1.3.1-1.21.1.jar` 放入 `mods` 文件夹。
+3. 将 `build/libs/simpleflightring-1.3.2-1.21.1.jar` 放入 `mods` 文件夹。
 4. （可选）安装 [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks)
    及其前置 [Sophisticated Core](https://modrinth.com/mod/sophisticated-core)，戒指放在精妙背包内也能生效。
 5. （可选）安装 [Allthemodium](https://modrinth.com/mod/allthemodium) 以获得三枚联动戒指与「魔能增幅」附魔。
@@ -440,7 +440,7 @@ S P S     R = 已充能的损坏末影戒指
 gradlew.bat build
 ```
 
-产物位于 `build/libs/simpleflightring-1.3.1-1.21.1.jar`。
+产物位于 `build/libs/simpleflightring-1.3.2-1.21.1.jar`。
 
 开发环境运行（含 Curios，来自本地 `libs/` 目录的 jar）：
 
