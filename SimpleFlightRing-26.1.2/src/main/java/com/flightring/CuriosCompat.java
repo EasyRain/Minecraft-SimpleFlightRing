@@ -5,7 +5,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.HitResult;
 import net.neoforged.fml.ModList;
 import top.theillusivec4.curios.api.CurioAttributeModifiers;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -46,19 +45,17 @@ public final class CuriosCompat {
                  * stack when this returns true - so without the override a ring could only be put
                  * into the slot through the Curios menu, never by right-clicking it.
                  * <p>
-                 * <b>Air clicks only</b>, like every other curio. NeoForge fires {@code RightClickItem}
-                 * for a block click as well: whenever the clicked block does not consume the click, the
-                 * client falls through to the air use and sends a {@code ServerboundUseItemPacket}, which
-                 * is what Curios listens to. A plain {@code true} therefore equipped the ring while
-                 * interacting with a block too (the user ran into exactly that on the broken portal). The
-                 * click context is not part of this call, so ask the wearer directly: with nothing in
-                 * front of them the ray trace misses, and the click was an air click.
+                 * Unconditional on purpose. Curios equips on {@code RightClickItem}, and the one click
+                 * that must <b>not</b> equip is the portal action - which is handled where it belongs:
+                 * {@link BrokenPortalConversion#onRightClickBlock} consumes that click on both sides, so
+                 * the client never falls through to the air use, never sends the packet, and Curios never
+                 * sees the event. Every other block click (and air) still equips, as it always did.
+                 * Deciding it there also avoids needing to know which block was clicked: the event Curios
+                 * listens to does not carry that.
                  */
                 @Override
                 public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
-                    return slotContext.entity() instanceof Player wearer
-                            && wearer.pick(wearer.blockInteractionRange(), 1.0F, false).getType()
-                                    == HitResult.Type.MISS;
+                    return true;
                 }
 
                 @Override

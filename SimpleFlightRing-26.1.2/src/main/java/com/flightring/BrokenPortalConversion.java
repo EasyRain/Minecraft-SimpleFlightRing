@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -50,10 +51,22 @@ public final class BrokenPortalConversion {
         if (event.getEntity().isShiftKeyDown()) {
             return;
         }
-        if (!(event.getLevel() instanceof ServerLevel level)) {
+        if (!isFlightRing(event.getItemStack())) {
             return;
         }
-        if (!isFlightRing(event.getItemStack())) {
+        if (!isPortalAction(event.getLevel(), event.getPos(), event.getFace())) {
+            return;
+        }
+        // Consume the click on BOTH sides, before touching the world: the client's Minecraft#startUseItem
+        // only stops after a block interaction that returns SUCCESS or FAIL, and otherwise falls through to
+        // the air use - which sends a ServerboundUseItemPacket and makes the server fire RightClickItem, the
+        // event Curios equips a ring on. A server-only cancel (what this used to do) therefore still equipped
+        // the ring while a portal was being built. With both sides cancelling, a portal click never equips,
+        // while every click that is not a portal action falls through as usual and equips normally.
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            // Client side: only the consumed click is predicted here, the server writes the blocks.
             return;
         }
         // A lit nether portal is rewritten (the original ritual); otherwise the ring forms a broken
@@ -64,13 +77,48 @@ public final class BrokenPortalConversion {
         if (converted == 0) {
             converted = formInFrame(level, event.getPos(), event.getFace());
         }
-        if (converted == 0) {
-            return;
+        if (converted > 0) {
+            // Whoever builds a portal is in the know: the chat hint is for everybody else.
+            BrokenPortalData.setKnowsDimension(event.getEntity());
         }
-        // Whoever builds a portal is in the know: the chat hint is for everybody else.
-        BrokenPortalData.setKnowsDimension(event.getEntity());
-        event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.SUCCESS);
+    }
+
+    /**
+     * True when right-clicking this block with a flight ring is a <b>portal action</b>: the click is going to
+     * rewrite a lit nether portal, or form one inside a complete portal frame.
+     * <p>
+     * Pure test, no writes, so the client runs the very same check and cancels the click there too (see
+     * {@link #onRightClickBlock} for why that matters). Both sides have to reach the same verdict, which is why
+     * nothing here uses data the client does not have: the clicked block and its neighbours are always loaded.
+     * Public for the same reason {@link #rewrite} is - probes can ask it without faking a right click.
+     */
+    public static boolean isPortalAction(LevelReader level, BlockPos clicked, @Nullable Direction face) {
+        BlockState state = level.getBlockState(clicked);
+        if (state.is(Blocks.NETHER_PORTAL) || state.is(ModBlocks.BROKEN_PORTAL.get())) {
+            return true;
+        }
+        // A frame can be clicked from its outside face, so all six neighbours are tried, the clicked one first.
+        Direction front = face == null ? Direction.UP : face;
+        if (hasFrameAround(level, clicked.relative(front))) {
+            return true;
+        }
+        for (Direction direction : Direction.values()) {
+            if (direction != front && hasFrameAround(level, clicked.relative(direction))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** True when {@code inside} is the inner corner of a complete portal frame, in either horizontal axis. */
+    private static boolean hasFrameAround(LevelReader level, BlockPos inside) {
+        for (Direction.Axis axis : new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z}) {
+            BrokenPortalFrames.Rect rect = BrokenPortalFrames.measure(level, inside, axis);
+            if (rect != null && BrokenPortalFrames.frameIntact(level, rect)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
