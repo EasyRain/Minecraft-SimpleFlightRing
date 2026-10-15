@@ -179,12 +179,17 @@ public final class BrokenConfig {
         EXCLUDE_FUNCTIONAL_BIOMES = builder.comment("Skip biomes that look purely functional (no features, no dimension",
                         "tag). / 跳过看起来纯功能性的群系（无地物、无维度标签）。", "Default: false")
                 .define("excludeFunctionalBiomes", false);
-        LOG_POOL = builder.comment("Log the biome pool decisions at server start.",
-                        "启动时输出群系池的判定日志。", "Default: true")
-                .define("logPool", true);
-        LOG_LAYOUT = builder.comment("Log the island layout dump at server start (gaps, radius spread, per-biome",
-                        "nearest island). / 启动时输出岛屿布局dump（间距/半径分布/每群系最近岛）。", "Default: true")
-                .define("logLayout", true);
+        LOG_POOL = builder.comment("Log the biome pool decisions at server start (diagnostics).",
+                        "启动时输出群系池的判定日志（诊断用）。",
+                        "This is for us, not for players: turn it on when you are asked to, or when you are",
+                        "chasing a biome that did not show up. / 这是我们自己排查用的，玩家不需要：被要求提供日志时、",
+                        "或者正在追某个没出现的群系时再打开。", "Default: false")
+                .define("logPool", false);
+        LOG_LAYOUT = builder.comment("Log the island layout dump at server start (diagnostics: gaps, radius spread,",
+                        "per-biome nearest island). / 启动时输出岛屿布局 dump（诊断用：间距/半径分布/每群系最近岛）。",
+                        "Also for us only - it is long, and it answers questions a player never asks.",
+                        "同样只给我们自己看：内容很长，回答的都是玩家不会问的问题。", "Default: false")
+                .define("logLayout", false);
         builder.pop();
 
         SPEC = builder.build();
