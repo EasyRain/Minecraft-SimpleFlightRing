@@ -127,6 +127,23 @@ public final class RingAffixHandler {
         ItemStack carried = player.containerMenu.getCarried();
         if (!carried.isEmpty() && carried.has(ModDataComponents.PENDING_REFORGE.get())) {
             RingAnvilHandler.rollIfPending(carried, player);
+            return;
+        }
+        // Safety net, once a second: a pending ring can end up in the bag without any take event at all (breaking
+        // the anvil block closes the GUI and vanilla returns the cursor stack to the inventory). Sweeping keeps
+        // such a ring from sitting unreforged until somebody happens to drop and pick it up again.
+        if (player.tickCount % 20 != 0) {
+            return;
+        }
+        for (ItemStack stack : player.getInventory().items) {
+            if (RingAnvilHandler.rollIfPending(stack, player)) {
+                return;
+            }
+        }
+        for (ItemStack stack : player.getInventory().offhand) {
+            if (RingAnvilHandler.rollIfPending(stack, player)) {
+                return;
+            }
         }
     }
 
