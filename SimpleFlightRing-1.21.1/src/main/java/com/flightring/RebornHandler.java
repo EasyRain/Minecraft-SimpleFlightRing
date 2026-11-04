@@ -106,6 +106,11 @@ public final class RebornHandler {
         if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
             remaining += RaidCharges.of(ring);
         }
+        // The Unobtainium ring's burst totem is one more save, even though it runs on its own path and only
+        // once - the user wants it counted in this number too (2026-11-04).
+        if (item.hasAbility(RingAbility.BURST_TOTEM)) {
+            remaining += 1;
+        }
         // Reuse the raid ring's own message and action bar (user 2026-11-04) instead of adding another line:
         // "rings blocked death for you (charges left: N)".
         player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
