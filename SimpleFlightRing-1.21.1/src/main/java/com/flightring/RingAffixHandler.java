@@ -36,6 +36,17 @@ public final class RingAffixHandler {
      */
     private static final ThreadLocal<Boolean> REENTRANT = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
+    /** How long (in game ticks) the anvil detection window stays open after the last tick with it open. */
+    private static final long ANVIL_WINDOW_TICKS = 20L;
+
+    /**
+     * Per-player deadline (game time) until which pending rings are still looked for. Set while an anvil screen is
+     * open and kept for {@link #ANVIL_WINDOW_TICKS} after it closes - closing also happens when the anvil block
+     * breaks, and vanilla then returns the cursor stack to the inventory. Entries are dropped once expired, so the
+     * map only ever holds players who touched an anvil in the last second.
+     */
+    private static final java.util.Map<java.util.UUID, Long> ANVIL_WINDOW = new java.util.concurrent.ConcurrentHashMap<>();
+
     private RingAffixHandler() {
     }
 
@@ -124,21 +135,33 @@ public final class RingAffixHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        // A pending ring can only appear on the cursor right after taking an anvil result, so the per-tick check
-        // is limited to the anvil screen: outside it there is nothing to look for and we do no work at all.
-        if (player.containerMenu instanceof net.minecraft.world.inventory.AnvilMenu) {
-            ItemStack carried = player.containerMenu.getCarried();
-            if (!carried.isEmpty() && carried.has(ModDataComponents.PENDING_REFORGE.get())) {
-                RingAnvilHandler.rollIfPending(carried, player);
-                return;
-            }
-        }
-        // Safety net, once a second: a pending ring can end up in the bag without any take event at all (breaking
-        // the anvil block closes the GUI and vanilla returns the cursor stack to the inventory). Sweeping keeps
-        // such a ring from sitting unreforged until somebody happens to drop and pick it up again.
-        if (player.tickCount % 20 != 0) {
+        long now = player.level().getGameTime();
+        net.minecraft.world.inventory.AbstractContainerMenu menu = player.containerMenu;
+        if (menu instanceof net.minecraft.world.inventory.AnvilMenu) {
+            // Inside the anvil: settle every tick, so taking the result feels instant. The 1s window below is
+            // armed here so that leaving (including the anvil block breaking, which closes the GUI) still gets a
+            // short detection window.
+            ANVIL_WINDOW.put(player.getUUID(), now + ANVIL_WINDOW_TICKS);
+            settleCarried(player);
             return;
         }
+        Long until = ANVIL_WINDOW.get(player.getUUID());
+        if (until == null || now > until) {
+            ANVIL_WINDOW.remove(player.getUUID());
+            return; // no anvil activity recently: no scanning at all
+        }
+        settleCarried(player);
+        settleInventory(player);
+    }
+
+    private static void settleCarried(ServerPlayer player) {
+        ItemStack carried = player.containerMenu.getCarried();
+        if (!carried.isEmpty() && carried.has(ModDataComponents.PENDING_REFORGE.get())) {
+            RingAnvilHandler.rollIfPending(carried, player);
+        }
+    }
+
+    private static void settleInventory(ServerPlayer player) {
         for (ItemStack stack : player.getInventory().items) {
             if (RingAnvilHandler.rollIfPending(stack, player)) {
                 return;
