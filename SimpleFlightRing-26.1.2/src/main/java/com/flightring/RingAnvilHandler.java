@@ -1,6 +1,5 @@
 package com.flightring;
 
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
@@ -9,25 +8,26 @@ import net.neoforged.neoforge.event.entity.player.AnvilCraftEvent;
 /**
  * Anvil reforge: a ring plus a reforge stone rolls a new affix, and the preview must not reveal it.
  * <p>
- * Two events are used. {@code AnvilUpdateEvent} builds the preview: a copy of the ring with the affix
- * <b>stripped</b> and a {@code pending_reforge} marker, so the anvil shows a plain ring no matter what the
- * roll will be (the anti-preview rule from the plan). {@code AnvilCraftEvent.Post} fires when the player
- * actually takes the result; it finds the marked ring in the player's inventory, rolls the affix there and
- * charges the XP points. Working through the inventory instead of the event's stack keeps this correct whether
- * or not the menu hands over the same instance it showed.
+ * Deliberately minimal - vanilla does the work, we only touch two things:
+ * <ol>
+ *   <li>the <b>level cost</b> ({@link #REFORGE_LEVEL_COST}) - vanilla draws the result, shows the cost, checks
+ *       the player has the levels and charges them on take;</li>
+ *   <li>the <b>preview output</b> - a copy of the ring with the affix stripped and a {@code pending_reforge}
+ *       marker, so the anvil shows a plain ring no matter what the roll will be.</li>
+ * </ol>
+ * The only other hook is the take itself, which rolls the affix into the ring. It writes both the event's
+ * output stack and the copy that may already sit in the player's inventory, so it does not matter which of
+ * the two vanilla hands over. Nothing is charged here: vanilla already took the levels.
  * <p>
- * 26.x notes: {@code AnvilRepairEvent} no longer exists (it became {@code AnvilCraftEvent} with Pre/Post), and
- * the level cost is called {@code xpCost} ({@code getXpCost/setXpCost}); 1.21.1 uses
- * {@code getCost/setCost(long)}. That is why this class differs between the two versions.
- * <p>
- * Cost: the anvil's own level cost is forced to 0 (otherwise the player would pay twice); the real cost is
- * {@link #REFORGE_XP_COST} <b>XP points</b> - the amount needed for level 10 (levels 0..9 need 2L+7 each),
- * not "10 levels". The reforge is refused up front when the player has fewer points than that.
+ * 26.x notes: {@code AnvilRepairEvent} became {@code AnvilCraftEvent.Post} and the level cost is
+ * {@code getXpCost/setXpCost(int)} (1.21.1: {@code getCost/setCost(long)}). Also
+ * {@code Inventory#items/#offhand} are private here, so the main inventory is {@code getNonEquipmentItems()}
+ * and {@code displayClientMessage} is {@code sendSystemMessage}.
  */
 public final class RingAnvilHandler {
 
-    /** XP points one reforge costs (level 10 in total: sum of 2L+7 for L=0..9). */
-    public static final int REFORGE_XP_COST = 160;
+    /** Level cost of one reforge; vanilla charges this and checks it for us. */
+    public static final int REFORGE_LEVEL_COST = 10;
 
     private RingAnvilHandler() {
     }
@@ -38,18 +38,11 @@ public final class RingAnvilHandler {
         if (!(left.getItem() instanceof FlightRingItem) || !right.is(ModItems.REFORGE_STONE.get())) {
             return;
         }
-        Player player = event.getPlayer();
-        if (player != null && player.totalExperience < REFORGE_XP_COST) {
-            return; // not enough points: no result is offered at all
-        }
         ItemStack preview = left.copy();
         preview.remove(ModDataComponents.RING_AFFIX.get());
         preview.set(ModDataComponents.PENDING_REFORGE.get(), net.minecraft.util.Unit.INSTANCE);
         event.setOutput(preview);
-        // NOT 0: vanilla AnvilMenu blanks the result when the level cost is <= 0, and the player would then see
-        // nothing at all (the classic "anvil shows an X" trap). 1 level is the smallest cost that lets vanilla
-        // do its own "do you have enough?" check and show a cost; onTaken refunds it and charges 160 points.
-        event.setXpCost(1);
+        event.setXpCost(REFORGE_LEVEL_COST);
         event.setMaterialCost(1);
     }
 
@@ -60,42 +53,32 @@ public final class RingAnvilHandler {
         if (!event.getRight().is(ModItems.REFORGE_STONE.get())) {
             return;
         }
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        boolean rolled = false;
-        // 26.x: Inventory#items / #offhand are private; getNonEquipmentItems() is the main inventory.
+        Player player = event.getEntity();
+        // The event's output is the stack vanilla is handing over; roll it in place.
+        rollIfPending(event.getOutput(), player);
+        // With a full inventory vanilla drops the result as an item entity instead; roll it there too. The
+        // inventory scan also covers the case where the handed-over stack is a copy this event never saw.
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-            rolled |= rollIfPending(stack, player);
+            rollIfPending(stack, player);
         }
-        // Charge exactly once, on take, whether the ring went into the inventory or was dropped as an item
-        // entity (vanilla does the same for its level cost). The pickup path below therefore never charges:
-        // a dropped pending ring that somebody else picks up was already paid for by the player who took it.
-        //
-        // The 1-level anvil cost exists only so vanilla draws a result and does its own "enough XP?" check;
-        // refund it and charge the real price in points instead (160 = the total for level 10).
-        player.giveExperienceLevels(1);
-        player.giveExperiencePoints(-REFORGE_XP_COST);
     }
 
     /**
-     * Fallback for the "inventory was full" case: settle the pending roll <b>before</b> the picked-up stack
-     * lands in the inventory, so the copy that is added is already the rolled one.
+     * Fallback: a pending ring that ended up as an item entity is settled before it is picked up, so the copy
+     * that lands in the inventory is already rolled. Nothing is charged - the player who took it paid vanilla's
+     * level cost already.
      */
     public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre event) {
         ItemStack stack = event.getItemEntity().getItem();
         if (!stack.has(ModDataComponents.PENDING_REFORGE.get())) {
             return;
         }
-        if (!(event.getPlayer() instanceof ServerPlayer player)) {
-            return;
-        }
-        rollIfPending(stack, player);
+        rollIfPending(stack, event.getPlayer());
     }
 
     /** Rolls the affix into a pending ring; returns whether this stack was one. */
-    private static boolean rollIfPending(ItemStack stack, ServerPlayer player) {
-        if (!stack.has(ModDataComponents.PENDING_REFORGE.get())) {
+    private static boolean rollIfPending(ItemStack stack, Player player) {
+        if (stack == null || stack.isEmpty() || !stack.has(ModDataComponents.PENDING_REFORGE.get())) {
             return false;
         }
         stack.remove(ModDataComponents.PENDING_REFORGE.get());
