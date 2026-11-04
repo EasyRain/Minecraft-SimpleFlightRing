@@ -189,6 +189,21 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
             return color;
         }
 
+        /**
+         * The vanilla rarity this tier is reported as. Vanilla only has four tiers, so the two
+         * top ones share {@code EPIC}; the point is that mods which draw a rarity border or sort
+         * by rarity (Apotheosis, JEI/EMI, ...) see a real value instead of always COMMON.
+         * Reads go through {@code ItemStackRarityMixin}.
+         */
+        public net.minecraft.world.item.Rarity vanillaRarity() {
+            return switch (this) {
+                case COMMON -> net.minecraft.world.item.Rarity.COMMON;
+                case RARE -> net.minecraft.world.item.Rarity.UNCOMMON;
+                case EPIC -> net.minecraft.world.item.Rarity.RARE;
+                case LEGENDARY, SACRED -> net.minecraft.world.item.Rarity.EPIC;
+            };
+        }
+
         /** Display name, e.g. 「神圣」/ "Sacred". */
         public MutableComponent displayName() {
             return Component.translatable("ring_rarity.simpleflightring." + key);
@@ -204,14 +219,18 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
     }
 
     /**
-     * The full item name: 「守护的普通 金飞行戒指」- the prefix + rarity part is coloured by the
-     * rarity, the ring's own name keeps whatever colour it had.
+     * The full item name: 「守护的普通 金飞行戒指」. <b>Every part carries an explicit colour</b>:
+     * the prefix + rarity part in the rarity's colour and the ring's own name in its own colour.
+     * That matters because {@code ItemStack#getHoverName()} wraps the result in
+     * {@code stack.getRarity().getStyleModifier()} - a parent style only fills in what the parts
+     * leave open, so explicitly coloured parts survive (vanilla's rarity colour would otherwise
+     * override ours).
      */
     public Component decorate(Component baseName) {
         return Component.translatable("ring_affix.simpleflightring.name",
                 prefix.displayName().withStyle(style -> style.withColor(rarity.color())),
                 rarity.displayName().withStyle(style -> style.withColor(rarity.color())),
-                baseName);
+                baseName.copy().withStyle(style -> style.withColor(rarity.color())));
     }
 
     /** The tooltip line for this affix, coloured by rarity. */
