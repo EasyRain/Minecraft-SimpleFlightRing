@@ -220,6 +220,13 @@
   "neoforge.configuration.uitext.section": "%s",
 
   "simpleflightring.command.locate.no_pool": "群系池还没建立（先进入过一次世界）",
+  "simpleflightring.command.reforge.done": "已重铸为：%s",
+  "simpleflightring.command.reforge.not_a_ring": "主手需要拿着一枚飞行戒指",
+  "simpleflightring.command.reforge.bad_prefix": "未知词条：%s",
+  "simpleflightring.command.reforge.bad_rarity": "未知稀有度：%s",
+  "simpleflightring.command.reforge.no_player": "只有玩家能执行这条指令",
+  "simpleflightring.command.reforge.cleared": "已清除词条",
+  "simpleflightring.command.reforge.no_affix": "这枚戒指没有词条",
   "simpleflightring.command.locate.wrong_dimension": "非破碎维度，此指令不可使用（请先进入破碎维度）",
   "simpleflightring.command.locate.bad_id": "群系 id 格式不对：%s（要写成 命名空间:群系）",
   "simpleflightring.command.locate.not_in_pool": "群系 %s 不在池子里（池子共 %s 个）",

@@ -130,6 +130,16 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
             return values[rarity.ordinal()];
         }
 
+        /** Looks a prefix up by its serialized key, or {@code null} if there is none. */
+        public static Prefix byKey(String key) {
+            for (Prefix prefix : values()) {
+                if (prefix.key.equalsIgnoreCase(key)) {
+                    return prefix;
+                }
+            }
+            return null;
+        }
+
         /** Display name, e.g. 「守护」/ "Warding". */
         public MutableComponent displayName() {
             return Component.translatable("ring_prefix.simpleflightring." + key);
@@ -201,6 +211,16 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
         /** Name colour: white, green, blue, purple, red. */
         public int color() {
             return color;
+        }
+
+        /** Looks a rarity up by its serialized key, or {@code null} if there is none. */
+        public static Rarity byKey(String key) {
+            for (Rarity rarity : values()) {
+                if (rarity.key.equalsIgnoreCase(key)) {
+                    return rarity;
+                }
+            }
+            return null;
         }
 
         /**
@@ -287,6 +307,39 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
                     new Change(Attributes.LUCK, value, AttributeModifier.Operation.ADD_VALUE, id));
             default -> java.util.List.of();
         };
+    }
+
+    // ---- rolling (used by the loot function and by /simpleflightring reforge) ----
+
+    /**
+     * Rolls an affix: a uniformly random prefix unless one is given, and a weighted rarity unless one is
+     * given. Anvil weights are used for the rarity, i.e. {@link Rarity#SACRED} is possible.
+     */
+    public static RingAffix roll(net.minecraft.util.RandomSource random, Prefix fixedPrefix, Rarity fixedRarity) {
+        Prefix prefix = fixedPrefix != null
+                ? fixedPrefix
+                : Prefix.values()[random.nextInt(Prefix.values().length)];
+        Rarity rarity = fixedRarity != null ? fixedRarity : rollRarity(random, true);
+        return new RingAffix(prefix, rarity);
+    }
+
+    /**
+     * Weighted rarity pick. {@code allowSacred} {@code false} gives the chest distribution, which is capped at
+     * {@link Rarity#LEGENDARY} (SACRED's chest weight is 0, so it simply never comes up).
+     */
+    public static Rarity rollRarity(net.minecraft.util.RandomSource random, boolean allowSacred) {
+        int total = 0;
+        for (Rarity rarity : Rarity.values()) {
+            total += allowSacred ? rarity.anvilWeight() : rarity.chestWeight();
+        }
+        int pick = random.nextInt(total);
+        for (Rarity rarity : Rarity.values()) {
+            pick -= allowSacred ? rarity.anvilWeight() : rarity.chestWeight();
+            if (pick < 0) {
+                return rarity;
+            }
+        }
+        return Rarity.COMMON;
     }
 
     // TODO(framework): the event-driven halves of THORNED / REBORN / PRECISE / WITHERING /

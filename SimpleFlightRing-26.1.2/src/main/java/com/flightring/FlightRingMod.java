@@ -65,6 +65,8 @@ public class FlightRingMod {
 
         // /simpleflightring locate ... - pure grid arithmetic, no chunk loading (see BrokenLocateCommand).
         NeoForge.EVENT_BUS.addListener(BrokenLocateCommand::register);
+        // /simpleflightring reforge [prefix] [rarity] - put a random affix on the held ring (see RingReforgeCommand).
+        NeoForge.EVENT_BUS.addListener(RingReforgeCommand::register);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
         // (never from ModConfigEvent - see BrokenConfig#snapshotAndLog).

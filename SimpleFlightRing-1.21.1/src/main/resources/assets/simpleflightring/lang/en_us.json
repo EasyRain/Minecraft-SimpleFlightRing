@@ -220,6 +220,13 @@
   "neoforge.configuration.uitext.section": "%s",
 
   "simpleflightring.command.locate.no_pool": "The biome pool does not exist yet (enter a world once first)",
+  "simpleflightring.command.reforge.done": "Reforged into: %s",
+  "simpleflightring.command.reforge.not_a_ring": "Hold a flight ring in your main hand",
+  "simpleflightring.command.reforge.bad_prefix": "Unknown prefix: %s",
+  "simpleflightring.command.reforge.bad_rarity": "Unknown rarity: %s",
+  "simpleflightring.command.reforge.no_player": "Only a player can run this command",
+  "simpleflightring.command.reforge.cleared": "Affix cleared",
+  "simpleflightring.command.reforge.no_affix": "This ring has no affix",
   "simpleflightring.command.locate.wrong_dimension": "Not the broken dimension - this command is unavailable here",
   "simpleflightring.command.locate.bad_id": "Malformed biome id: %s (expected namespace:biome)",
   "simpleflightring.command.locate.not_in_pool": "Biome %s is not in the pool (%s biomes in it)",
