@@ -68,9 +68,18 @@ public final class BrokenLocateCommand {
     private BrokenLocateCommand() {
     }
 
+    /** Root names: the full one stays, {@code /sfr} is the short alias (the same tree is registered twice). */
+    private static final String[] ROOTS = {"simpleflightring", "sfr"};
+
     public static void register(RegisterCommandsEvent event) {
+        for (String root : ROOTS) {
+            registerRoot(event, root);
+        }
+    }
+
+    private static void registerRoot(RegisterCommandsEvent event, String root) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        dispatcher.register(Commands.literal("simpleflightring")
+        dispatcher.register(Commands.literal(root)
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("locate")
                         .then(Commands.literal("biome")

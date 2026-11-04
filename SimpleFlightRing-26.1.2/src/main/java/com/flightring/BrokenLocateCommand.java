@@ -68,9 +68,18 @@ public final class BrokenLocateCommand {
     private BrokenLocateCommand() {
     }
 
+    /** Root names: the full one stays, {@code /sfr} is the short alias (the same tree is registered twice). */
+    private static final String[] ROOTS = {"simpleflightring", "sfr"};
+
     public static void register(RegisterCommandsEvent event) {
+        for (String root : ROOTS) {
+            registerRoot(event, root);
+        }
+    }
+
+    private static void registerRoot(RegisterCommandsEvent event, String root) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        dispatcher.register(Commands.literal("simpleflightring")
+        dispatcher.register(Commands.literal(root)
                 // 26.x: CommandSourceStack#hasPermission(int) is gone - permissions are a PermissionSet, and
                 // Commands exposes the same levels vanilla's own /locate uses.
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
