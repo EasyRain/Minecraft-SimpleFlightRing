@@ -75,6 +75,8 @@ public class FlightRingMod {
         NeoForge.EVENT_BUS.addListener(RingAnvilHandler::onPickup);
         // Keep the affix when a ring is upgraded into another ring.
         NeoForge.EVENT_BUS.addListener(RingUpgradeHandler::onCrafted);
+        // Event-driven affix prefixes, batch 1: 精准 / 凋零 / 荼毒 / 荆棘.
+        NeoForge.EVENT_BUS.addListener(RingAffixHandler::onIncomingDamage);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
         // (never from ModConfigEvent - see BrokenConfig#snapshotAndLog).
