@@ -12,19 +12,29 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /**
- * {@code /simpleflightring reforge [prefix] [rarity]} - puts a random affix on the ring in the main hand.
+ * {@code /simpleflightring reforge ...} - affixes for the ring in the main hand, without the long
+ * {@code /give ... [simpleflightring:ring_affix={...}]} syntax ({@code /give} keeps working).
  * <p>
- * Meant for testing (and for us) so the long {@code /give ... [simpleflightring:ring_affix={...}]} syntax is
- * not needed; {@code /give} of course keeps working.
+ * Four subcommands, each with a fixed role:
  * <ul>
- *   <li>{@code reforge} - rolls <b>both</b> the prefix and the rarity;</li>
- *   <li>{@code reforge <prefix>} - keeps that prefix and rolls the rarity;</li>
- *   <li>{@code reforge <prefix> <rarity>} - both fixed.</li>
+ *   <li>{@code reforge roll} - rolls <b>both</b> the prefix and the rarity;</li>
+ *   <li>{@code reforge prefix [prefix]} - sets that prefix, or rolls the prefix when omitted. The rarity
+ *       is <b>kept</b>; on a ring without an affix yet it is rolled too;</li>
+ *   <li>{@code reforge rarity [rarity]} - the same the other way round: rarity set or rolled, prefix kept
+ *       (rolled on a ring without an affix);</li>
+ *   <li>{@code reforge clear} - removes the affix.</li>
  * </ul>
  * The rarity roll uses the anvil weights, so {@link RingAffix.Rarity#SACRED} is possible (chest drops stay
- * capped at {@code LEGENDARY}). Tab completion lists the prefix and rarity keys.
+ * capped at {@code LEGENDARY}). Prefix and rarity keys have tab completion.
  */
 public final class RingReforgeCommand {
+
+    /** Which half of the affix the invocation is about; the other half is kept (or rolled if absent). */
+    private enum Half {
+        BOTH,
+        PREFIX,
+        RARITY
+    }
 
     private static final SuggestionProvider<CommandSourceStack> PREFIX_SUGGESTIONS = (ctx, builder) -> {
         String remaining = builder.getRemainingLowerCase();
@@ -54,36 +64,31 @@ public final class RingReforgeCommand {
         dispatcher.register(Commands.literal("simpleflightring")
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("reforge")
-                        .executes(ctx -> reforge(ctx, null, null))
-                        .then(Commands.literal("clear")
-                                .executes(RingReforgeCommand::clear))
-                        // Fixing only one half needs the keyword forms: the positional ones below always
-                        // take the prefix first, so they cannot express "keep the rarity, roll the prefix".
+                        .then(Commands.literal("roll")
+                                .executes(ctx -> reforge(ctx, Half.BOTH, null, null)))
                         .then(Commands.literal("prefix")
+                                .executes(ctx -> reforge(ctx, Half.PREFIX, null, null))
                                 .then(Commands.argument("prefixKey", StringArgumentType.word())
                                         .suggests(PREFIX_SUGGESTIONS)
-                                        .executes(ctx -> reforge(ctx,
+                                        .executes(ctx -> reforge(ctx, Half.PREFIX,
                                                 StringArgumentType.getString(ctx, "prefixKey"), null))))
                         .then(Commands.literal("rarity")
+                                .executes(ctx -> reforge(ctx, Half.RARITY, null, null))
                                 .then(Commands.argument("rarityKey", StringArgumentType.word())
                                         .suggests(RARITY_SUGGESTIONS)
-                                        .executes(ctx -> reforge(ctx, null,
+                                        .executes(ctx -> reforge(ctx, Half.RARITY, null,
                                                 StringArgumentType.getString(ctx, "rarityKey")))))
-                        .then(Commands.argument("prefix", StringArgumentType.word())
-                                .suggests(PREFIX_SUGGESTIONS)
-                                .executes(ctx -> reforge(ctx, StringArgumentType.getString(ctx, "prefix"), null))
-                                .then(Commands.argument("rarity", StringArgumentType.word())
-                                        .suggests(RARITY_SUGGESTIONS)
-                                        .executes(ctx -> reforge(ctx,
-                                                StringArgumentType.getString(ctx, "prefix"),
-                                                StringArgumentType.getString(ctx, "rarity")))))));
+                        .then(Commands.literal("clear")
+                                .executes(RingReforgeCommand::clear))));
     }
 
     /**
-     * Applies an affix to the held ring. A {@code null} prefix and/or rarity is rolled; a non-null one has to
-     * name a known key, otherwise the command fails with a message instead of silently rolling.
+     * Applies an affix to the held ring. A {@code null} prefix / rarity means "roll it"; for the
+     * {@code PREFIX} and {@code RARITY} halves the other half is taken from the ring's current affix (and
+     * rolled too when the ring has none yet). An explicit key has to name a known one, otherwise the
+     * command fails with a message instead of silently rolling.
      */
-    private static int reforge(CommandContext<CommandSourceStack> ctx, String prefixKey, String rarityKey) {
+    private static int reforge(CommandContext<CommandSourceStack> ctx, Half half, String prefixKey, String rarityKey) {
         CommandSourceStack source = ctx.getSource();
         ServerPlayer player = source.getPlayer();
         if (player == null) {
@@ -113,6 +118,15 @@ public final class RingReforgeCommand {
                 return 0;
             }
         }
+        RingAffix existing = stack.get(ModDataComponents.RING_AFFIX.get());
+        if (existing != null) {
+            // Keep the half this invocation is not about; a fixed key of course wins over it.
+            if (half == Half.PREFIX && rarity == null) {
+                rarity = existing.rarity();
+            } else if (half == Half.RARITY && prefix == null) {
+                prefix = existing.prefix();
+            }
+        }
         RingAffix rolled = RingAffix.roll(source.getLevel().getRandom(), prefix, rarity);
         stack.set(ModDataComponents.RING_AFFIX.get(), rolled);
         RingAffix applied = rolled;
@@ -121,8 +135,8 @@ public final class RingReforgeCommand {
     }
 
     /**
-     * {@code reforge clear} - removes the affix from the held ring (the ring itself and everything else
-     * on the stack stays untouched, so a plain ring comes out just like a crafted one).
+     * {@code reforge clear} - removes the affix from the held ring (the ring itself and everything else on
+     * the stack stays untouched, so a plain ring comes out just like a crafted one).
      */
     private static int clear(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack source = ctx.getSource();
