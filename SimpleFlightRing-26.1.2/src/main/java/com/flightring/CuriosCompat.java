@@ -109,7 +109,10 @@ public final class CuriosCompat {
                     RingBonuses bonuses = usable ? item.getBonuses() : null;
                     RelicBonuses relicBonuses = usable ? item.getRelicBonuses() : null;
                     boolean underwaterMining = usable && item.hasAbility(RingAbility.OCEAN_FAVORED);
-                    if (bonuses == null && relicBonuses == null && !underwaterMining) {
+                    // Random affix (broken-dimension loot): only the plain attribute prefixes give
+                    // anything here, the event-driven ones are handled by their own hooks.
+                    RingAffix affix = usable ? stack.get(ModDataComponents.RING_AFFIX.get()) : null;
+                    if (bonuses == null && relicBonuses == null && !underwaterMining && affix == null) {
                         return CurioAttributeModifiers.EMPTY;
                     }
                     CurioAttributeModifiers.Builder builder = CurioAttributeModifiers.builder();
@@ -120,6 +123,13 @@ public final class CuriosCompat {
                     if (relicBonuses != null) {
                         relicBonuses.attributeModifiers(ApothicAttributesCompat.dodgeTarget())
                                 .forEach((attribute, modifier) -> builder.addModifier(attribute, modifier, SLOT_ID));
+                    }
+                    if (affix != null) {
+                        for (RingAffix.Change change : affix.attributeChanges()) {
+                            builder.addModifier(change.attribute(), new AttributeModifier(
+                                    Identifier.fromNamespaceAndPath(FlightRingMod.MODID, change.id()),
+                                    change.amount(), change.operation()), SLOT_ID);
+                        }
                     }
                     if (underwaterMining) {
                         builder.addModifier(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(

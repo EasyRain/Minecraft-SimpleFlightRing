@@ -2,11 +2,15 @@ package com.flightring;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
  * The random affix of a flight ring taken from a broken-dimension structure chest: one
@@ -215,6 +219,41 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
         return Component.translatable("ring_affix.simpleflightring.line",
                         prefix.displayName(), prefix.describe(rarity))
                 .withStyle(style -> style.withColor(rarity.color()));
+    }
+
+    /**
+     * One attribute change this affix grants, kept free of any Curios type so both versions can
+     * turn it into their own modifier class (1.21.1 uses a plain {@code AttributeModifier} in a
+     * {@code Multimap}, 26.1.2 uses {@code CurioAttributeModifiers}).
+     */
+    public record Change(Holder<Attribute> attribute, double amount,
+                         AttributeModifier.Operation operation, String id) {
+    }
+
+    /**
+     * The attribute changes of this affix. Only the plain attribute prefixes appear here; the
+     * event-driven ones (thorned / reborn / precise / withering / venomous / piercing / brittle)
+     * grant nothing through this channel and are handled by their own hooks - see the TODO below.
+     */
+    public java.util.List<Change> attributeChanges() {
+        double value = prefix.value(rarity);
+        String id = "affix_" + prefix.key();
+        return switch (prefix) {
+            case WARDING -> java.util.List.of(
+                    new Change(Attributes.ARMOR, value, AttributeModifier.Operation.ADD_VALUE, id));
+            case VITAL -> java.util.List.of(
+                    new Change(Attributes.MAX_HEALTH, value, AttributeModifier.Operation.ADD_VALUE, id));
+            case BRUTAL -> java.util.List.of(
+                    new Change(Attributes.ATTACK_DAMAGE, value, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, id));
+            case SWIFT -> java.util.List.of(
+                    new Change(Attributes.MOVEMENT_SPEED, value, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, id));
+            case AGILE -> java.util.List.of(
+                    new Change(ApothicAttributesCompat.dodgeTarget(), value,
+                            AttributeModifier.Operation.ADD_VALUE, id));
+            case FORTUNATE -> java.util.List.of(
+                    new Change(Attributes.LUCK, value, AttributeModifier.Operation.ADD_VALUE, id));
+            default -> java.util.List.of();
+        };
     }
 
     // TODO(framework): the event-driven halves of THORNED / REBORN / PRECISE / WITHERING /

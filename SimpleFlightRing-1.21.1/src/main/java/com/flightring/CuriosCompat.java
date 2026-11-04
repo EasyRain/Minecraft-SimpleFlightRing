@@ -98,6 +98,16 @@ public final class CuriosCompat {
                     if (relicBonuses != null) {
                         modifiers.putAll(relicBonuses.attributeModifiers(ApothicAttributesCompat.dodgeTarget()));
                     }
+                    // Random affix (broken-dimension loot): only the plain attribute prefixes give
+                    // anything here, the event-driven ones are handled by their own hooks.
+                    RingAffix affix = stack.get(ModDataComponents.RING_AFFIX.get());
+                    if (affix != null) {
+                        for (RingAffix.Change change : affix.attributeChanges()) {
+                            modifiers.put(change.attribute(), new AttributeModifier(
+                                    ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, change.id()),
+                                    change.amount(), change.operation()));
+                        }
+                    }
                     if (item.hasAbility(RingAbility.OCEAN_FAVORED)) {
                         modifiers.put(Attributes.SUBMERGED_MINING_SPEED, new AttributeModifier(
                                 ResourceLocation.fromNamespaceAndPath(FlightRingMod.MODID, "ocean_submerged_mining"),
