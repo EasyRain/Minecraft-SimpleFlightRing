@@ -60,11 +60,13 @@ public final class RebornHandler {
         if (affix == null || affix.prefix() != RingAffix.Prefix.REBORN) {
             return;
         }
-        // Priority (user 2026-11-04): a durability-priced ring should let 劫掠 save it for free, because burning
-        // the affix's durability is the more expensive way out. An indestructible ring is the other way round -
-        // its 重生 only costs a recharge, which is cheaper than what 劫掠 asks for - so it takes over.
+        // Priority (user 2026-11-04): a durability-priced ring lets 劫掠 take the hit while the raid ring still
+        // has a totem charge - that costs no durability, so it is the cheaper way out. Once those charges are
+        // spent we must still save the wearer, so the condition includes the charge count. An indestructible ring
+        // is the other way round: this handler runs at HIGH priority, so its recharge-priced 重生 fires first and
+        // the raid never gets to spend a charge.
         boolean indestructible = ring.has(ModDataComponents.INDESTRUCTIBLE.get());
-        if (item.hasAbility(RingAbility.RAID_PLUNDER) && !indestructible) {
+        if (!indestructible && item.hasAbility(RingAbility.RAID_PLUNDER) && RaidCharges.of(ring) > 0) {
             return;
         }
         if (indestructible) {

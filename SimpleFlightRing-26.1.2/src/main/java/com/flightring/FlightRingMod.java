@@ -83,7 +83,8 @@ public class FlightRingMod {
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectExpired);
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectRemoved);
         // 重生: one totem-like save; durability-priced, or a cooldown charge on indestructible rings.
-        NeoForge.EVENT_BUS.addListener(RebornHandler::onFatalDamage);
+        // HIGH priority so an indestructible ring's 重生 fires before 劫掠 can spend a totem charge.
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGH, RebornHandler::onFatalDamage);
         // 重生: count the indestructible ring's charge down (the component drives the bar on the client).
         NeoForge.EVENT_BUS.addListener(RebornHandler::onPlayerTick);
 
