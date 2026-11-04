@@ -65,8 +65,10 @@ public final class RingAnvilHandler {
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             rolled |= rollIfPending(stack, player);
         }
-        // If the inventory was full the anvil drops the ring as an item entity instead; that case is settled
-        // on pickup, see onPickup.
+        // Charge exactly once, on take, whether the ring went into the inventory or was dropped as an item
+        // entity (vanilla does the same for its level cost). The pickup path below therefore never charges:
+        // a dropped pending ring that somebody else picks up was already paid for by the player who took it.
+        player.giveExperiencePoints(-REFORGE_XP_COST);
     }
 
     /**
@@ -98,8 +100,6 @@ public final class RingAnvilHandler {
         player.sendSystemMessage(
                 net.minecraft.network.chat.Component.translatable(
                         "simpleflightring.command.reforge.done", affix.displayName()));
-        // Charged here so both paths (inventory on take, item entity on pickup) cost exactly one reforge.
-        player.giveExperiencePoints(-REFORGE_XP_COST);
         return true;
     }
 }
