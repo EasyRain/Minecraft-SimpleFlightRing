@@ -117,7 +117,7 @@ public final class RingAnvilHandler {
     }
 
     /** Rolls the affix into a pending ring; returns whether this stack was one. */
-    private static boolean rollIfPending(ItemStack stack, Player player) {
+    public static boolean rollIfPending(ItemStack stack, Player player) {
         if (stack == null || stack.isEmpty() || !stack.has(ModDataComponents.PENDING_REFORGE.get())) {
             return false;
         }

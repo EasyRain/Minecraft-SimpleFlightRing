@@ -77,6 +77,8 @@ public class FlightRingMod {
         NeoForge.EVENT_BUS.addListener(RingUpgradeHandler::onCrafted);
         // Event-driven affix prefixes, batch 1: 精准 / 凋零 / 荼毒 / 荆棘.
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onIncomingDamage);
+        // Settle a reforged ring that is sitting on the player's cursor (normal click in the anvil).
+        NeoForge.EVENT_BUS.addListener(RingAffixHandler::onPlayerTick);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
         // (never from ModConfigEvent - see BrokenConfig#snapshotAndLog).

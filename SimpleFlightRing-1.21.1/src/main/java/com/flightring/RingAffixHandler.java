@@ -112,9 +112,26 @@ public final class RingAffixHandler {
         attacker.hurt(victim.damageSources().thorns(victim), (float) reflect);
     }
 
+    /**
+     * Settles a pending ring that appears on the player's <b>cursor</b>.
+     * <p>
+     * A normal left click in the anvil hands the result to the cursor, and it is not in any inventory slot while
+     * the take event runs - so the take-time scan cannot see it and the ring would stay plain. Checking the
+     * carried stack once per tick covers that, and also covers dropping it out of the GUI (by then it is already
+     * rolled, so the pickup fallback does not roll a second time).
+     */
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        ItemStack carried = player.containerMenu.getCarried();
+        if (!carried.isEmpty() && carried.has(ModDataComponents.PENDING_REFORGE.get())) {
+            RingAnvilHandler.rollIfPending(carried, player);
+        }
+    }
+
     /** The affix of the ring the player has equipped, or {@code null}. */
-    private static RingAffix affixOf(ServerPlayer player) {
-        ItemStack ring = CuriosCompat.findRingInSlot(player);
+    private static RingAffix affixOf(ServerPlayer player) {        ItemStack ring = CuriosCompat.findRingInSlot(player);
         return ring.get(ModDataComponents.RING_AFFIX.get());
     }
 
