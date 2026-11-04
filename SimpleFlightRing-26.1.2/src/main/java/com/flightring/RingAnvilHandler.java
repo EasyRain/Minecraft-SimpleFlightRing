@@ -63,6 +63,9 @@ public final class RingAnvilHandler {
         // puts into the inventory (and, when the bag is full, an item entity). Rolling all of them rolled the
         // ring two or three times, so roll exactly one - the one the player actually received - and only strip
         // the marker from the rest.
+        // Only roll what actually landed in the inventory (shift-click). A normal click hands the result to the
+        // cursor as a *copy*, so rolling the event's output here would roll a throw-away stack and print a
+        // message for a ring the player never receives - the cursor tick settles that case instead.
         boolean rolled = false;
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (rollIfPending(stack, player)) {
@@ -71,11 +74,8 @@ public final class RingAnvilHandler {
             }
         }
         if (!rolled) {
-            rolled = rollIfPending(event.getOutput(), player);
-        }
-        if (!rolled) {
-            // Nothing to roll (the bag was full and the ring is an item entity): keep the marker so the pickup
-            // handler can settle it.
+            // Nothing in the inventory: the result is on the cursor (or was dropped). Leave every marker alone so
+            // the cursor tick / the pickup fallback can settle it exactly once.
             return;
         }
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
