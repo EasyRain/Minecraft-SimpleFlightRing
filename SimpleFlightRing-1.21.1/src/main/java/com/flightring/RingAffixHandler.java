@@ -77,6 +77,8 @@ public final class RingAffixHandler {
         }
         RingAffix.Prefix prefix = affix.prefix();
         double value = prefix.value(affix.rarity());
+        FlightRingMod.LOGGER.info("[AFFIX-DEBUG] attackerSide: prefix={}, value={}, fullCharge={}",
+                prefix, value, isFullCharge(attacker));
         if (prefix == RingAffix.Prefix.PRECISE) {
             // Only projectile damage (arrows, tridents, thrown potions, modded projectiles that use the tag).
             if (event.getSource().is(DamageTypeTags.IS_PROJECTILE)) {
@@ -128,15 +130,14 @@ public final class RingAffixHandler {
             addStackingModifier(victim, Attributes.ARMOR, "shred_armour", -Math.min(loss, Math.max(0.0, armour)));
             return;
         }
-        double maxHealth = victim.getAttributeValue(Attributes.MAX_HEALTH);
-        double loss = Math.floor(maxHealth * value);
-        if (loss <= 0.0) {
+        // 脆弱 (user 2026-11-04): damage proportional to the target's CURRENT health instead of touching its
+        // max-health attribute - simpler, immune to other mods re-setting attributes, and the "cannot hold its
+        // health any more" death falls out by itself.
+        float loss = (float) Math.floor(victim.getHealth() * value);
+        if (loss < 1.0F) {
             return;
         }
-        addStackingModifier(victim, Attributes.MAX_HEALTH, "shred_max_health", -loss);
-        if (victim.getHealth() > victim.getMaxHealth()) {
-            victim.kill();
-        }
+        victim.hurt(victim.damageSources().magic(), loss);
     }
 
     /**
