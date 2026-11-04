@@ -95,10 +95,10 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
         WITHERING("withering", Kind.EFFECT, 0, 0, 1, 1, 2),
         /** 荼毒: poison on hit. */
         VENOMOUS("venomous", Kind.EFFECT, 0, 0, 1, 1, 2),
-        /** 穿透: shreds a share of the target's CURRENT armour per full-charge hit. */
-        SUNDERING("sundering", Kind.SPECIAL, 0.02, 0.04, 0.08, 0.12, 0.18),
-        /** 脆弱: shreds a share of the target's CURRENT max health per full-charge hit. */
-        BRITTLE("brittle", Kind.SPECIAL, 0.02, 0.04, 0.08, 0.12, 0.18);
+        /** 破甲: shreds a share of the target's CURRENT armour per full-charge hit. */
+        SUNDERING("sundering", Kind.PERCENT, 0.02, 0.04, 0.08, 0.12, 0.18),
+        /** 脆弱: deals damage proportional to the target's CURRENT health per full-charge hit. */
+        BRITTLE("brittle", Kind.PERCENT, 0.02, 0.04, 0.08, 0.12, 0.18);
 
         public static final Codec<Prefix> CODEC = StringRepresentable.fromEnum(Prefix::values);
 

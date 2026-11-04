@@ -77,8 +77,6 @@ public final class RingAffixHandler {
         }
         RingAffix.Prefix prefix = affix.prefix();
         double value = prefix.value(affix.rarity());
-        FlightRingMod.LOGGER.info("[AFFIX-DEBUG] attackerSide: prefix={}, value={}, fullCharge={}",
-                prefix, value, isFullCharge(attacker));
         if (prefix == RingAffix.Prefix.PRECISE) {
             // Only projectile damage (arrows, tridents, thrown potions, modded projectiles that use the tag).
             if (event.getSource().is(DamageTypeTags.IS_PROJECTILE)) {
