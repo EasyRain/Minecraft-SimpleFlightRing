@@ -215,6 +215,8 @@
   "simpleflightring.configuration.forceAllDry": "全部强制干洞",
   "simpleflightring.configuration.bowlShellMin": "盆底下方最少岩层",
   "simpleflightring.configuration.repairRimFrom": "补边外圈范围（0..1）",
+  "simpleflightring.configuration.thicknessScale": "厚度乘数",
+  "simpleflightring.configuration.thicknessScale.tooltip": "岛体自中心向下的深度乘数（1.0 = 默认形状）。",
   "simpleflightring.configuration.topMargin": "距建筑上限的余量",
   "simpleflightring.configuration.bottomMargin": "距世界底部的余量",
   "simpleflightring.configuration.structures": "结构",
@@ -261,8 +263,8 @@
   "simpleflightring.configuration.biomeBlacklist.tooltip": "逐个屏蔽的群系 id，例如 useless_mod:useless_biome。",
   "simpleflightring.configuration.biomeAllowlist.tooltip": "强制放回的群系 id —— 在名单之前判定，用来救回被误杀的群系。",
   "simpleflightring.configuration.functionalKeywords.tooltip": "功能性群系的 id 关键字（整段或下划线后缀匹配，且仅当该群系没有任何地物时才生效）。",
-  "simpleflightring.configuration.excludeFeaturelessBiomes.tooltip": "跳过所有没有地物的群系（很粗暴，默认关闭）。",
-  "simpleflightring.configuration.excludeFunctionalBiomes.tooltip": "跳过看起来纯功能性的群系（无地物、无维度标签，默认关闭）。",
+  "simpleflightring.configuration.excludeFeaturelessBiomes.tooltip": "跳过所有没有地物的群系（默认开启）。",
+  "simpleflightring.configuration.excludeFunctionalBiomes.tooltip": "跳过看起来纯功能性群系（无地物、无维度标签，默认开启）。",
   "simpleflightring.configuration.logPool.tooltip": "启动时把群系池的取舍结果打印到日志。",
   "simpleflightring.configuration.logLayout.tooltip": "启动时把岛屿布局（种子、格、间距）打印到日志。"
 }

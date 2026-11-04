@@ -173,13 +173,13 @@ public final class BrokenConfig {
                         "下划线后缀匹配，且仅在该群系没有任何地物时才生效）。", "Default: [\"orbit\"]")
                 .defineListAllowEmpty("functionalKeywords", List.of("orbit"), () -> "keyword",
                         o -> o instanceof String);
-        EXCLUDE_FEATURELESS_BIOMES = builder.comment("Skip every biome without a placed feature (very blunt, off by",
-                        "default - mod dimension biomes can be featureless yet real). / 跳过所有没有地物的群系（很粗暴，",
-                        "默认关闭——模组维度群系可能没有地物但仍然是真实地貌）。", "Default: false")
-                .define("excludeFeaturelessBiomes", false);
+        EXCLUDE_FEATURELESS_BIOMES = builder.comment("Skip every biome without a placed feature (a featureless biome makes a",
+                        "bare island, so this is on by default). / 跳过所有没有地物的群系（没有地物会变成光秃的岛，",
+                        "所以默认开启）。", "Default: true")
+                .define("excludeFeaturelessBiomes", true);
         EXCLUDE_FUNCTIONAL_BIOMES = builder.comment("Skip biomes that look purely functional (no features, no dimension",
-                        "tag). / 跳过看起来纯功能性的群系（无地物、无维度标签）。", "Default: false")
-                .define("excludeFunctionalBiomes", false);
+                        "tag); on by default. / 跳过看起来纯功能性的群系（无地物、无维度标签），默认开启。", "Default: true")
+                .define("excludeFunctionalBiomes", true);
         LOG_POOL = builder.comment("Log the biome pool decisions at server start (diagnostics).",
                         "启动时输出群系池的判定日志（诊断用）。",
                         "This is for us, not for players: turn it on when you are asked to, or when you are",

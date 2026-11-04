@@ -215,6 +215,8 @@
   "simpleflightring.configuration.forceAllDry": "Force every island dry",
   "simpleflightring.configuration.bowlShellMin": "Least rock under a basin floor",
   "simpleflightring.configuration.repairRimFrom": "Air repair outer band (0..1)",
+  "simpleflightring.configuration.thicknessScale": "Thickness multiplier",
+  "simpleflightring.configuration.thicknessScale.tooltip": "Multiplier on how far an island reaches down from its centre (1.0 = the shipped shape).",
   "simpleflightring.configuration.topMargin": "Headroom under the build limit",
   "simpleflightring.configuration.bottomMargin": "Headroom above the world floor",
   "simpleflightring.configuration.structures": "Structures",
@@ -261,8 +263,8 @@
   "simpleflightring.configuration.biomeBlacklist.tooltip": "Individual biome ids to skip, e.g. useless_mod:useless_biome.",
   "simpleflightring.configuration.biomeAllowlist.tooltip": "Biome ids to force back in. Checked before the blacklists, for rescuing a biome that was dropped.",
   "simpleflightring.configuration.functionalKeywords.tooltip": "Id keywords of functional biomes (matched on the whole path or after an underscore, and only when the biome lists no feature).",
-  "simpleflightring.configuration.excludeFeaturelessBiomes.tooltip": "Skip every biome that lists no placed feature (very blunt, off by default).",
-  "simpleflightring.configuration.excludeFunctionalBiomes.tooltip": "Skip biomes that look purely functional (no features, no dimension tag; off by default).",
+  "simpleflightring.configuration.excludeFeaturelessBiomes.tooltip": "Skip every biome that lists no placed feature (on by default).",
+  "simpleflightring.configuration.excludeFunctionalBiomes.tooltip": "Skip biomes that look purely functional (no features, no dimension tag; on by default).",
   "simpleflightring.configuration.logPool.tooltip": "Print the biome pool decisions to the log at startup.",
   "simpleflightring.configuration.logLayout.tooltip": "Print the island layout (seed, grid, gaps) to the log at startup."
 }
