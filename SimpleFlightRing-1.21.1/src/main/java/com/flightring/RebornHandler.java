@@ -106,8 +106,10 @@ public final class RebornHandler {
         if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
             remaining += RaidCharges.of(ring);
         }
+        // Reuse the raid ring's own message and action bar (user 2026-11-04) instead of adding another line:
+        // "rings blocked death for you (charges left: N)".
         player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
-                "ring_affix.simpleflightring.reborn_left", remaining));
+                "message.simpleflightring.raid_totem_used", Integer.toString(remaining)), true);
         revive(player);
     }
 

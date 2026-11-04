@@ -214,7 +214,6 @@
   "ring_rarity.simpleflightring.sacred": "神圣",
   "ring_affix.simpleflightring.name": "%s的%s%s",
   "ring_affix.simpleflightring.line": "%s：%s",
-  "ring_affix.simpleflightring.reborn_left": "还剩 %s 次濒死急救",
   "hud.simpleflightring.flight_time_long": "飞行时间：%sH %sM %sS",
   "hud.simpleflightring.energy": "%s/%s",
 
