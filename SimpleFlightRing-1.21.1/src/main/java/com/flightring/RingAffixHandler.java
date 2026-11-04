@@ -124,10 +124,14 @@ public final class RingAffixHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        ItemStack carried = player.containerMenu.getCarried();
-        if (!carried.isEmpty() && carried.has(ModDataComponents.PENDING_REFORGE.get())) {
-            RingAnvilHandler.rollIfPending(carried, player);
-            return;
+        // A pending ring can only appear on the cursor right after taking an anvil result, so the per-tick check
+        // is limited to the anvil screen: outside it there is nothing to look for and we do no work at all.
+        if (player.containerMenu instanceof net.minecraft.world.inventory.AnvilMenu) {
+            ItemStack carried = player.containerMenu.getCarried();
+            if (!carried.isEmpty() && carried.has(ModDataComponents.PENDING_REFORGE.get())) {
+                RingAnvilHandler.rollIfPending(carried, player);
+                return;
+            }
         }
         // Safety net, once a second: a pending ring can end up in the bag without any take event at all (breaking
         // the anvil block closes the GUI and vanilla returns the cursor stack to the inventory). Sweeping keeps
