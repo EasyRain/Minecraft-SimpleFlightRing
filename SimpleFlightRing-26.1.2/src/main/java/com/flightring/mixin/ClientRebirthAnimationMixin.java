@@ -32,6 +32,8 @@ public abstract class ClientRebirthAnimationMixin {
             return;
         }
         ItemStack ring = CuriosCompat.findRingInSlot(minecraft.player);
+        com.flightring.FlightRingMod.LOGGER.info("[REBIRTH-ANIM] event={}, ring={}, isRingItem={}",
+                packet.getEventId(), ring, ring.getItem() instanceof FlightRingItem);
         if (!(ring.getItem() instanceof FlightRingItem)) {
             return;
         }
