@@ -41,6 +41,16 @@ public class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.FLOAT));
 
     /**
+     * The random affix of a ring found in the broken dimension: {@code {prefix, rarity}} only -
+     * the numbers are derived from {@link RingAffix}'s tables, so rebalancing them also rebalances
+     * rings players already own, and an upgrade only has to copy this component.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<RingAffix>> RING_AFFIX =
+            COMPONENTS.registerComponentType("ring_affix", builder -> builder
+                    .persistent(RingAffix.CODEC)
+                    .networkSynchronized(RingAffix.STREAM_CODEC));
+
+    /**
      * Sculk relic ring quest step: the damaged sculk ring has absorbed a Warden's soul,
      * so it glints and can finally be forged into the working ring (see
      * {@link SculkRingQuest} and the {@code sculk_flight_ring} recipe). Absent means the

@@ -271,8 +271,24 @@ public class FlightRingItem extends Item {
         return enchantmentValue;
     }
 
+    /**
+     * Puts the affix's prefix and rarity in front of the ring's own name, coloured by rarity
+     * (see {@link RingAffix}). The ring's own name keeps its usual style, which is why the
+     * affix part is styled separately and passed into the name format.
+     */
+    @Override
+    public Component getName(ItemStack stack) {
+        RingAffix affix = stack.get(ModDataComponents.RING_AFFIX.get());
+        return affix == null ? super.getName(stack) : affix.decorate(super.getName(stack));
+    }
+
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        // The random affix comes first: it is what makes this particular ring special.
+        RingAffix affix = stack.get(ModDataComponents.RING_AFFIX.get());
+        if (affix != null) {
+            tooltipComponents.add(affix.tooltipLine());
+        }
         boolean infinite = stack.has(ModDataComponents.INDESTRUCTIBLE.get());
 
         // 1. Remaining flight time ("Infinite" for a ring forged with the Indestructible Core).
