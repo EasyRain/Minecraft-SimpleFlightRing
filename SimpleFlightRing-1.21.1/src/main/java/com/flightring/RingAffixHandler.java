@@ -29,6 +29,13 @@ public final class RingAffixHandler {
     /** Effect duration in ticks by rarity: 3s / 5s / 6s / 8s / 10s. */
     private static final int[] EFFECT_TICKS = {60, 100, 120, 160, 200};
 
+    /**
+     * Re-entrancy guard for the damage we deal ourselves (荆棘 reflects damage from inside this handler, which
+     * can land on another ring wearer and come straight back). Apotheosis guards its own damage handler exactly
+     * this way with a {@code ThreadLocal<AtomicBoolean>}.
+     */
+    private static final ThreadLocal<Boolean> REENTRANT = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
     private RingAffixHandler() {
     }
 
@@ -36,8 +43,16 @@ public final class RingAffixHandler {
         if (event.getEntity().level().isClientSide()) {
             return;
         }
-        attackerSide(event);
-        victimSide(event);
+        if (REENTRANT.get()) {
+            return;
+        }
+        REENTRANT.set(Boolean.TRUE);
+        try {
+            attackerSide(event);
+            victimSide(event);
+        } finally {
+            REENTRANT.set(Boolean.FALSE);
+        }
     }
 
     /** 精准 (projectile share) and 凋零 / 荼毒 (full-charge on-hit) - read from the attacker's ring. */
