@@ -54,13 +54,29 @@ public final class RingAnvilHandler {
             return;
         }
         Player player = event.getEntity();
-        // The event's output is the stack vanilla is handing over; roll it in place.
-        rollIfPending(event.getOutput(), player);
-        // With a full inventory vanilla drops the result as an item entity instead; roll it there too. The
-        // inventory scan also covers the case where the handed-over stack is a copy this event never saw.
+        // One take produces several stacks carrying the pending marker: the event's output, the copy vanilla
+        // puts into the inventory (and, when the bag is full, an item entity). Rolling all of them rolled the
+        // ring two or three times, so roll exactly one - the one the player actually received - and only strip
+        // the marker from the rest.
+        boolean rolled = false;
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-            rollIfPending(stack, player);
+            if (rollIfPending(stack, player)) {
+                rolled = true;
+                break;
+            }
         }
+        if (!rolled) {
+            rolled = rollIfPending(event.getOutput(), player);
+        }
+        if (!rolled) {
+            // Nothing to roll (the bag was full and the ring is an item entity): keep the marker so the pickup
+            // handler can settle it.
+            return;
+        }
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+            clearPending(stack);
+        }
+        clearPending(event.getOutput());
     }
 
     /**
@@ -74,6 +90,13 @@ public final class RingAnvilHandler {
             return;
         }
         rollIfPending(stack, event.getPlayer());
+    }
+
+    /** Drops the marker without rolling, for the extra copies a single take produces. */
+    private static void clearPending(ItemStack stack) {
+        if (stack != null && !stack.isEmpty() && stack.has(ModDataComponents.PENDING_REFORGE.get())) {
+            stack.remove(ModDataComponents.PENDING_REFORGE.get());
+        }
     }
 
     /** Rolls the affix into a pending ring; returns whether this stack was one. */
