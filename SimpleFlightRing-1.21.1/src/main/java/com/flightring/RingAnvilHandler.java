@@ -51,6 +51,11 @@ public final class RingAnvilHandler {
         if (!event.getRight().is(ModItems.REFORGE_STONE.get())) {
             return;
         }
+        // This event fires on BOTH sides (the client's own menu takes the result too), which made the ring roll
+        // twice. Only the server may roll.
+        if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer)) {
+            return;
+        }
         Player player = event.getEntity();
         // One take produces several stacks carrying the pending marker: the event's output, the copy vanilla
         // puts into the inventory (and, when the bag is full, an item entity). Rolling all of them rolled the
@@ -94,6 +99,9 @@ public final class RingAnvilHandler {
      * level cost already.
      */
     public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre event) {
+        if (!(event.getPlayer() instanceof net.minecraft.server.level.ServerPlayer)) {
+            return;
+        }
         ItemStack stack = event.getItemEntity().getItem();
         if (!stack.has(ModDataComponents.PENDING_REFORGE.get())) {
             return;
