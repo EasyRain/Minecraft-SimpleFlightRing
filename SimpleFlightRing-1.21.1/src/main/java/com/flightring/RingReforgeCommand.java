@@ -57,6 +57,18 @@ public final class RingReforgeCommand {
                         .executes(ctx -> reforge(ctx, null, null))
                         .then(Commands.literal("clear")
                                 .executes(RingReforgeCommand::clear))
+                        // Fixing only one half needs the keyword forms: the positional ones below always
+                        // take the prefix first, so they cannot express "keep the rarity, roll the prefix".
+                        .then(Commands.literal("prefix")
+                                .then(Commands.argument("prefixKey", StringArgumentType.word())
+                                        .suggests(PREFIX_SUGGESTIONS)
+                                        .executes(ctx -> reforge(ctx,
+                                                StringArgumentType.getString(ctx, "prefixKey"), null))))
+                        .then(Commands.literal("rarity")
+                                .then(Commands.argument("rarityKey", StringArgumentType.word())
+                                        .suggests(RARITY_SUGGESTIONS)
+                                        .executes(ctx -> reforge(ctx, null,
+                                                StringArgumentType.getString(ctx, "rarityKey")))))
                         .then(Commands.argument("prefix", StringArgumentType.word())
                                 .suggests(PREFIX_SUGGESTIONS)
                                 .executes(ctx -> reforge(ctx, StringArgumentType.getString(ctx, "prefix"), null))
