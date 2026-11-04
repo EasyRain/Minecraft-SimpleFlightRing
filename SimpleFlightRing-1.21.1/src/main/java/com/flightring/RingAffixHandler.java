@@ -199,6 +199,15 @@ public final class RingAffixHandler {
             return;
         }
         long now = player.level().getGameTime();
+        // Fallback, once a second: the primary cleanup is SunderedEffect#removeAttributeModifiers (fired once when
+        // the debuff ends, no cost while it lasts). If some mod removed the effect in a way that skipped it, this
+        // drops the shredded armour anyway. One effect lookup per second per player.
+        if (player.tickCount % 20 == 0 && !player.hasEffect(ModMobEffects.SUNDERED)) {
+            var armour = player.getAttribute(Attributes.ARMOR);
+            if (armour != null) {
+                armour.removeModifier(SunderedEffect.SHRED_ARMOUR_ID);
+            }
+        }
         net.minecraft.world.inventory.AbstractContainerMenu menu = player.containerMenu;
         if (menu instanceof net.minecraft.world.inventory.AnvilMenu) {
             // Inside the anvil: settle every tick, so taking the result feels instant. The 1s window below is
