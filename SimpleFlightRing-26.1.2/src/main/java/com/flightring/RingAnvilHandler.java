@@ -26,16 +26,8 @@ import net.neoforged.neoforge.event.entity.player.AnvilCraftEvent;
  */
 public final class RingAnvilHandler {
 
-    /**
-     * The anvil's own level cost. It is only a <b>gate and a hook</b>: vanilla refuses to draw a result when the
-     * cost is 0, and on take it charges {@code cost.get()} levels - we refund that level and charge the real
-     * price in XP points (see {@link #REFORGE_XP_COST}). The anvil has always worked in "XP equivalent to
-     * levels"; it is the old enchanting table that deducted whole levels.
-     */
-    public static final int ANVIL_LEVEL_GATE = 1;
-
-    /** XP points one reforge really costs: the total for level 10 (levels 0..9 need 2L+7 each = 160). */
-    public static final int REFORGE_XP_COST = 160;
+    /** Level cost of one reforge; vanilla charges this and checks it for us. */
+    public static final int REFORGE_LEVEL_COST = 10;
 
     private RingAnvilHandler() {
     }
@@ -46,15 +38,11 @@ public final class RingAnvilHandler {
         if (!(left.getItem() instanceof FlightRingItem) || !right.is(ModItems.REFORGE_STONE.get())) {
             return;
         }
-        Player player = event.getPlayer();
-        if (player != null && player.totalExperience < REFORGE_XP_COST) {
-            return; // not enough points: no result is offered (our version of vanilla's "not enough levels")
-        }
         ItemStack preview = left.copy();
         preview.remove(ModDataComponents.RING_AFFIX.get());
         preview.set(ModDataComponents.PENDING_REFORGE.get(), net.minecraft.util.Unit.INSTANCE);
         event.setOutput(preview);
-        event.setXpCost(ANVIL_LEVEL_GATE);
+        event.setXpCost(REFORGE_LEVEL_COST);
         event.setMaterialCost(1);
     }
 
@@ -80,14 +68,9 @@ public final class RingAnvilHandler {
         if (!rolled) {
             rolled = rollIfPending(event.getOutput(), player);
         }
-        // Vanilla already charged ANVIL_LEVEL_GATE levels on take; give that back and charge the real price in
-        // XP points here - once per reforge, whether the ring went into the bag or was dropped as an entity
-        // (so the "bag full" case is paid for as well; the pickup handler only rolls, it never charges).
-        player.giveExperienceLevels(ANVIL_LEVEL_GATE);
-        player.giveExperiencePoints(-REFORGE_XP_COST);
         if (!rolled) {
-            // Nothing to roll yet (the bag was full and the ring is an item entity): keep the marker so the
-            // pickup handler can settle it.
+            // Nothing to roll (the bag was full and the ring is an item entity): keep the marker so the pickup
+            // handler can settle it.
             return;
         }
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
