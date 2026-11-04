@@ -2,18 +2,16 @@ package com.flightring;
 
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
- * "破甲" (Sundered): the visible, clearable half of the 破甲 prefix.
+ * "破甲" (Sundered): the timer half of the 破甲 prefix.
  * <p>
- * The actual armour loss is a transient {@code ARMOR} modifier that accumulates across hits (see
- * {@link RingAffixHandler}); this effect is its <b>timer</b>. While the effect is on the target the shredded
- * armour stays off; once it runs out - or somebody removes the debuff (milk, another mod's "cleanse") - the
- * modifier is dropped and the armour comes back.
- * <p>
- * The removal is done in {@link #removeAttributeModifiers}, which vanilla calls for <b>every</b> entity the
- * effect ends on, so mobs recover exactly like players do - no per-entity bookkeeping needed.
+ * The armour loss itself is a transient {@code ARMOR} modifier that {@link RingAffixHandler} accumulates; this
+ * effect only marks how long it lasts. The cleanup deliberately does <b>not</b> live in
+ * {@code removeAttributeModifiers}: vanilla calls that every time an existing effect is <b>refreshed</b> (it
+ * removes and re-adds the attribute modifiers of an updated effect), which wiped the shred on every hit.
+ * {@code MobEffectEvent.Remove} fires only for a real removal, so the modifier is dropped exactly once - when the
+ * debuff expires or is cleansed - for mobs and players alike.
  */
 public class SunderedEffect extends MobEffect {
 
@@ -26,14 +24,5 @@ public class SunderedEffect extends MobEffect {
 
     public SunderedEffect() {
         super(MobEffectCategory.HARMFUL, 0x8B5A2B);
-    }
-
-    @Override
-    public void removeAttributeModifiers(net.minecraft.world.entity.ai.attributes.AttributeMap attributes) {
-        var instance = attributes.getInstance(Attributes.ARMOR);
-        if (instance != null) {
-            instance.removeModifier(SHRED_ARMOUR_ID);
-        }
-        super.removeAttributeModifiers(attributes);
     }
 }

@@ -246,6 +246,23 @@ public final class RingAffixHandler {
         }
     }
 
+    /**
+     * 破甲: drop the accumulated armour shred when the debuff is really removed (expiry, milk, another mod's
+     * cleanse). Deliberately <b>not</b> {@code MobEffect#removeAttributeModifiers}: vanilla calls that whenever an
+     * existing effect is refreshed, which happens on every hit and wiped the shred immediately.
+     */
+    public static void onEffectRemoved(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Remove event) {
+        if (event.getEffectInstance() == null
+                || !event.getEffectInstance().is(ModMobEffects.SUNDERED)) {
+            return;
+        }
+        var attributes = event.getEntity().getAttributes();
+        var armour = attributes.getInstance(Attributes.ARMOR);
+        if (armour != null) {
+            armour.removeModifier(SunderedEffect.SHRED_ARMOUR_ID);
+        }
+    }
+
     /** The affix of the ring the player has equipped, or {@code null}. */
     private static RingAffix affixOf(ServerPlayer player) {        ItemStack ring = CuriosCompat.findRingInSlot(player);
         return ring.get(ModDataComponents.RING_AFFIX.get());
