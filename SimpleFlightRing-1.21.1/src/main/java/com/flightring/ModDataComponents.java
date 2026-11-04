@@ -61,6 +61,15 @@ public class ModDataComponents {
                     .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
     /**
+     * Ticks until the wearer of this ring can be saved again by 重生. Absent = ready. Kept as plain ticks (the
+     * server decrements it once per tick) so the client can draw the charge bar without needing a time source.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> REBIRTH_CHARGE =
+            COMPONENTS.registerComponentType("rebirth_charge", builder -> builder
+                    .persistent(Codec.LONG)
+                    .networkSynchronized(ByteBufCodecs.VAR_LONG));
+
+    /**
      * Sculk relic ring quest step: the damaged sculk ring has absorbed a Warden's soul,
      * so it glints and can finally be forged into the working ring (see
      * {@link SculkRingQuest} and the {@code sculk_flight_ring} recipe). Absent means the

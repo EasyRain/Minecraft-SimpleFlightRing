@@ -9,10 +9,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * 重生 (Reborn): one totem-like save. Modelled on {@link BurstTotemHandler}.
  * <p>
@@ -20,8 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * roll is used up in one save while a sacred one lasts five. Running out of durability never blocks the last
  * save - the ring is simply left at one point from breaking.
  * <p>
- * Indestructible rings (they have no durability bar at all) instead use a one-charge cooldown, tracked here in
- * server game ticks; the ring's own bar renders that charge (see {@code FlightRingItem}).
+ * Indestructible rings (they have no durability bar at all) instead use a one-charge cooldown stored in the
+ * {@code rebirth_charge} component as the number of ticks left. Keeping it on the stack means the client can draw
+ * the charge bar (see {@link FlightRingItem}) without needing a time source, and the server just counts it down
+ * once per tick.
  * <p>
  * 劫掠 (the raid relic's own save) always wins when a ring could do both, as specified.
  */
@@ -29,9 +27,6 @@ public final class RebornHandler {
 
     /** Cooldown of the indestructible ring's single charge: 60 seconds. */
     public static final int INDESTRUCTIBLE_COOLDOWN_TICKS = 1200;
-
-    /** Per-player game time at which the next indestructible save becomes available. */
-    private static final Map<UUID, Long> RECHARGE_UNTIL = new ConcurrentHashMap<>();
 
     private RebornHandler() {
     }
@@ -64,13 +59,12 @@ public final class RebornHandler {
         if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
             return;
         }
-        long now = player.level().getGameTime();
         if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
-            Long until = RECHARGE_UNTIL.get(player.getUUID());
-            if (until != null && now < until) {
+            Long left = ring.get(ModDataComponents.REBIRTH_CHARGE.get());
+            if (left != null && left > 0L) {
                 return; // still recharging
             }
-            RECHARGE_UNTIL.put(player.getUUID(), now + INDESTRUCTIBLE_COOLDOWN_TICKS);
+            ring.set(ModDataComponents.REBIRTH_CHARGE.get(), (long) INDESTRUCTIBLE_COOLDOWN_TICKS);
         } else {
             int share = Math.max(1, ring.getMaxDamage() / (affix.rarity().ordinal() + 1));
             // Running out never blocks this save: the ring is simply left just short of breaking.
@@ -80,17 +74,21 @@ public final class RebornHandler {
         revive(player);
     }
 
-    /** Progress of the indestructible charge, 0..1 (1 = ready). Used by the ring's bar. */
-    public static float chargeProgress(ServerPlayer player, long now) {
-        Long until = RECHARGE_UNTIL.get(player.getUUID());
-        if (until == null) {
-            return 1.0F;
+    /** Counts the charge down on the worn ring, so the component (and therefore the bar) stays current. */
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
         }
-        long remaining = until - now;
-        if (remaining <= 0L) {
-            return 1.0F;
+        ItemStack ring = CuriosCompat.findRingInSlot(player);
+        Long left = ring.get(ModDataComponents.REBIRTH_CHARGE.get());
+        if (left == null || left <= 0L) {
+            return;
         }
-        return 1.0F - (float) remaining / INDESTRUCTIBLE_COOLDOWN_TICKS;
+        if (left <= 1L) {
+            ring.remove(ModDataComponents.REBIRTH_CHARGE.get());
+        } else {
+            ring.set(ModDataComponents.REBIRTH_CHARGE.get(), left - 1L);
+        }
     }
 
     private static void revive(ServerPlayer player) {

@@ -283,6 +283,45 @@ public class FlightRingItem extends Item {
         return affix == null ? super.getName(stack) : affix.decorate(super.getName(stack));
     }
 
+    /**
+     * 重生 on an indestructible ring shows a charge bar instead of the durability one. Such rings never take
+     * damage, so vanilla hides their bar entirely and this is the only bar on screen (see {@link RebornHandler}).
+     */
+    private boolean showsRebirthCharge(ItemStack stack) {
+        if (!stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            return false;
+        }
+        RingAffix affix = stack.get(ModDataComponents.RING_AFFIX.get());
+        return affix != null && affix.prefix() == RingAffix.Prefix.REBORN;
+    }
+
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        return showsRebirthCharge(stack) || super.isBarVisible(stack);
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        if (!showsRebirthCharge(stack)) {
+            return super.getBarWidth(stack);
+        }
+        Long left = stack.get(ModDataComponents.REBIRTH_CHARGE.get());
+        if (left == null || left <= 0L) {
+            return 13; // full charge
+        }
+        float ready = 1.0F - (float) Math.min(left, (long) RebornHandler.INDESTRUCTIBLE_COOLDOWN_TICKS)
+                / RebornHandler.INDESTRUCTIBLE_COOLDOWN_TICKS;
+        return Math.max(1, Math.round(13.0F * ready));
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        if (showsRebirthCharge(stack)) {
+            return 0xFFD700; // totem yellow, deliberately not the durability green
+        }
+        return super.getBarColor(stack);
+    }
+
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {

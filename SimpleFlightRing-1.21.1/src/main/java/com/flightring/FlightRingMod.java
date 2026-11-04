@@ -84,6 +84,8 @@ public class FlightRingMod {
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectRemoved);
         // 重生: one totem-like save; durability-priced, or a cooldown charge on indestructible rings.
         NeoForge.EVENT_BUS.addListener(RebornHandler::onFatalDamage);
+        // 重生: count the indestructible ring's charge down (the component drives the bar on the client).
+        NeoForge.EVENT_BUS.addListener(RebornHandler::onPlayerTick);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
         // (never from ModConfigEvent - see BrokenConfig#snapshotAndLog).
