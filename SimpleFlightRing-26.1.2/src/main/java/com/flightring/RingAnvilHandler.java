@@ -46,7 +46,10 @@ public final class RingAnvilHandler {
         preview.remove(ModDataComponents.RING_AFFIX.get());
         preview.set(ModDataComponents.PENDING_REFORGE.get(), net.minecraft.util.Unit.INSTANCE);
         event.setOutput(preview);
-        event.setXpCost(0);
+        // NOT 0: vanilla AnvilMenu blanks the result when the level cost is <= 0, and the player would then see
+        // nothing at all (the classic "anvil shows an X" trap). 1 level is the smallest cost that lets vanilla
+        // do its own "do you have enough?" check and show a cost; onTaken refunds it and charges 160 points.
+        event.setXpCost(1);
         event.setMaterialCost(1);
     }
 
@@ -68,6 +71,10 @@ public final class RingAnvilHandler {
         // Charge exactly once, on take, whether the ring went into the inventory or was dropped as an item
         // entity (vanilla does the same for its level cost). The pickup path below therefore never charges:
         // a dropped pending ring that somebody else picks up was already paid for by the player who took it.
+        //
+        // The 1-level anvil cost exists only so vanilla draws a result and does its own "enough XP?" check;
+        // refund it and charge the real price in points instead (160 = the total for level 10).
+        player.giveExperienceLevels(1);
         player.giveExperiencePoints(-REFORGE_XP_COST);
     }
 
