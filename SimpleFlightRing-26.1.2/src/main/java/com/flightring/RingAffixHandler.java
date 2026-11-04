@@ -85,7 +85,7 @@ public final class RingAffixHandler {
             return;
         }
         if (prefix != RingAffix.Prefix.WITHERING && prefix != RingAffix.Prefix.VENOMOUS) {
-            if (prefix == RingAffix.Prefix.PIERCING || prefix == RingAffix.Prefix.BRITTLE) {
+            if (prefix == RingAffix.Prefix.SUNDERING || prefix == RingAffix.Prefix.BRITTLE) {
                 shred(event, attacker, prefix, value);
             }
             return;
@@ -120,7 +120,7 @@ public final class RingAffixHandler {
         if (victim == attacker) {
             return;
         }
-        if (prefix == RingAffix.Prefix.PIERCING) {
+        if (prefix == RingAffix.Prefix.SUNDERING) {
             double armour = victim.getAttributeValue(Attributes.ARMOR);
             double loss = Math.floor(armour * value);
             if (loss <= 0.0) {

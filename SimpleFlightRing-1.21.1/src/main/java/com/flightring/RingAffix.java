@@ -96,7 +96,7 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
         /** 荼毒: poison on hit. */
         VENOMOUS("venomous", Kind.EFFECT, 0, 0, 1, 1, 2),
         /** 穿透: shreds a share of the target's CURRENT armour per full-charge hit. */
-        PIERCING("piercing", Kind.SPECIAL, 0.02, 0.04, 0.08, 0.12, 0.18),
+        SUNDERING("sundering", Kind.SPECIAL, 0.02, 0.04, 0.08, 0.12, 0.18),
         /** 脆弱: shreds a share of the target's CURRENT max health per full-charge hit. */
         BRITTLE("brittle", Kind.SPECIAL, 0.02, 0.04, 0.08, 0.12, 0.18);
 
@@ -342,7 +342,7 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
     }
 
     // TODO(framework): the event-driven halves of THORNED / REBORN / PRECISE / WITHERING /
-    //  VENOMOUS / PIERCING / BRITTLE (full-charge on-hit hook, totem save + charge bar,
+    //  VENOMOUS / SUNDERING / BRITTLE (full-charge on-hit hook, totem save + charge bar,
     //  projectile damage share, armour / max-health shredding with the "dies when max health
     //  falls below current health" fallback) - see docs/PLAN-随机属性戒指.md §2 and §3.1.
 }
