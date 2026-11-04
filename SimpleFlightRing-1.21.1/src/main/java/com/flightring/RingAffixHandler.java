@@ -199,15 +199,6 @@ public final class RingAffixHandler {
             return;
         }
         long now = player.level().getGameTime();
-        // 破甲 cleanup: the debuff is the timer. Once it is gone (expired, or cleansed by milk / another mod) the
-        // armour reduction goes with it, which is what gives players a recovery path.
-        if (!player.hasEffect(ModMobEffects.SUNDERED)) {
-            var armour = player.getAttribute(Attributes.ARMOR);
-            if (armour != null) {
-                armour.removeModifier(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
-                        FlightRingMod.MODID, "shred_armour"));
-            }
-        }
         net.minecraft.world.inventory.AbstractContainerMenu menu = player.containerMenu;
         if (menu instanceof net.minecraft.world.inventory.AnvilMenu) {
             // Inside the anvil: settle every tick, so taking the result feels instant. The 1s window below is
