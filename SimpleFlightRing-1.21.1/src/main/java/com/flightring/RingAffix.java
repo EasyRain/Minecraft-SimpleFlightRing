@@ -42,9 +42,16 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
 
     /** How a prefix's value is meant to be read. */
     public enum Kind {
-        /** Flat amount (armour, max health, luck, ...). */
+        /** Flat amount (luck, dodge, ...). */
         FLAT,
-        /** Fraction of something (movement speed, melee/ranged damage, ...); 0.03 = +3%. */
+        /**
+         * A percentage of the <b>player's total</b> attribute value, via
+         * {@code ADD_MULTIPLIED_TOTAL}: 0.09 = +9% on top of whatever the player already has, so it
+         * stays meaningful next to strong modded gear. Used for armour, max health, attack damage
+         * and movement speed.
+         */
+        PERCENT_TOTAL,
+        /** A percentage of something else (reflect share, shred share, projectile hit, ...). */
         PERCENT,
         /** A mob effect on the victim: the value is the amplifier (0 = level I). */
         EFFECT,
@@ -53,29 +60,36 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
     }
 
     /**
-     * The 13 prefixes with their five values, {@code T1(T1) .. T5(SACRED)}.
+     * The 13 prefixes with their five values, {@code T1(COMMON) .. T5(SACRED)}.
      * <p>
      * The curve is super-linear on purpose ({@code x1, x2, x4, x6, x9}): the higher rarity is
      * much rarer, so it may as well be worth noticeably more.
+     * <p>
+     * <b>Most values are fractions of the player's own totals</b> ({@link Kind#PERCENT_TOTAL}):
+     * the ring with its own attributes is the base, the affix is the multiplier - so a fine ring on
+     * a well-geared character is worth much more than the same ring early on.
+     * Two prefixes stay flat on purpose: {@link #AGILE} (dodge is already a percentage attribute,
+     * so scaling it by the player's total would give 0 for anyone without another dodge source) and
+     * {@link #FORTUNATE} (the player's luck base is 0).
      */
     public enum Prefix implements StringRepresentable {
-        /** 守护: armour. */
-        WARDING("warding", Kind.FLAT, 1, 2, 4, 6, 9),
+        /** 守护: +% of the player's total armour. */
+        WARDING("warding", Kind.PERCENT_TOTAL, 0.01, 0.02, 0.04, 0.06, 0.09),
         /** 荆棘: reflects a share of the ATTACKER's attack power. */
         THORNED("thorned", Kind.PERCENT, 0.05, 0.10, 0.20, 0.30, 0.45),
-        /** 生命: max health. */
-        VITAL("vital", Kind.FLAT, 2, 4, 8, 12, 18),
+        /** 生命: +% of the player's total max health. */
+        VITAL("vital", Kind.PERCENT_TOTAL, 0.02, 0.04, 0.08, 0.12, 0.18),
         /** 重生: one totem-like save per charge; durability cost depends on the rarity. */
         REBORN("reborn", Kind.SPECIAL, 1, 2, 3, 4, 5),
-        /** 残暴: melee attack damage, as a fraction (like the relic rings). */
-        BRUTAL("brutal", Kind.PERCENT, 0.03, 0.06, 0.12, 0.18, 0.27),
-        /** 精准: ranged (projectile) damage, as a fraction. */
+        /** 残暴: +% of the player's total melee attack damage. */
+        BRUTAL("brutal", Kind.PERCENT_TOTAL, 0.03, 0.06, 0.12, 0.18, 0.27),
+        /** 精准: +% of the projectile hit's damage (see the event hook TODO). */
         PRECISE("precise", Kind.PERCENT, 0.03, 0.06, 0.12, 0.18, 0.27),
-        /** 迅捷: movement speed. */
-        SWIFT("swift", Kind.PERCENT, 0.02, 0.04, 0.08, 0.12, 0.18),
-        /** 灵活: dodge chance (our own attribute). */
-        AGILE("agile", Kind.PERCENT, 0.02, 0.04, 0.08, 0.12, 0.18),
-        /** 幸运: luck. */
+        /** 迅捷: +% of the player's total movement speed. */
+        SWIFT("swift", Kind.PERCENT_TOTAL, 0.02, 0.04, 0.08, 0.12, 0.18),
+        /** 灵活: flat dodge chance (dodge is already a percentage attribute). */
+        AGILE("agile", Kind.FLAT, 0.02, 0.04, 0.08, 0.12, 0.18),
+        /** 幸运: flat luck (the player's luck base is 0). */
         FORTUNATE("fortunate", Kind.FLAT, 0.5, 1, 2, 3, 4.5),
         /** 凋零: wither on hit (amplifier; the duration table is TODO). */
         WITHERING("withering", Kind.EFFECT, 0, 0, 1, 1, 2),
@@ -131,7 +145,7 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
             String formatted;
             if (kind == Kind.EFFECT) {
                 formatted = Long.toString((long) value + 1);
-            } else if (kind == Kind.PERCENT) {
+            } else if (kind == Kind.PERCENT || kind == Kind.PERCENT_TOTAL) {
                 formatted = Math.round(value * 100.0) + "%";
             } else {
                 formatted = value == Math.rint(value) ? Long.toString((long) value) : Double.toString(value);
@@ -259,13 +273,13 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
         String id = "affix_" + prefix.key();
         return switch (prefix) {
             case WARDING -> java.util.List.of(
-                    new Change(Attributes.ARMOR, value, AttributeModifier.Operation.ADD_VALUE, id));
+                    new Change(Attributes.ARMOR, value, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id));
             case VITAL -> java.util.List.of(
-                    new Change(Attributes.MAX_HEALTH, value, AttributeModifier.Operation.ADD_VALUE, id));
+                    new Change(Attributes.MAX_HEALTH, value, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id));
             case BRUTAL -> java.util.List.of(
-                    new Change(Attributes.ATTACK_DAMAGE, value, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, id));
+                    new Change(Attributes.ATTACK_DAMAGE, value, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id));
             case SWIFT -> java.util.List.of(
-                    new Change(Attributes.MOVEMENT_SPEED, value, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, id));
+                    new Change(Attributes.MOVEMENT_SPEED, value, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id));
             case AGILE -> java.util.List.of(
                     new Change(ApothicAttributesCompat.dodgeTarget(), value,
                             AttributeModifier.Operation.ADD_VALUE, id));
