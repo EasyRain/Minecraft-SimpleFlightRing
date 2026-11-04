@@ -51,6 +51,11 @@ public final class RebornHandler {
         if (!(ring.getItem() instanceof FlightRingItem item)) {
             return;
         }
+        // A ring whose durability is used up is inert: it must not save anyone (otherwise every "last save" would
+        // top it back up and the wearer would be immortal).
+        if (!item.isUsable(ring)) {
+            return;
+        }
         RingAffix affix = ring.get(ModDataComponents.RING_AFFIX.get());
         if (affix == null || affix.prefix() != RingAffix.Prefix.REBORN) {
             return;
@@ -67,16 +72,20 @@ public final class RebornHandler {
             ring.set(ModDataComponents.REBIRTH_CHARGE.get(), (long) INDESTRUCTIBLE_COOLDOWN_TICKS);
         } else {
             int share = Math.max(1, ring.getMaxDamage() / (affix.rarity().ordinal() + 1));
-            // Running out never blocks this save: the ring is simply left just short of breaking.
-            ring.setDamageValue(Math.min(ring.getMaxDamage() - 1, ring.getDamageValue() + share));
+            // Never clamp back below "broken": paying with the last scrap of durability breaks the ring, which is
+            // what ends the chain of saves. (Repairing it brings the charge back, which is intended.)
+            ring.setDamageValue(Math.min(ring.getMaxDamage(), ring.getDamageValue() + share));
         }
         event.setNewDamage(0.0F);
         revive(player);
     }
 
-    /** Counts the charge down on the worn ring, so the component (and therefore the bar) stays current. */
+    /** Counts the charge down on the worn ring once a second, so the bar stays current without spamming syncs. */
     public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        if (player.tickCount % 20 != 0) {
             return;
         }
         ItemStack ring = CuriosCompat.findRingInSlot(player);
@@ -84,10 +93,11 @@ public final class RebornHandler {
         if (left == null || left <= 0L) {
             return;
         }
-        if (left <= 1L) {
+        long next = left - 20L;
+        if (next <= 0L) {
             ring.remove(ModDataComponents.REBIRTH_CHARGE.get());
         } else {
-            ring.set(ModDataComponents.REBIRTH_CHARGE.get(), left - 1L);
+            ring.set(ModDataComponents.REBIRTH_CHARGE.get(), next);
         }
     }
 
