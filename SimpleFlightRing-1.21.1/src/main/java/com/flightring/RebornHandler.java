@@ -115,6 +115,17 @@ public final class RebornHandler {
         }
     }
 
+    /**
+     * Asks the client to play the totem flip animation with the worn ring instead of a totem of undying. Shared by
+     * 重生 and by the relic rings' own totem-like saves (e.g. the Unobtainium ring's burst totem), since the user
+     * wants every such effect to flip the ring - 劫掠 keeps vanilla's animation because it goes through the vanilla
+     * entity event 35 and never calls this.
+     */
+    public static void playRingAnimation(ServerPlayer player) {
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundEntityEventPacket(
+                player, REBIRTH_ANIMATION_EVENT));
+    }
+
     private static void revive(ServerPlayer player) {
         player.setHealth(1.0F);
         player.removeAllEffects();
@@ -123,8 +134,6 @@ public final class RebornHandler {
         player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
         player.level().playSound(null, player.blockPosition(), SoundEvents.TOTEM_USE,
                 SoundSource.PLAYERS, 1.0F, 1.0F);
-        // Ask the client for the same flip animation, but with the ring (see ClientRebirthAnimationMixin).
-        player.connection.send(new net.minecraft.network.protocol.game.ClientboundEntityEventPacket(
-                player, REBIRTH_ANIMATION_EVENT));
+        playRingAnimation(player);
     }
 }

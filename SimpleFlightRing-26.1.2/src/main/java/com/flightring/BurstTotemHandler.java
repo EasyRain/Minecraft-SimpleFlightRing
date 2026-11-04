@@ -155,6 +155,8 @@ public final class BurstTotemHandler {
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
         player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 100, 1));
         player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
+        // Same totem flip as 重生, but flipping the worn ring (see ClientRebirthAnimationMixin).
+        RebornHandler.playRingAnimation(player);
     }
 
     /** The totem is charged again as soon as the pool is full, and only then. */
