@@ -60,11 +60,14 @@ public final class RebornHandler {
         if (affix == null || affix.prefix() != RingAffix.Prefix.REBORN) {
             return;
         }
-        // 劫掠 wins whenever the same ring could do both.
-        if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
+        // Priority (user 2026-11-04): a durability-priced ring should let 劫掠 save it for free, because burning
+        // the affix's durability is the more expensive way out. An indestructible ring is the other way round -
+        // its 重生 only costs a recharge, which is cheaper than what 劫掠 asks for - so it takes over.
+        boolean indestructible = ring.has(ModDataComponents.INDESTRUCTIBLE.get());
+        if (item.hasAbility(RingAbility.RAID_PLUNDER) && !indestructible) {
             return;
         }
-        if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+        if (indestructible) {
             // Same number of charges as the durability version has uses: rarity + 1. Each charge takes
             // INDESTRUCTIBLE_COOLDOWN_TICKS to come back, so a sacred ring needs 5 x 60s to be full again.
             int charges = affix.rarity().ordinal() + 1;
