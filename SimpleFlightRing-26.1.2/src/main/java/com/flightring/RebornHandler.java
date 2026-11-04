@@ -65,11 +65,14 @@ public final class RebornHandler {
             return;
         }
         if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
-            Long left = ring.get(ModDataComponents.REBIRTH_CHARGE.get());
-            if (left != null && left > 0L) {
-                return; // still recharging
+            // Same number of charges as the durability version has uses: rarity + 1. Each charge takes
+            // INDESTRUCTIBLE_COOLDOWN_TICKS to come back, so a sacred ring needs 5 x 60s to be full again.
+            int charges = affix.rarity().ordinal() + 1;
+            long spent = ring.getOrDefault(ModDataComponents.REBIRTH_CHARGE.get(), 0L);
+            if (spent > (long) (charges - 1) * INDESTRUCTIBLE_COOLDOWN_TICKS) {
+                return; // no full charge available yet
             }
-            ring.set(ModDataComponents.REBIRTH_CHARGE.get(), (long) INDESTRUCTIBLE_COOLDOWN_TICKS);
+            ring.set(ModDataComponents.REBIRTH_CHARGE.get(), spent + INDESTRUCTIBLE_COOLDOWN_TICKS);
         } else {
             int share = Math.max(1, ring.getMaxDamage() / (affix.rarity().ordinal() + 1));
             // Never clamp back below "broken": paying with the last scrap of durability breaks the ring, which is
@@ -80,7 +83,7 @@ public final class RebornHandler {
         revive(player);
     }
 
-    /** Counts the charge down on the worn ring once a second, so the bar stays current without spamming syncs. */
+    /** Counts the owed recharge down on the worn ring once a second, so the bar stays current without spamming syncs. */
     public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
@@ -89,11 +92,11 @@ public final class RebornHandler {
             return;
         }
         ItemStack ring = CuriosCompat.findRingInSlot(player);
-        Long left = ring.get(ModDataComponents.REBIRTH_CHARGE.get());
-        if (left == null || left <= 0L) {
+        Long spent = ring.get(ModDataComponents.REBIRTH_CHARGE.get());
+        if (spent == null || spent <= 0L) {
             return;
         }
-        long next = left - 20L;
+        long next = spent - 20L;
         if (next <= 0L) {
             ring.remove(ModDataComponents.REBIRTH_CHARGE.get());
         } else {

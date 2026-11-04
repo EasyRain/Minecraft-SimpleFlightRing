@@ -304,12 +304,12 @@ public class FlightRingItem extends Item {
         if (!showsRebirthCharge(stack)) {
             return super.getBarWidth(stack);
         }
-        Long left = stack.get(ModDataComponents.REBIRTH_CHARGE.get());
-        if (left == null || left <= 0L) {
-            return 13; // full charge
-        }
-        float ready = 1.0F - (float) Math.min(left, (long) RebornHandler.INDESTRUCTIBLE_COOLDOWN_TICKS)
-                / RebornHandler.INDESTRUCTIBLE_COOLDOWN_TICKS;
+        RingAffix affix = stack.get(ModDataComponents.RING_AFFIX.get());
+        int charges = affix == null ? 1 : affix.rarity().ordinal() + 1;
+        long total = (long) charges * RebornHandler.INDESTRUCTIBLE_COOLDOWN_TICKS;
+        Long spent = stack.get(ModDataComponents.REBIRTH_CHARGE.get());
+        long owed = spent == null ? 0L : Math.min(spent, total);
+        float ready = 1.0F - (float) owed / total;
         return Math.max(1, Math.round(13.0F * ready));
     }
 
