@@ -79,7 +79,8 @@ public class FlightRingMod {
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onIncomingDamage);
         // Settle a reforged ring that is sitting on the player's cursor (normal click in the anvil).
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onPlayerTick);
-        // 破甲: restore the shredded armour when the debuff is really removed (not on a refresh).
+        // 破甲: restore the shredded armour when the debuff really goes away (expiry or manual removal).
+        NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectExpired);
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectRemoved);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
