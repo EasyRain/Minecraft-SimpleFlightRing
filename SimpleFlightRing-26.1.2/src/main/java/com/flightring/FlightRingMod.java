@@ -71,6 +71,8 @@ public class FlightRingMod {
         // Anvil reforge (ring + reforge stone): the preview hides the roll, taking the result applies it.
         NeoForge.EVENT_BUS.addListener(RingAnvilHandler::onUpdate);
         NeoForge.EVENT_BUS.addListener(RingAnvilHandler::onTaken);
+        // Fallback: the anvil drops the ring when the inventory is full, so settle it on pickup.
+        NeoForge.EVENT_BUS.addListener(RingAnvilHandler::onPickup);
         // Keep the affix when a ring is upgraded into another ring.
         NeoForge.EVENT_BUS.addListener(RingUpgradeHandler::onCrafted);
 

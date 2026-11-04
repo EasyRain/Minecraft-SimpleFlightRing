@@ -65,12 +65,23 @@ public final class RingAnvilHandler {
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             rolled |= rollIfPending(stack, player);
         }
-        // TODO(framework): if the inventory was full the anvil drops the ring as an item entity; a follow-up
-        //  pass should also roll the pending ring there (rare, and only reachable with a completely full bag).
-        if (!rolled) {
+        // If the inventory was full the anvil drops the ring as an item entity instead; that case is settled
+        // on pickup, see onPickup.
+    }
+
+    /**
+     * Fallback for the "inventory was full" case: settle the pending roll <b>before</b> the picked-up stack
+     * lands in the inventory, so the copy that is added is already the rolled one.
+     */
+    public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre event) {
+        ItemStack stack = event.getItemEntity().getItem();
+        if (!stack.has(ModDataComponents.PENDING_REFORGE.get())) {
             return;
         }
-        player.giveExperiencePoints(-REFORGE_XP_COST);
+        if (!(event.getPlayer() instanceof ServerPlayer player)) {
+            return;
+        }
+        rollIfPending(stack, player);
     }
 
     /** Rolls the affix into a pending ring; returns whether this stack was one. */
@@ -87,6 +98,8 @@ public final class RingAnvilHandler {
         player.sendSystemMessage(
                 net.minecraft.network.chat.Component.translatable(
                         "simpleflightring.command.reforge.done", affix.displayName()));
+        // Charged here so both paths (inventory on take, item entity on pickup) cost exactly one reforge.
+        player.giveExperiencePoints(-REFORGE_XP_COST);
         return true;
     }
 }
