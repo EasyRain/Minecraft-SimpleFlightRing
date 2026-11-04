@@ -51,6 +51,16 @@ public class ModDataComponents {
                     .networkSynchronized(RingAffix.STREAM_CODEC));
 
     /**
+     * Marks a ring the anvil is about to reforge: the preview shows a plain ring with this marker, and the
+     * affix is rolled only once the player takes the result (see {@link RingAnvilHandler}). Never survives a
+     * reforge, so it is not meant to be stored anywhere else.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> PENDING_REFORGE =
+            COMPONENTS.registerComponentType("pending_reforge", builder -> builder
+                    .persistent(Unit.CODEC)
+                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+
+    /**
      * Sculk relic ring quest step: the damaged sculk ring has absorbed a Warden's soul,
      * so it glints and can finally be forged into the working ring (see
      * {@link SculkRingQuest} and the {@code sculk_flight_ring} recipe). Absent means the

@@ -68,6 +68,11 @@ public class FlightRingMod {
         NeoForge.EVENT_BUS.addListener(BrokenLocateCommand::register);
         // /simpleflightring reforge [prefix] [rarity] - put a random affix on the held ring (see RingReforgeCommand).
         NeoForge.EVENT_BUS.addListener(RingReforgeCommand::register);
+        // Anvil reforge (ring + reforge stone): the preview hides the roll, taking the result applies it.
+        NeoForge.EVENT_BUS.addListener(RingAnvilHandler::onUpdate);
+        NeoForge.EVENT_BUS.addListener(RingAnvilHandler::onTaken);
+        // Keep the affix when a ring is upgraded into another ring.
+        NeoForge.EVENT_BUS.addListener(RingUpgradeHandler::onCrafted);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
         // (never from ModConfigEvent - see BrokenConfig#snapshotAndLog).
