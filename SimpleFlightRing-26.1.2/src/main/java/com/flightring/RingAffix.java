@@ -87,8 +87,8 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
         PRECISE("precise", Kind.PERCENT, 0.03, 0.06, 0.12, 0.18, 0.27),
         /** 迅捷: +% of the player's total movement speed. */
         SWIFT("swift", Kind.PERCENT_TOTAL, 0.02, 0.04, 0.08, 0.12, 0.18),
-        /** 灵活: flat dodge chance (dodge is already a percentage attribute). */
-        AGILE("agile", Kind.FLAT, 0.02, 0.04, 0.08, 0.12, 0.18),
+        /** 灵活: flat dodge chance, which is itself a fraction - displayed as a percentage. */
+        AGILE("agile", Kind.PERCENT, 0.02, 0.04, 0.08, 0.12, 0.18),
         /** 幸运: flat luck (the player's luck base is 0). */
         FORTUNATE("fortunate", Kind.FLAT, 0.5, 1, 2, 3, 4.5),
         /** 凋零: wither on hit (amplifier; the duration table is TODO). */

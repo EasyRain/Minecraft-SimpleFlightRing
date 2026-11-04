@@ -157,6 +157,12 @@ public final class BurstTotemHandler {
         player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
         // Same totem flip as 重生, but flipping the worn ring (see ClientRebirthAnimationMixin).
         RebornHandler.playRingAnimation(player);
+        // The burst totem is one of the saves counted by RebornHandler.remainingSaves; this one has just been
+        // spent, so report the number without it (the user wants the "0" to show up as well).
+        ItemStack ring = CuriosCompat.findRingInSlot(player);
+        int remaining = RebornHandler.remainingSaves(ring) - 1;
+        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                "message.simpleflightring.raid_totem_used", Integer.toString(Math.max(0, remaining))), true);
     }
 
     /** The totem is charged again as soon as the pool is full, and only then. */

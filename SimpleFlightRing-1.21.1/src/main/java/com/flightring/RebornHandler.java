@@ -93,24 +93,7 @@ public final class RebornHandler {
         event.setNewDamage(0.0F);
         // Tell the wearer how many saves are left (user 2026-11-04): the affix's remaining count, plus the raid
         // ring's built-in totem charges when it has them.
-        int charges = affix.rarity().ordinal() + 1;
-        int remaining;
-        if (indestructible) {
-            long spent = ring.getOrDefault(ModDataComponents.REBIRTH_CHARGE.get(), 0L);
-            long owed = (spent + INDESTRUCTIBLE_COOLDOWN_TICKS - 1) / INDESTRUCTIBLE_COOLDOWN_TICKS;
-            remaining = charges - (int) owed;
-        } else {
-            int share = Math.max(1, ring.getMaxDamage() / charges);
-            remaining = Math.max(0, (ring.getMaxDamage() - ring.getDamageValue()) / share);
-        }
-        if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
-            remaining += RaidCharges.of(ring);
-        }
-        // The Unobtainium ring's burst totem is one more save, even though it runs on its own path and only
-        // once - the user wants it counted in this number too (2026-11-04).
-        if (item.hasAbility(RingAbility.BURST_TOTEM)) {
-            remaining += 1;
-        }
+        int remaining = remainingSaves(ring);
         // Reuse the raid ring's own message and action bar (user 2026-11-04) instead of adding another line:
         // "rings blocked death for you (charges left: N)".
         player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
@@ -148,6 +131,37 @@ public final class RebornHandler {
     public static void playRingAnimation(ServerPlayer player) {
         player.connection.send(new net.minecraft.network.protocol.game.ClientboundEntityEventPacket(
                 player, REBIRTH_ANIMATION_EVENT));
+    }
+
+    /**
+     * How many saves this ring has left in total: the affix's remaining uses, plus the raid ring's built-in totem
+     * charges, plus the Unobtainium ring's burst totem (which is one more save, on its own path). Shared with
+     * {@link BurstTotemHandler} so its save reports the same number.
+     */
+    public static int remainingSaves(ItemStack ring) {
+        if (!(ring.getItem() instanceof FlightRingItem item)) {
+            return 0;
+        }
+        RingAffix affix = ring.get(ModDataComponents.RING_AFFIX.get());
+        int remaining = 0;
+        if (affix != null && affix.prefix() == RingAffix.Prefix.REBORN) {
+            int charges = affix.rarity().ordinal() + 1;
+            if (ring.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+                long spent = ring.getOrDefault(ModDataComponents.REBIRTH_CHARGE.get(), 0L);
+                long owed = (spent + INDESTRUCTIBLE_COOLDOWN_TICKS - 1) / INDESTRUCTIBLE_COOLDOWN_TICKS;
+                remaining = charges - (int) owed;
+            } else {
+                int share = Math.max(1, ring.getMaxDamage() / charges);
+                remaining = Math.max(0, (ring.getMaxDamage() - ring.getDamageValue()) / share);
+            }
+        }
+        if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
+            remaining += RaidCharges.of(ring);
+        }
+        if (item.hasAbility(RingAbility.BURST_TOTEM)) {
+            remaining += 1;
+        }
+        return Math.max(0, remaining);
     }
 
     private static void revive(ServerPlayer player) {
