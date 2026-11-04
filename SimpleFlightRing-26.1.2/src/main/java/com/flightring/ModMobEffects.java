@@ -30,6 +30,14 @@ public class ModMobEffects {
     public static final DeferredHolder<MobEffect, MobEffect> ETERNAL_SOUL_FIRE =
             EFFECTS.register("eternal_soul_fire", EternalSoulFireEffect::new);
 
+    /**
+     * "破甲" (Sundered): the timer half of the 破甲 prefix. The armour loss itself is a transient modifier that
+     * {@link RingAffixHandler} keeps adding; this effect keeps it alive while it lasts, so the armour comes back
+     * when it expires or is cleansed. See {@link SunderedEffect}.
+     */
+    public static final DeferredHolder<MobEffect, MobEffect> SUNDERED =
+            EFFECTS.register("sundered", SunderedEffect::new);
+
     private ModMobEffects() {
     }
 }

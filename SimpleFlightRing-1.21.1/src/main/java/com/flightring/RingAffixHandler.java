@@ -126,6 +126,9 @@ public final class RingAffixHandler {
                 return;
             }
             addStackingModifier(victim, Attributes.ARMOR, "shred_armour", -Math.min(loss, Math.max(0.0, armour)));
+            // The effect is the timer: while it lasts the shredded armour stays off, and clearing it (milk, another
+            // mod's cleanse) restores the armour. Players therefore have a real recovery path.
+            victim.addEffect(new MobEffectInstance(ModMobEffects.SUNDERED, SunderedEffect.DURATION, 0));
             return;
         }
         // 脆弱 (user 2026-11-04): damage proportional to the target's CURRENT health instead of touching its
@@ -196,6 +199,15 @@ public final class RingAffixHandler {
             return;
         }
         long now = player.level().getGameTime();
+        // 破甲 cleanup: the debuff is the timer. Once it is gone (expired, or cleansed by milk / another mod) the
+        // armour reduction goes with it, which is what gives players a recovery path.
+        if (!player.hasEffect(ModMobEffects.SUNDERED)) {
+            var armour = player.getAttribute(Attributes.ARMOR);
+            if (armour != null) {
+                armour.removeModifier(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                        FlightRingMod.MODID, "shred_armour"));
+            }
+        }
         net.minecraft.world.inventory.AbstractContainerMenu menu = player.containerMenu;
         if (menu instanceof net.minecraft.world.inventory.AnvilMenu) {
             // Inside the anvil: settle every tick, so taking the result feels instant. The 1s window below is
