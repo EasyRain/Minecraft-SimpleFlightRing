@@ -39,6 +39,14 @@ public class ModItems {
             ITEMS.registerItem("indestructible_core", Item::new, properties -> properties);
 
     /**
+     * Reforge Stone: dropped by the broken dimension's structure chests (10% per chest) and used in an anvil
+     * together with a ring to roll a new affix (see the reforge command and the anvil handler). A plain
+     * stackable material.
+     */
+    public static final DeferredItem<Item> REFORGE_STONE =
+            ITEMS.registerItem("reforge_stone", Item::new, properties -> properties);
+
+    /**
      * Stable Flight Ring: iron ring + 8 amethyst shards, with Flight Stability I built
      * in. 2400 durability (40 minutes of flight); destroyed once fully drained.
      */

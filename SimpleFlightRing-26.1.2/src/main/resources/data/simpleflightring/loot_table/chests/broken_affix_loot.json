@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        { "condition": "minecraft:random_chance", "chance": 0.05 }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:tag",
+          "name": "simpleflightring:affix_rings",
+          "expand": true,
+          "functions": [
+            { "function": "simpleflightring:roll_affix" },
+            {
+              "function": "minecraft:set_damage",
+              "damage": { "type": "minecraft:uniform", "min": 0.0, "max": 0.99 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        { "condition": "minecraft:random_chance", "chance": 0.10 }
+      ],
+      "entries": [
+        { "type": "minecraft:item", "name": "simpleflightring:reforge_stone" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_table",
+  "conditions": [
+    {
+      "condition": "minecraft:location_check",
+      "predicate": { "dimension": "simpleflightring:the_broken" }
+    }
+  ],
+  "table": "simpleflightring:chests/broken_affix_loot"
+}

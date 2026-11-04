@@ -58,6 +58,14 @@ public class ModItems {
             ITEMS.registerItem("indestructible_core", Item::new, new Item.Properties());
 
     /**
+     * Reforge Stone: dropped by the broken dimension's structure chests (10% per chest) and used in an anvil
+     * together with a ring to roll a new affix (see the reforge command and the anvil handler). A plain
+     * stackable material.
+     */
+    public static final DeferredItem<Item> REFORGE_STONE =
+            ITEMS.registerItem("reforge_stone", Item::new, new Item.Properties());
+
+    /**
      * AllTheModium integration chain. Like that mod's own gear these three rings are
      * indestructible: the INDESTRUCTIBLE component is their DEFAULT component, so every
      * instance - smithed, taken from the creative tab or spawned with {@code /give} -

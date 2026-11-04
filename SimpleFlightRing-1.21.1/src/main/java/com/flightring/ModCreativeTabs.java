@@ -27,6 +27,7 @@ public class ModCreativeTabs {
                         // The soul-fed sculk ring is deliberately NOT listed here: it is a quest
                         // step, so it only exists once a player has fed it a Warden's soul.
                         output.accept(new ItemStack(ModItems.INDESTRUCTIBLE_CORE.get()));
+                        output.accept(new ItemStack(ModItems.REFORGE_STONE.get()));
                     })
                     .build());
 

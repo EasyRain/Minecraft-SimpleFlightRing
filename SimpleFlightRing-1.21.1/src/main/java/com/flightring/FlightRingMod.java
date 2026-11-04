@@ -28,6 +28,7 @@ public class FlightRingMod {
         ModItems.ITEMS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModDataComponents.COMPONENTS.register(modEventBus);
+        ModLootFunctions.LOOT_FUNCTIONS.register(modEventBus);
         ModMobEffects.EFFECTS.register(modEventBus);
         ModAttributes.ATTRIBUTES.register(modEventBus);
         ModParticles.PARTICLES.register(modEventBus);
