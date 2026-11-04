@@ -253,18 +253,17 @@ public record RingAffix(Prefix prefix, Rarity rarity) {
     }
 
     /**
-     * The full item name: 「守护的普通 金飞行戒指」. <b>Every part carries an explicit colour</b>:
-     * the prefix + rarity part in the rarity's colour and the ring's own name in its own colour.
-     * That matters because {@code ItemStack#getHoverName()} wraps the result in
-     * {@code stack.getRarity().getStyleModifier()} - a parent style only fills in what the parts
-     * leave open, so explicitly coloured parts survive (vanilla's rarity colour would otherwise
-     * override ours).
+     * The full item name: 「守护的普通 金飞行戒指」. <b>Every part carries an explicit colour, and so does the
+     * whole component</b> - the format string's own literal text (the 「的」 / the spaces in English) has no
+     * style of its own, so without the outer colour it would inherit the parent style that
+     * {@code ItemStack#getHoverName()} adds, i.e. the vanilla rarity colour (yellow for UNCOMMON, ...).
      */
     public Component decorate(Component baseName) {
         return Component.translatable("ring_affix.simpleflightring.name",
-                prefix.displayName().withStyle(style -> style.withColor(rarity.color())),
-                rarity.displayName().withStyle(style -> style.withColor(rarity.color())),
-                baseName.copy().withStyle(style -> style.withColor(rarity.color())));
+                        prefix.displayName().withStyle(style -> style.withColor(rarity.color())),
+                        rarity.displayName().withStyle(style -> style.withColor(rarity.color())),
+                        baseName.copy().withStyle(style -> style.withColor(rarity.color())))
+                .withStyle(style -> style.withColor(rarity.color()));
     }
 
     /** The tooltip line for this affix, coloured by rarity. */
