@@ -85,6 +85,9 @@ public final class RingAffixHandler {
             return;
         }
         if (prefix != RingAffix.Prefix.WITHERING && prefix != RingAffix.Prefix.VENOMOUS) {
+            if (prefix == RingAffix.Prefix.PIERCING || prefix == RingAffix.Prefix.BRITTLE) {
+                shred(event, attacker, prefix, value);
+            }
             return;
         }
         // Both effects share one predicate: a fully charged melee hit, so a clicker gets nothing.
@@ -97,6 +100,68 @@ public final class RingAffixHandler {
                 : MobEffects.POISON;
         event.getEntity().addEffect(new MobEffectInstance(
                 effect, EFFECT_TICKS[affix.rarity().ordinal()], (int) value));
+    }
+
+    /**
+     * 穿透 / 脆弱: shred a share of the target's <b>current</b> armour / max health. Both are computed from the
+     * live value ({@code floor(current * pct)}), so they fade as the target wears down - strong at the start of a
+     * boss fight, weaker later, exactly as specified.
+     * <p>
+     * 脆弱 note: the weapon damage lands on the target's <b>current</b> health in the same hit, while the max
+     * health also drops, so the two compound. That is why the "max health can no longer support the current
+     * health" check below can kill a target sooner than the shred alone would suggest - by design.
+     */
+    private static void shred(LivingIncomingDamageEvent event, ServerPlayer attacker, RingAffix.Prefix prefix,
+                              double value) {
+        if (!isFullCharge(attacker)) {
+            return; // same anti-clicker gate as the on-hit effects
+        }
+        LivingEntity victim = event.getEntity();
+        if (victim == attacker) {
+            return;
+        }
+        if (prefix == RingAffix.Prefix.PIERCING) {
+            double armour = victim.getAttributeValue(Attributes.ARMOR);
+            double loss = Math.floor(armour * value);
+            if (loss <= 0.0) {
+                return;
+            }
+            addStackingModifier(victim, Attributes.ARMOR, "shred_armour", -Math.min(loss, Math.max(0.0, armour)));
+            return;
+        }
+        double maxHealth = victim.getAttributeValue(Attributes.MAX_HEALTH);
+        double loss = Math.floor(maxHealth * value);
+        if (loss <= 0.0) {
+            return;
+        }
+        addStackingModifier(victim, Attributes.MAX_HEALTH, "shred_max_health", -loss);
+        if (victim.getHealth() > victim.getMaxHealth()) {
+            // 26.x: LivingEntity#kill takes the ServerLevel.
+            victim.kill((net.minecraft.server.level.ServerLevel) victim.level());
+        }
+    }
+
+    /**
+     * Adds (or grows) one transient modifier, so repeated hits keep shrinking the same attribute instead of piling
+     * up modifiers. Transient modifiers are not saved with the entity - a reload gives the target its stats back,
+     * which is the behaviour we want for a per-fight debuff.
+     */
+    private static void addStackingModifier(LivingEntity entity, net.minecraft.core.Holder<
+            net.minecraft.world.entity.ai.attributes.Attribute> attribute, String name, double delta) {
+        var instance = entity.getAttribute(attribute);
+        if (instance == null) {
+            return;
+        }
+        // 26.x: Identifier instead of ResourceLocation.
+        net.minecraft.resources.Identifier id =
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(FlightRingMod.MODID, name);
+        net.minecraft.world.entity.ai.attributes.AttributeModifier existing = instance.getModifier(id);
+        double total = delta + (existing == null ? 0.0 : existing.amount());
+        if (existing != null) {
+            instance.removeModifier(id);
+        }
+        instance.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                id, total, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
     }
 
     /** 荆棘: reflects a share of the attacker's attack power back at them. */
