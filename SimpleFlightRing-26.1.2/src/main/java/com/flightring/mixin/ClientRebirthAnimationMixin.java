@@ -36,6 +36,7 @@ public abstract class ClientRebirthAnimationMixin {
             return;
         }
         minecraft.gameRenderer.displayItemActivation(ring.copy());
-        ci.cancel();
+        // Deliberately NOT cancelled: entity event ids are a shared byte space and another mod could be using 80
+        // too. Letting the packet continue means its handlers still run; the worst case is a second animation.
     }
 }
