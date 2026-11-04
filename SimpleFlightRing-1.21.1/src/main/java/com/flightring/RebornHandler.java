@@ -91,6 +91,23 @@ public final class RebornHandler {
             ring.setDamageValue(Math.min(ring.getMaxDamage(), ring.getDamageValue() + share));
         }
         event.setNewDamage(0.0F);
+        // Tell the wearer how many saves are left (user 2026-11-04): the affix's remaining count, plus the raid
+        // ring's built-in totem charges when it has them.
+        int charges = affix.rarity().ordinal() + 1;
+        int remaining;
+        if (indestructible) {
+            long spent = ring.getOrDefault(ModDataComponents.REBIRTH_CHARGE.get(), 0L);
+            long owed = (spent + INDESTRUCTIBLE_COOLDOWN_TICKS - 1) / INDESTRUCTIBLE_COOLDOWN_TICKS;
+            remaining = charges - (int) owed;
+        } else {
+            int share = Math.max(1, ring.getMaxDamage() / charges);
+            remaining = Math.max(0, (ring.getMaxDamage() - ring.getDamageValue()) / share);
+        }
+        if (item.hasAbility(RingAbility.RAID_PLUNDER)) {
+            remaining += RaidCharges.of(ring);
+        }
+        player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                "ring_affix.simpleflightring.reborn_left", remaining));
         revive(player);
     }
 

@@ -214,6 +214,7 @@
   "ring_rarity.simpleflightring.sacred": "Sacred",
   "ring_affix.simpleflightring.name": "%s %s %s",
   "ring_affix.simpleflightring.line": "%s: %s",
+  "ring_affix.simpleflightring.reborn_left": "%s saves from death left",
   "hud.simpleflightring.flight_time_long": "Flight time: %sH %sM %sS",
   "hud.simpleflightring.energy": "%s/%s",
 
