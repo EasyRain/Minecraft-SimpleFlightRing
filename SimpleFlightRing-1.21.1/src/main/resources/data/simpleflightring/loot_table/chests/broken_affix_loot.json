@@ -10,14 +10,14 @@
         {
           "type": "minecraft:tag",
           "name": "simpleflightring:affix_rings",
-          "expand": true,
-          "functions": [
-            { "function": "simpleflightring:roll_affix" },
-            {
-              "function": "minecraft:set_damage",
-              "damage": { "type": "minecraft:uniform", "min": 0.0, "max": 0.99 }
-            }
-          ]
+          "expand": true
+        }
+      ],
+      "functions": [
+        { "function": "simpleflightring:roll_affix" },
+        {
+          "function": "minecraft:set_damage",
+          "damage": { "type": "minecraft:uniform", "min": 0.0, "max": 0.99 }
         }
       ]
     },
