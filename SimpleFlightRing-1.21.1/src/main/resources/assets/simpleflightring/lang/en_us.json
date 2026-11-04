@@ -197,7 +197,7 @@
   "ring_prefix.simpleflightring.warding.unit": "Armour +%s",
   "ring_prefix.simpleflightring.thorned.unit": "Reflect %s",
   "ring_prefix.simpleflightring.vital.unit": "Max health +%s",
-  "ring_prefix.simpleflightring.reborn.unit": "Rebirth: %s charges",
+  "ring_prefix.simpleflightring.reborn.unit": "Saves you from death up to %s times",
   "ring_prefix.simpleflightring.brutal.unit": "Melee damage +%s",
   "ring_prefix.simpleflightring.precise.unit": "Ranged damage +%s",
   "ring_prefix.simpleflightring.swift.unit": "Movement speed +%s",

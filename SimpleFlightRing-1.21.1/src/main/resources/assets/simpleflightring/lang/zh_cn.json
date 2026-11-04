@@ -197,7 +197,7 @@
   "ring_prefix.simpleflightring.warding.unit": "护甲 +%s",
   "ring_prefix.simpleflightring.thorned.unit": "反伤 %s",
   "ring_prefix.simpleflightring.vital.unit": "最大生命 +%s",
-  "ring_prefix.simpleflightring.reborn.unit": "重生：%s 次充能",
+  "ring_prefix.simpleflightring.reborn.unit": "最高 %s 次濒死急救",
   "ring_prefix.simpleflightring.brutal.unit": "近战伤害 +%s",
   "ring_prefix.simpleflightring.precise.unit": "远程伤害 +%s",
   "ring_prefix.simpleflightring.swift.unit": "移动速度 +%s",
