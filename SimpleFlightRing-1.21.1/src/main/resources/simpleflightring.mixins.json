@@ -19,6 +19,7 @@
   "client": [
     "ClientFireAnimationMixin",
     "ClientFireOverlayMixin",
+    "ClientRebirthAnimationMixin",
     "ElderGuardianCurseMixin"
   ],
   "injectors": {

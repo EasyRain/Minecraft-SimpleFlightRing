@@ -28,6 +28,12 @@ public final class RebornHandler {
     /** Cooldown of the indestructible ring's single charge: 60 seconds. */
     public static final int INDESTRUCTIBLE_COOLDOWN_TICKS = 1200;
 
+    /**
+     * Entity event id used to ask the client to play the totem flip with the worn ring. Vanilla uses 35 for the
+     * real totem (left untouched, so 劫掠 keeps its normal animation); 80 is inside the free mod range.
+     */
+    public static final byte REBIRTH_ANIMATION_EVENT = (byte) 80;
+
     private RebornHandler() {
     }
 
@@ -117,5 +123,8 @@ public final class RebornHandler {
         player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
         player.level().playSound(null, player.blockPosition(), SoundEvents.TOTEM_USE,
                 SoundSource.PLAYERS, 1.0F, 1.0F);
+        // Ask the client for the same flip animation, but with the ring (see ClientRebirthAnimationMixin).
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundEntityEventPacket(
+                player, REBIRTH_ANIMATION_EVENT));
     }
 }
