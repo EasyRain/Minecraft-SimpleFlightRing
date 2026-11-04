@@ -82,6 +82,8 @@ public class FlightRingMod {
         // 破甲: restore the shredded armour when the debuff really goes away (expiry or manual removal).
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectExpired);
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectRemoved);
+        // 重生: one totem-like save; durability-priced, or a cooldown charge on indestructible rings.
+        NeoForge.EVENT_BUS.addListener(RebornHandler::onFatalDamage);
 
         // Configs are all loaded by common setup, so this is the first safe point to read our COMMON values
         // (never from ModConfigEvent - see BrokenConfig#snapshotAndLog).
