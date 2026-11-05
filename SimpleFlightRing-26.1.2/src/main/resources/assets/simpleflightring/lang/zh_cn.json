@@ -232,6 +232,8 @@
   "simpleflightring.command.durability.damage_set": "已将耐久损伤设为 %s / %s（0 = 完好）",
   "simpleflightring.command.durability.unbreakable_on": "这枚戒指已设为不朽",
   "simpleflightring.command.durability.unbreakable_off": "已取消不朽",
+  "simpleflightring.command.durability.no_charge": "这枚戒指没有重生充能（需要不朽 + 重生词条）",
+  "simpleflightring.command.durability.charge_set": "已将重生充能设为 %s / %s 格",
   "simpleflightring.command.locate.wrong_dimension": "非破碎维度，此指令不可使用（请先进入破碎维度）",
   "simpleflightring.command.locate.bad_id": "群系 id 格式不对：%s（要写成 命名空间:群系）",
   "simpleflightring.command.locate.not_in_pool": "群系 %s 不在池子里（池子共 %s 个）",

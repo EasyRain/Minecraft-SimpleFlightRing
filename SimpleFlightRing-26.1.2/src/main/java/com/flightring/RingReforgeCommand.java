@@ -101,7 +101,11 @@ public final class RingReforgeCommand {
                         .then(Commands.literal("unbreakable")
                                 .then(Commands.argument("value", BoolArgumentType.bool())
                                         .executes(ctx -> setUnbreakable(ctx,
-                                                BoolArgumentType.getBool(ctx, "value")))))));
+                                                BoolArgumentType.getBool(ctx, "value")))))
+                        .then(Commands.literal("charge")
+                                .then(Commands.argument("value", IntegerArgumentType.integer(0))
+                                        .executes(ctx -> setCharge(ctx,
+                                                IntegerArgumentType.getInteger(ctx, "value")))))));
     }
 
     /**
@@ -160,6 +164,38 @@ public final class RingReforgeCommand {
         source.sendSuccess(() -> Component.translatable(value
                 ? "simpleflightring.command.durability.unbreakable_on"
                 : "simpleflightring.command.durability.unbreakable_off"), false);
+        return 1;
+    }
+
+    /**
+     * {@code durability charge <value>} - sets how many 重生 charges the held ring has left, in whole charges
+     * ({@code 0} = none left, the maximum = full). Only indestructible rings carry that bar: on a ring paid for
+     * with durability the same information already shows up as the green bar.
+     */
+    private static int setCharge(CommandContext<CommandSourceStack> ctx, int value) {
+        CommandSourceStack source = ctx.getSource();
+        ItemStack stack = heldRing(source);
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        RingAffix affix = stack.get(ModDataComponents.RING_AFFIX.get());
+        if (affix == null || affix.prefix() != RingAffix.Prefix.REBORN
+                || !stack.has(ModDataComponents.INDESTRUCTIBLE.get())) {
+            source.sendFailure(Component.translatable("simpleflightring.command.durability.no_charge"));
+            return 0;
+        }
+        int maximum = affix.rarity().ordinal() + 1;
+        int remaining = Math.max(0, Math.min(value, maximum));
+        // The component stores the ticks still owed, not the charges left: one charge takes a full cooldown
+        // to come back, so (maximum - remaining) charges of debt is exactly that many cooldowns.
+        long owed = (long) (maximum - remaining) * RebornHandler.INDESTRUCTIBLE_COOLDOWN_TICKS;
+        if (owed <= 0L) {
+            stack.remove(ModDataComponents.REBIRTH_CHARGE.get());
+        } else {
+            stack.set(ModDataComponents.REBIRTH_CHARGE.get(), owed);
+        }
+        source.sendSuccess(() -> Component.translatable("simpleflightring.command.durability.charge_set",
+                Integer.toString(remaining), Integer.toString(maximum)), false);
         return 1;
     }
 

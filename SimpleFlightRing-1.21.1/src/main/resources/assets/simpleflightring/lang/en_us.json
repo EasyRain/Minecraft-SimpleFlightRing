@@ -232,6 +232,8 @@
   "simpleflightring.command.durability.damage_set": "Durability damage set to %s / %s (0 = pristine)",
   "simpleflightring.command.durability.unbreakable_on": "This ring is now unbreakable",
   "simpleflightring.command.durability.unbreakable_off": "This ring is no longer unbreakable",
+  "simpleflightring.command.durability.no_charge": "This ring has no rebirth charge (needs the reborn prefix on an unbreakable ring)",
+  "simpleflightring.command.durability.charge_set": "Rebirth charges set to %s / %s",
   "simpleflightring.command.locate.wrong_dimension": "Not the broken dimension - this command is unavailable here",
   "simpleflightring.command.locate.bad_id": "Malformed biome id: %s (expected namespace:biome)",
   "simpleflightring.command.locate.not_in_pool": "Biome %s is not in the pool (%s biomes in it)",
