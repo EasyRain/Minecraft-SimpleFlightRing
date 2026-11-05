@@ -1,0 +1,9 @@
+{
+  "type": "simpleflightring:ring_repair",
+  "category": "equipment",
+  "material": "minecraft:ominous_bottle",
+  "result": {
+    "id": "simpleflightring:raid_flight_ring",
+    "count": 1
+  }
+}

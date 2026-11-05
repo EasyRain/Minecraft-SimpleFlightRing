@@ -1,0 +1,9 @@
+{
+  "type": "simpleflightring:ring_repair",
+  "category": "equipment",
+  "material": "minecraft:echo_shard",
+  "result": {
+    "id": "simpleflightring:sculk_flight_ring",
+    "count": 1
+  }
+}

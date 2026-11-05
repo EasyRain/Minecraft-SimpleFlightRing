@@ -1,0 +1,9 @@
+{
+  "type": "simpleflightring:ring_repair",
+  "category": "equipment",
+  "material": "minecraft:emerald_block",
+  "result": {
+    "id": "simpleflightring:emerald_flight_ring",
+    "count": 1
+  }
+}

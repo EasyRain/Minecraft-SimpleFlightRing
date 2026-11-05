@@ -1,0 +1,9 @@
+{
+  "type": "simpleflightring:ring_repair",
+  "category": "equipment",
+  "material": "minecraft:shulker_shell",
+  "result": {
+    "id": "simpleflightring:ender_flight_ring",
+    "count": 1
+  }
+}
