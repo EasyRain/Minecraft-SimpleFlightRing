@@ -147,8 +147,21 @@ tasks.withType(AbstractArchiveTask).configureEach {
     reproducibleFileOrder = true
 }
 
-// The built jar stays in build/libs (user 2026-11-05: with several projects the workspace root was
-// collecting one jar per project per build). Deploy commands read build/libs/simpleflightring-<ver>.jar.
+// Copy the built mod jar into the workspace's shared build folder (D:\DshWorkSpace\MCMODuild),
+// which is where every project drops its jars - several projects emit more than one jar per build, so a
+// dedicated folder beats littering the workspace root. Implemented as an imperative copy so Gradle does not
+// track that folder (it holds other projects' jars too).
+tasks.register('copyToWorkspace') {
+    doLast {
+        copy {
+            from(tasks.named('jar'))
+            into file('../../build')
+        }
+    }
+}
+tasks.named('build') {
+    dependsOn 'copyToWorkspace'
+}
 
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
