@@ -32,9 +32,13 @@ public final class DirectedStoneFunction implements LootItemFunction {
 
     @Override
     public ItemStack apply(ItemStack stack, LootContext lootContext) {
+        // The entry already names the directed stone, so the loot viewer associates this table with it; all this
+        // function does is stamp the randomly chosen half onto that very stack.
+        if (!stack.is(ModItems.REFORGE_STONE_DIRECTED.get())) {
+            return stack;
+        }
         ReforgeMode mode = lootContext.getRandom().nextBoolean() ? ReforgeMode.PREFIX : ReforgeMode.RARITY;
-        ItemStack directed = new ItemStack(ModItems.REFORGE_STONE_DIRECTED.get());
-        directed.set(ModDataComponents.REFORGE_MODE.get(), mode);
-        return directed;
+        stack.set(ModDataComponents.REFORGE_MODE.get(), mode);
+        return stack;
     }
 }

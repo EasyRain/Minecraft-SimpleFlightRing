@@ -12,7 +12,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "simpleflightring:reforge_stone",
+          "name": "simpleflightring:reforge_stone_directed",
           "functions": [
             {
               "function": "simpleflightring:directed_stone"
