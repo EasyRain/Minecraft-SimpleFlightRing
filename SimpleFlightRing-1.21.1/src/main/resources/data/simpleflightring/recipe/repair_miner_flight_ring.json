@@ -1,9 +1,14 @@
 {
   "type": "simpleflightring:ring_repair",
   "category": "equipment",
-  "material": {
-    "item": "minecraft:iron_block"
-  },
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
   "result": {
     "id": "simpleflightring:miner_flight_ring",
     "count": 1

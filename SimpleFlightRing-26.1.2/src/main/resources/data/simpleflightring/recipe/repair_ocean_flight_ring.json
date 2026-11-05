@@ -1,7 +1,10 @@
 {
   "type": "simpleflightring:ring_repair",
   "category": "equipment",
-  "material": "minecraft:heart_of_the_sea",
+  "materials": [
+    "minecraft:prismarine_shard",
+    "minecraft:prismarine_crystals"
+  ],
   "result": {
     "id": "simpleflightring:ocean_flight_ring",
     "count": 1

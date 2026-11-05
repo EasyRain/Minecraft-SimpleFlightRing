@@ -20,17 +20,21 @@ import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Shapeless repair recipe: one flight ring + 1 material unit = one craft.
- * Each craft restores 25% durability (netherite restores 100% with a single
- * ingot); repeat the craft to fully repair a ring. Consumes exactly one
- * material per craft - the standard vanilla per-slot consumption - so the
- * recipe works identically in every crafting system (crafting table, recipe
- * book, AE2 crafting terminal, ...). Enchantments, custom name and lore are
- * preserved by copying the input ring. A fully-durable ring cannot be used.
+ * Shapeless repair recipe: one flight ring + the listed materials = one craft.
+ * <p>
+ * Each craft restores 25% durability (netherite restores 100%); repeat the craft to fully repair a ring. The
+ * materials are <b>shapeless</b>, so position never matters and a recipe with one or two materials also fits in
+ * the 2x2 grid. Each entry in {@code materials} takes its own slot, which is how "two ingots per craft" is
+ * expressed - a stack of two in a single slot does <i>not</i> count twice, exactly like vanilla per-slot
+ * consumption. Container items (a lava bucket) come back through the vanilla crafting-remainder handling.
+ * <p>
+ * Enchantments, affixes, custom name and lore are preserved by copying the input ring. A fully-durable ring
+ * cannot be used.
  */
 public class RingRepairRecipe extends NormalCraftingRecipe {
 
@@ -38,33 +42,59 @@ public class RingRepairRecipe extends NormalCraftingRecipe {
             instance -> instance.group(
                     Recipe.CommonInfo.MAP_CODEC.forGetter(ring -> ring.commonInfo),
                     CraftingRecipe.CraftingBookInfo.MAP_CODEC.forGetter(ring -> ring.bookInfo),
-                    Ingredient.CODEC.fieldOf("material").forGetter(ring -> ring.material),
+                    Ingredient.CODEC.listOf().optionalFieldOf("materials", List.of())
+                            .forGetter(ring -> ring.materials),
+                    Ingredient.CODEC.optionalFieldOf("material").forGetter(
+                            ring -> ring.materials.size() == 1 ? Optional.of(ring.materials.get(0)) : Optional.empty()),
                     ItemStackTemplate.CODEC.fieldOf("result").forGetter(ring -> ring.result)
             ).apply(instance, RingRepairRecipe::new)
     );
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, RingRepairRecipe> STREAM_CODEC = StreamCodec.composite(
-            Recipe.CommonInfo.STREAM_CODEC,
-            ring -> ring.commonInfo,
-            CraftingRecipe.CraftingBookInfo.STREAM_CODEC,
-            ring -> ring.bookInfo,
-            Ingredient.CONTENTS_STREAM_CODEC,
-            ring -> ring.material,
-            ItemStackTemplate.STREAM_CODEC,
-            ring -> ring.result,
-            RingRepairRecipe::new
-    );
+    public static final StreamCodec<RegistryFriendlyByteBuf, RingRepairRecipe> STREAM_CODEC =
+            StreamCodec.of(RingRepairRecipe::toNetwork, RingRepairRecipe::fromNetwork);
+
+    private static RingRepairRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+        Recipe.CommonInfo common = Recipe.CommonInfo.STREAM_CODEC.decode(buffer);
+        CraftingRecipe.CraftingBookInfo book = CraftingRecipe.CraftingBookInfo.STREAM_CODEC.decode(buffer);
+        int count = buffer.readVarInt();
+        List<Ingredient> materials = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            materials.add(Ingredient.CONTENTS_STREAM_CODEC.decode(buffer));
+        }
+        ItemStackTemplate result = ItemStackTemplate.STREAM_CODEC.decode(buffer);
+        return new RingRepairRecipe(common, book, materials, result);
+    }
+
+    private static void toNetwork(RegistryFriendlyByteBuf buffer, RingRepairRecipe recipe) {
+        Recipe.CommonInfo.STREAM_CODEC.encode(buffer, recipe.commonInfo);
+        CraftingRecipe.CraftingBookInfo.STREAM_CODEC.encode(buffer, recipe.bookInfo);
+        buffer.writeVarInt(recipe.materials.size());
+        for (Ingredient material : recipe.materials) {
+            Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, material);
+        }
+        ItemStackTemplate.STREAM_CODEC.encode(buffer, recipe.result);
+    }
 
     public static final RecipeSerializer<RingRepairRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
-    private final Ingredient material;
+    private final List<Ingredient> materials;
     private final ItemStackTemplate result;
     private final boolean fullRepair;
 
     public RingRepairRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo,
-                            Ingredient material, ItemStackTemplate result) {
+                            List<Ingredient> materials, ItemStackTemplate result) {
+        this(commonInfo, bookInfo, materials, Optional.empty(), result);
+    }
+
+    /** Accepts both {@code materials: [...]} and the older single {@code material: ...}. */
+    public RingRepairRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo,
+                            List<Ingredient> materials, Optional<Ingredient> single, ItemStackTemplate result) {
         super(commonInfo, bookInfo);
-        this.material = material;
+        List<Ingredient> combined = new ArrayList<>(materials);
+        if (combined.isEmpty()) {
+            single.ifPresent(combined::add);
+        }
+        this.materials = List.copyOf(combined);
         this.result = result;
         this.fullRepair = result.item().is(ModItems.NETHERITE_FLIGHT_RING);
     }
@@ -72,7 +102,7 @@ public class RingRepairRecipe extends NormalCraftingRecipe {
     @Override
     public boolean matches(CraftingInput input, Level level) {
         ItemStack ring = ItemStack.EMPTY;
-        boolean hasMaterial = false;
+        boolean[] matched = new boolean[this.materials.size()];
         for (ItemStack stack : input.items()) {
             if (stack.isEmpty()) {
                 continue;
@@ -82,13 +112,29 @@ public class RingRepairRecipe extends NormalCraftingRecipe {
                     return false;
                 }
                 ring = stack;
-            } else if (this.material.test(stack)) {
-                hasMaterial = true;
-            } else {
+                continue;
+            }
+            int slot = -1;
+            for (int i = 0; i < this.materials.size(); i++) {
+                if (!matched[i] && this.materials.get(i).test(stack)) {
+                    slot = i;
+                    break;
+                }
+            }
+            if (slot < 0) {
+                return false;
+            }
+            matched[slot] = true;
+        }
+        if (ring.isEmpty() || ring.getDamageValue() <= 0) {
+            return false;
+        }
+        for (boolean used : matched) {
+            if (!used) {
                 return false;
             }
         }
-        return !ring.isEmpty() && hasMaterial && ring.getDamageValue() > 0;
+        return true;
     }
 
     @Override
@@ -106,6 +152,10 @@ public class RingRepairRecipe extends NormalCraftingRecipe {
         return repaired;
     }
 
+    public List<Ingredient> getMaterials() {
+        return this.materials;
+    }
+
     @Override
     public RecipeSerializer<? extends NormalCraftingRecipe> getSerializer() {
         return SERIALIZER;
@@ -113,15 +163,24 @@ public class RingRepairRecipe extends NormalCraftingRecipe {
 
     @Override
     protected PlacementInfo createPlacementInfo() {
-        return PlacementInfo.createFromOptionals(
-                List.of(Optional.of(this.material), Optional.of(Ingredient.of(this.result.item().value()))));
+        List<Optional<Ingredient>> slots = new ArrayList<>();
+        for (Ingredient material : this.materials) {
+            slots.add(Optional.of(material));
+        }
+        slots.add(Optional.of(Ingredient.of(this.result.item().value())));
+        return PlacementInfo.createFromOptionals(slots);
     }
 
     @Override
     public List<RecipeDisplay> display() {
+        List<SlotDisplay> shown = new ArrayList<>();
+        for (Ingredient material : this.materials) {
+            shown.add(material.display());
+        }
+        shown.add(new SlotDisplay.ItemSlotDisplay(this.result.item()));
         return List.of(
                 new ShapelessCraftingRecipeDisplay(
-                        List.of(this.material.display(), new SlotDisplay.ItemSlotDisplay(this.result.item())),
+                        shown,
                         new SlotDisplay.ItemStackSlotDisplay(this.result),
                         new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
                 )

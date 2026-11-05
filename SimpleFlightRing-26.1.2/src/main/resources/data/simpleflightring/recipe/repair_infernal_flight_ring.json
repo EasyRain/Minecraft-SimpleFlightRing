@@ -1,7 +1,11 @@
 {
   "type": "simpleflightring:ring_repair",
   "category": "equipment",
-  "material": "minecraft:blaze_rod",
+  "materials": [
+    "minecraft:lava_bucket",
+    "minecraft:blaze_rod",
+    "minecraft:blaze_powder"
+  ],
   "result": {
     "id": "simpleflightring:infernal_flight_ring",
     "count": 1
