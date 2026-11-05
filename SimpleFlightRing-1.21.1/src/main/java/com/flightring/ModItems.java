@@ -66,6 +66,14 @@ public class ModItems {
             ITEMS.registerItem("reforge_stone", Item::new, new Item.Properties());
 
     /**
+     * The directed reforge stone: rerolls only the half named by its {@code reforge_mode} component
+     * (see {@link DirectedReforgeStoneItem}). There is exactly one per world - the broken dimension's chests
+     * hand it out once - and from then on the player copies it with the plain stone.
+     */
+    public static final DeferredItem<Item> REFORGE_STONE_DIRECTED =
+            ITEMS.registerItem("reforge_stone_directed", DirectedReforgeStoneItem::new, new Item.Properties());
+
+    /**
      * AllTheModium integration chain. Like that mod's own gear these three rings are
      * indestructible: the INDESTRUCTIBLE component is their DEFAULT component, so every
      * instance - smithed, taken from the creative tab or spawned with {@code /give} -

@@ -16,4 +16,8 @@ public class ModLootFunctions {
 
     public static final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<RollAffixFunction>> ROLL_AFFIX =
             LOOT_FUNCTIONS.register("roll_affix", () -> new LootItemFunctionType<>(RollAffixFunction.CODEC));
+
+    /** Hands out this world's single directed reforge stone (see {@link DirectedStoneFunction}). */
+    public static final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<DirectedStoneFunction>> DIRECTED_STONE =
+            LOOT_FUNCTIONS.register("directed_stone", () -> new LootItemFunctionType<>(DirectedStoneFunction.CODEC));
 }

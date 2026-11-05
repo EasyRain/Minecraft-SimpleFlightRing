@@ -1,0 +1,10 @@
+{
+  "type": "simpleflightring:directed_stone_copy",
+  "category": "misc",
+  "directed": "simpleflightring:reforge_stone_directed",
+  "plain": "simpleflightring:reforge_stone",
+  "result": {
+    "id": "simpleflightring:reforge_stone_directed",
+    "count": 2
+  }
+}

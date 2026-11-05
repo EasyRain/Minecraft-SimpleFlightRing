@@ -43,6 +43,18 @@ public enum ReforgeMode implements StringRepresentable {
         return this.key;
     }
 
+    /**
+     * The mode a reforge stone implies: the directed stone carries its own component, a plain stone falls back to
+     * its (usually absent) component, i.e. {@link #BOTH}.
+     */
+    public static ReforgeMode of(net.minecraft.world.item.ItemStack stone) {
+        if (stone.is(ModItems.REFORGE_STONE_DIRECTED.get())) {
+            ReforgeMode mode = stone.get(ModDataComponents.REFORGE_MODE.get());
+            return mode == null ? BOTH : mode;
+        }
+        return stone.getOrDefault(ModDataComponents.REFORGE_MODE.get(), BOTH);
+    }
+
     /** Looks a mode up by key, or {@code null} when it is not one of the three. */
     public static ReforgeMode byKey(String key) {
         for (ReforgeMode mode : values()) {

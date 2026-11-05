@@ -32,17 +32,22 @@ public final class RingAnvilHandler {
     private RingAnvilHandler() {
     }
 
+    /** True for the plain stone and the directed one - anything that can be put on the right anvil slot. */
+    public static boolean isReforgeStone(ItemStack stack) {
+        return stack.is(ModItems.REFORGE_STONE.get()) || stack.is(ModItems.REFORGE_STONE_DIRECTED.get());
+    }
+
     public static void onUpdate(AnvilUpdateEvent event) {
         ItemStack left = event.getLeft();
         ItemStack right = event.getRight();
-        if (!(left.getItem() instanceof FlightRingItem) || !right.is(ModItems.REFORGE_STONE.get())) {
+        if (!(left.getItem() instanceof FlightRingItem) || !isReforgeStone(right)) {
             return;
         }
         ItemStack preview = left.copy();
         preview.remove(ModDataComponents.RING_AFFIX.get());
         // A directed stone (see ReforgeMode) rerolls only one half, so the marker carries the mode and the affix
         // the ring had: the settle step keeps the half this mode is not about.
-        ReforgeMode mode = right.getOrDefault(ModDataComponents.REFORGE_MODE.get(), ReforgeMode.BOTH);
+        ReforgeMode mode = ReforgeMode.of(right);
         preview.set(ModDataComponents.PENDING_REFORGE.get(),
                 new PendingReforge(mode, left.get(ModDataComponents.RING_AFFIX.get())));
         event.setOutput(preview);
@@ -54,7 +59,7 @@ public final class RingAnvilHandler {
         if (!(event.getLeft().getItem() instanceof FlightRingItem)) {
             return;
         }
-        if (!event.getRight().is(ModItems.REFORGE_STONE.get())) {
+        if (!isReforgeStone(event.getRight())) {
             return;
         }
         // This event fires on BOTH sides (the client's own menu takes the result too), which made the ring roll

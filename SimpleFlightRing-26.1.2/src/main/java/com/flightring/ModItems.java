@@ -47,6 +47,14 @@ public class ModItems {
             ITEMS.registerItem("reforge_stone", Item::new, properties -> properties);
 
     /**
+     * The directed reforge stone: rerolls only the half named by its {@code reforge_mode} component
+     * (see {@link DirectedReforgeStoneItem}). There is exactly one per world - the broken dimension's chests
+     * hand it out once - and from then on the player copies it with the plain stone.
+     */
+    public static final DeferredItem<Item> REFORGE_STONE_DIRECTED =
+            ITEMS.registerItem("reforge_stone_directed", DirectedReforgeStoneItem::new, properties -> properties);
+
+    /**
      * Stable Flight Ring: iron ring + 8 amethyst shards, with Flight Stability I built
      * in. 2400 durability (40 minutes of flight); destroyed once fully drained.
      */

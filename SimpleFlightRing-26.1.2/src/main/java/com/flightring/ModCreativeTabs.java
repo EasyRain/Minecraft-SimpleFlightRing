@@ -28,6 +28,12 @@ public class ModCreativeTabs {
                         // step, so it only exists once a player has fed it a Warden's soul.
                         output.accept(new ItemStack(ModItems.INDESTRUCTIBLE_CORE.get()));
                         output.accept(new ItemStack(ModItems.REFORGE_STONE.get()));
+                        // The directed stone is one item whose name follows its mode, so show both kinds here.
+                        for (ReforgeMode mode : new ReforgeMode[]{ReforgeMode.PREFIX, ReforgeMode.RARITY}) {
+                            ItemStack directed = new ItemStack(ModItems.REFORGE_STONE_DIRECTED.get());
+                            directed.set(ModDataComponents.REFORGE_MODE.get(), mode);
+                            output.accept(directed);
+                        }
                     })
                     .build());
 
