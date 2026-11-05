@@ -6,11 +6,14 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 
 /**
- * Turns the loot table's placeholder reforge stone into this world's single directed stone.
+ * Turns the loot table's placeholder reforge stone into a <b>randomly directed</b> one.
  * <p>
- * The table already fails 99% of the time through {@code minecraft:random_chance}; this function then asks
- * {@link DirectedStoneData} whether the world still has its one stone. If not, the stack is emptied (the loot
- * table simply drops nothing) and the world is locked to the kind picked here.
+ * The table already handles the 1% through {@code minecraft:random_chance} and makes sure a single chest
+ * yields at most one stone ({@code rolls: 1}); this function only picks which half the stone rerolls and
+ * stamps that choice on it as the {@code reforge_mode} component.
+ * <p>
+ * No world-wide limit: every chest rolls its own 1% (user 2026-11-05 - a global limit would soft-lock other
+ * players on a server whenever the finder logs off with the stone in their inventory).
  * <p>
  * Referenced from the loot table as {@code simpleflightring:directed_stone}.
  */
@@ -29,20 +32,9 @@ public final class DirectedStoneFunction implements LootItemFunction {
 
     @Override
     public ItemStack apply(ItemStack stack, LootContext lootContext) {
-        if (lootContext.getLevel().getServer() == null) {
-            return ItemStack.EMPTY;
-        }
-        DirectedStoneData data = DirectedStoneData.get(lootContext.getLevel().getServer());
-        String kind = data.claim(lootContext.getRandom());
-        if (kind == null) {
-            return ItemStack.EMPTY;
-        }
-        ReforgeMode mode = ReforgeMode.byKey(kind);
+        ReforgeMode mode = lootContext.getRandom().nextBoolean() ? ReforgeMode.PREFIX : ReforgeMode.RARITY;
         ItemStack directed = new ItemStack(ModItems.REFORGE_STONE_DIRECTED.get());
-        if (mode != null) {
-            directed.set(ModDataComponents.REFORGE_MODE.get(), mode);
-        }
-        FlightRingMod.LOGGER.info("[FlightRing] this world's directed reforge stone ({}) has been generated", kind);
+        directed.set(ModDataComponents.REFORGE_MODE.get(), mode);
         return directed;
     }
 }
