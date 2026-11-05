@@ -117,6 +117,8 @@
   "message.simpleflightring.raid_quest_passed": "灾厄意志认可了你的能力",
   "message.simpleflightring.raid_quest_failed": "灾厄意志没有认可你",
   "message.simpleflightring.raid_totem_used": "戒指替你挡下了死亡（剩余充能：%s）",
+  "message.simpleflightring.totem_loaded": "不死图腾已装入戒指（剩余充能：%s）",
+  "message.simpleflightring.totem_full": "这枚戒指装不下了（当前充能：%s，上限 10）",
   "message.simpleflightring.raid_villager_refuses": "村民拒绝与你交易",
   "message.simpleflightring.raid_bottle_trade": "换得一瓶不祥之瓶（%s 级）",
   "message.simpleflightring.raid_totem_trade": "换得一个不死图腾",

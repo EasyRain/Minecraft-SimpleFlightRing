@@ -116,6 +116,8 @@
   "message.simpleflightring.raid_quest_watching": "The illager will is watching (%s s)",
   "message.simpleflightring.raid_quest_passed": "The illager will has acknowledged your strength",
   "message.simpleflightring.raid_quest_failed": "The illager will did not acknowledge you",
+  "message.simpleflightring.totem_loaded": "Totem of Undying loaded (charges: %s)",
+  "message.simpleflightring.totem_full": "This ring cannot take another totem (charges: %s of 10)",
   "message.simpleflightring.raid_totem_used": "The ring took the blow for you (charges left: %s)",
   "message.simpleflightring.raid_villager_refuses": "The villager refuses to trade with you",
   "message.simpleflightring.raid_bottle_trade": "Traded for an ominous bottle (level %s)",

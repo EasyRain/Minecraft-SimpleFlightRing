@@ -82,6 +82,8 @@ public class FlightRingMod {
         // 破甲: restore the shredded armour when the debuff really goes away (expiry or manual removal).
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectExpired);
         NeoForge.EVENT_BUS.addListener(RingAffixHandler::onEffectRemoved);
+        // Shift-right-click a totem of undying to feed it into the worn raid ring (the recipe still works).
+        NeoForge.EVENT_BUS.addListener(TotemLoadHandler::onRightClick);
         // 重生: one totem-like save; durability-priced, or a cooldown charge on indestructible rings.
         // HIGH priority so an indestructible ring's 重生 fires before 劫掠 can spend a totem charge.
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGH, RebornHandler::onFatalDamage);
