@@ -52,13 +52,23 @@ public class ModDataComponents {
 
     /**
      * Marks a ring the anvil is about to reforge: the preview shows a plain ring with this marker, and the
-     * affix is rolled only once the player takes the result (see {@link RingAnvilHandler}). Never survives a
-     * reforge, so it is not meant to be stored anywhere else.
+     * affix is rolled only once the player takes the result (see {@link RingAnvilHandler}). It also carries the
+     * roll mode and the affix the ring had, so a directed reforge stone can keep the half it does not reroll.
+     * Never survives a reforge, so it is not meant to be stored anywhere else.
      */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> PENDING_REFORGE =
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PendingReforge>> PENDING_REFORGE =
             COMPONENTS.registerComponentType("pending_reforge", builder -> builder
-                    .persistent(Unit.CODEC)
-                    .networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
+                    .persistent(PendingReforge.CODEC)
+                    .networkSynchronized(PendingReforge.STREAM_CODEC));
+
+    /**
+     * Which half a reforge stone rerolls (see {@link ReforgeMode}). Absent on a stone means
+     * {@link ReforgeMode#BOTH}, i.e. the classic behaviour, so ordinary stones need no component at all.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ReforgeMode>> REFORGE_MODE =
+            COMPONENTS.registerComponentType("reforge_mode", builder -> builder
+                    .persistent(ReforgeMode.CODEC)
+                    .networkSynchronized(ReforgeMode.STREAM_CODEC));
 
     /**
      * Ticks until the wearer of this ring can be saved again by 重生. Absent = ready. Kept as plain ticks (the

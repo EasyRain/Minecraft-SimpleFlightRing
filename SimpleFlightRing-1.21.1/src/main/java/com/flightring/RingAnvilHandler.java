@@ -38,7 +38,11 @@ public final class RingAnvilHandler {
         }
         ItemStack preview = left.copy();
         preview.remove(ModDataComponents.RING_AFFIX.get());
-        preview.set(ModDataComponents.PENDING_REFORGE.get(), net.minecraft.util.Unit.INSTANCE);
+        // A directed stone (see ReforgeMode) rerolls only one half, so the marker carries the mode and the affix
+        // the ring had: the settle step keeps the half this mode is not about.
+        ReforgeMode mode = right.getOrDefault(ModDataComponents.REFORGE_MODE.get(), ReforgeMode.BOTH);
+        preview.set(ModDataComponents.PENDING_REFORGE.get(),
+                new PendingReforge(mode, left.get(ModDataComponents.RING_AFFIX.get())));
         event.setOutput(preview);
         event.setCost(REFORGE_LEVEL_COST);
         event.setMaterialCost(1);
@@ -121,11 +125,23 @@ public final class RingAnvilHandler {
         if (stack == null || stack.isEmpty() || !stack.has(ModDataComponents.PENDING_REFORGE.get())) {
             return false;
         }
+        PendingReforge pending = stack.get(ModDataComponents.PENDING_REFORGE.get());
         stack.remove(ModDataComponents.PENDING_REFORGE.get());
         if (!(stack.getItem() instanceof FlightRingItem)) {
             return false;
         }
-        RingAffix affix = RingAffix.roll(player.getRandom(), null, null);
+        // A directed stone keeps the half it is not rerolling; a ring without an affix has nothing to keep, so
+        // then the mode simply falls back to rolling both.
+        RingAffix kept = pending == null ? null : pending.kept();
+        ReforgeMode mode = pending == null ? ReforgeMode.BOTH : pending.mode();
+        RingAffix affix;
+        if (kept != null && mode == ReforgeMode.PREFIX) {
+            affix = RingAffix.roll(player.getRandom(), null, kept.rarity());
+        } else if (kept != null && mode == ReforgeMode.RARITY) {
+            affix = RingAffix.roll(player.getRandom(), kept.prefix(), null);
+        } else {
+            affix = RingAffix.roll(player.getRandom(), null, null);
+        }
         stack.set(ModDataComponents.RING_AFFIX.get(), affix);
         player.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable(

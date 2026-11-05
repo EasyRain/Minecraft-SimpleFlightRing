@@ -59,6 +59,16 @@ public final class RingReforgeCommand {
         return builder.buildFuture();
     };
 
+    private static final SuggestionProvider<CommandSourceStack> MODE_SUGGESTIONS = (ctx, builder) -> {
+        String remaining = builder.getRemainingLowerCase();
+        for (ReforgeMode mode : ReforgeMode.values()) {
+            if (mode.key().startsWith(remaining)) {
+                builder.suggest(mode.key());
+            }
+        }
+        return builder.buildFuture();
+    };
+
     private RingReforgeCommand() {
     }
 
@@ -92,7 +102,12 @@ public final class RingReforgeCommand {
                                         .executes(ctx -> reforge(ctx, Half.RARITY, null,
                                                 StringArgumentType.getString(ctx, "rarityKey")))))
                         .then(Commands.literal("clear")
-                                .executes(RingReforgeCommand::clear)))
+                                .executes(RingReforgeCommand::clear))
+                        .then(Commands.literal("stone")
+                                .then(Commands.argument("mode", StringArgumentType.word())
+                                        .suggests(MODE_SUGGESTIONS)
+                                        .executes(ctx -> setStoneMode(ctx,
+                                                StringArgumentType.getString(ctx, "mode"))))))
                 .then(Commands.literal("durability")
                         .then(Commands.literal("damage")
                                 .then(Commands.argument("value", IntegerArgumentType.integer(0))
@@ -196,6 +211,37 @@ public final class RingReforgeCommand {
         }
         source.sendSuccess(() -> Component.translatable("simpleflightring.command.durability.charge_set",
                 Integer.toString(remaining), Integer.toString(maximum)), false);
+        return 1;
+    }
+
+    /**
+     * {@code reforge stone <both|prefix|rarity>} - marks the reforge stone in the main hand so it only rerolls
+     * that half of the ring's affix. {@code both} removes the mark again (and is what an unmarked stone does).
+     */
+    private static int setStoneMode(CommandContext<CommandSourceStack> ctx, String modeKey) {
+        CommandSourceStack source = ctx.getSource();
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            source.sendFailure(Component.translatable("simpleflightring.command.reforge.no_player"));
+            return 0;
+        }
+        ItemStack stack = player.getMainHandItem();
+        if (!stack.is(ModItems.REFORGE_STONE.get())) {
+            source.sendFailure(Component.translatable("simpleflightring.command.reforge.not_a_stone"));
+            return 0;
+        }
+        ReforgeMode mode = ReforgeMode.byKey(modeKey);
+        if (mode == null) {
+            source.sendFailure(Component.translatable("simpleflightring.command.reforge.bad_mode", modeKey));
+            return 0;
+        }
+        if (mode == ReforgeMode.BOTH) {
+            stack.remove(ModDataComponents.REFORGE_MODE.get());
+        } else {
+            stack.set(ModDataComponents.REFORGE_MODE.get(), mode);
+        }
+        source.sendSuccess(() -> Component.translatable("simpleflightring.command.reforge.stone_mode",
+                Component.translatable("reforge_mode.simpleflightring." + mode.key())), false);
         return 1;
     }
 
