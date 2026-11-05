@@ -1,6 +1,8 @@
 package com.flightring;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -8,6 +10,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
@@ -88,7 +91,75 @@ public final class RingReforgeCommand {
                                         .executes(ctx -> reforge(ctx, Half.RARITY, null,
                                                 StringArgumentType.getString(ctx, "rarityKey")))))
                         .then(Commands.literal("clear")
-                                .executes(RingReforgeCommand::clear))));
+                                .executes(RingReforgeCommand::clear)))
+                .then(Commands.literal("durability")
+                        .then(Commands.literal("damage")
+                                .then(Commands.argument("value", IntegerArgumentType.integer(0))
+                                        .executes(ctx -> setDamage(ctx,
+                                                IntegerArgumentType.getInteger(ctx, "value")))))
+                        .then(Commands.literal("unbreakable")
+                                .then(Commands.argument("value", BoolArgumentType.bool())
+                                        .executes(ctx -> setUnbreakable(ctx,
+                                                BoolArgumentType.getBool(ctx, "value")))))));
+    }
+
+    /**
+     * The ring in the main hand, or {@link ItemStack#EMPTY} after sending the matching failure message.
+     * Shared by the durability subcommands so they fail exactly like {@code reforge} does.
+     */
+    private static ItemStack heldRing(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            source.sendFailure(Component.translatable("simpleflightring.command.reforge.no_player"));
+            return ItemStack.EMPTY;
+        }
+        ItemStack stack = player.getMainHandItem();
+        if (!(stack.getItem() instanceof FlightRingItem)) {
+            source.sendFailure(Component.translatable("simpleflightring.command.reforge.not_a_ring"));
+            return ItemStack.EMPTY;
+        }
+        return stack;
+    }
+
+    /**
+     * {@code durability damage <value>} - sets how much durability the held ring has lost, clamped to its
+     * maximum ({@code 0} therefore repairs it, the maximum leaves it inert). Handy for testing the
+     * 重生 durability split without punching a dummy fifty times.
+     */
+    private static int setDamage(CommandContext<CommandSourceStack> ctx, int value) {
+        CommandSourceStack source = ctx.getSource();
+        ItemStack stack = heldRing(source);
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        int maximum = stack.getMaxDamage();
+        int damage = Math.max(0, Math.min(value, maximum));
+        stack.setDamageValue(damage);
+        source.sendSuccess(() -> Component.translatable("simpleflightring.command.durability.damage_set",
+                Integer.toString(damage), Integer.toString(maximum)), false);
+        return 1;
+    }
+
+    /**
+     * {@code durability unbreakable <true|false>} - toggles the Indestructible Core marker, i.e. whether the
+     * ring has infinite durability. Turning it off does not reset the damage value, so a ring that was left
+     * fully damaged becomes inert again right away.
+     */
+    private static int setUnbreakable(CommandContext<CommandSourceStack> ctx, boolean value) {
+        CommandSourceStack source = ctx.getSource();
+        ItemStack stack = heldRing(source);
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        if (value) {
+            stack.set(ModDataComponents.INDESTRUCTIBLE.get(), Unit.INSTANCE);
+        } else {
+            stack.remove(ModDataComponents.INDESTRUCTIBLE.get());
+        }
+        source.sendSuccess(() -> Component.translatable(value
+                ? "simpleflightring.command.durability.unbreakable_on"
+                : "simpleflightring.command.durability.unbreakable_off"), false);
+        return 1;
     }
 
     /**
