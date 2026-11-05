@@ -226,7 +226,7 @@ public final class RingReforgeCommand {
             return 0;
         }
         ItemStack stack = player.getMainHandItem();
-        if (!stack.is(ModItems.REFORGE_STONE.get())) {
+        if (!RingAnvilHandler.isReforgeStone(stack)) {
             source.sendFailure(Component.translatable("simpleflightring.command.reforge.not_a_stone"));
             return 0;
         }
@@ -235,11 +235,17 @@ public final class RingReforgeCommand {
             source.sendFailure(Component.translatable("simpleflightring.command.reforge.bad_mode", modeKey));
             return 0;
         }
+        // Swap the item itself, otherwise the name and the copy recipe would not follow the mode: a plain stone
+        // with a component looks identical to a normal one and never copies into directed stones.
+        int count = stack.getCount();
+        ItemStack swapped;
         if (mode == ReforgeMode.BOTH) {
-            stack.remove(ModDataComponents.REFORGE_MODE.get());
+            swapped = new ItemStack(ModItems.REFORGE_STONE.get(), count);
         } else {
-            stack.set(ModDataComponents.REFORGE_MODE.get(), mode);
+            swapped = new ItemStack(ModItems.REFORGE_STONE_DIRECTED.get(), count);
+            swapped.set(ModDataComponents.REFORGE_MODE.get(), mode);
         }
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, swapped);
         source.sendSuccess(() -> Component.translatable("simpleflightring.command.reforge.stone_mode",
                 Component.translatable("reforge_mode.simpleflightring." + mode.key())), false);
         return 1;
