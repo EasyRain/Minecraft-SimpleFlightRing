@@ -24,6 +24,7 @@ desktop.ini
 # 以下是本地档案（Agent / developer notes + Modrinth 上传文案）：只留本机、不进 git
 /docs/PROJECT_MEMORY.md
 /docs/MODRINTH_DESCRIPTION.md
+/docs/CURSEFORGE_DESCRIPTION.md
 /docs/[0-9]*.md
 /docs/PLAN-*.md
 
